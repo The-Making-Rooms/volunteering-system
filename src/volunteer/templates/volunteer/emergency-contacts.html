@@ -1,0 +1,35 @@
+<form id='eContactForm'>
+        {% csrf_token %}
+    
+        <a href="#" class="btn btn-primary" hx-post="/volunteer/coreinfoform/" hx-swap="innerHTML transition:true" hx-target="closest div">Go somewhere</a>
+
+</form>
+
+<div class="card-header" hx-swap-oob="innerHTML:.card-header">
+    <div class="d-flex flex-row align-items-center">
+        <div class="flex-grow-1">
+            Emergency Contacts
+        </div>
+    
+        <a
+            name=""
+            id=""
+            class="btn btn-primary"
+            style="width: 6rem;"
+            href="#"
+            role="button"
+
+            hx-get="emergency-contact-form"
+            hx-swap="afterbegin"
+            hx-target="#eContactForm"
+
+
+            >Add
+        </a>
+    </div>
+
+</div>
+
+<script>
+
+</script>

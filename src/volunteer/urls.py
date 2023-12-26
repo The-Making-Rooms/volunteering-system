@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="volunteer"),
-    path("coreinfoform/", views.coreInfoForm, name="coreInfoForm")
+    path("coreinfoform/", views.coreInfoForm, name="coreInfoForm"),
+    path("emergency-contact-form", views.emergencyContactInput, name="emergency-contact-form"),
 ]
