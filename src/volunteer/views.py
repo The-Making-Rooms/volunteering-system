@@ -4,8 +4,17 @@ from django.http import HttpResponseRedirect
 from volunteer.models import Volunteer, VolunteerAddress
 from django.core.exceptions import ObjectDoesNotExist
 import random
+from django.contrib.auth.decorators import login_required
+
 from datetime import datetime
 # Create your views here.
+
+class HTTPResponseHXRedirect(HttpResponseRedirect):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self["HX-Redirect"] = self["Location"]
+
+    status_code = 200
 
 def index(request):
     if request.user.is_authenticated:
@@ -13,7 +22,7 @@ def index(request):
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
-            return HttpResponse('Profile Found.. Loading ' + current_user.id)
+            return HttpResponse('Profile Found.. Loading ' + str(current_user.id))
                     
         except ObjectDoesNotExist:
             return render(request, 'volunteer/container.html')
@@ -22,6 +31,11 @@ def index(request):
     
 def createVolunteer(data, user):
     print(data['DateOfBirth'])
+
+    user.first_name = data['FirstName']
+    user.last_name = data['LastName']
+    user.save()
+
     new_volunteer = Volunteer(
         user = user,
         #avatar = models.ImageField(upload_to='avatars/')
@@ -43,6 +57,7 @@ def createVolunteer(data, user):
 
     volunteerAddress.save()
 
+@login_required()
 def emergencyContactInput(request):
     match request.method:
         case 'GET':
@@ -64,7 +79,7 @@ def emergencyContactInput(request):
             else:
                 return HttpResponseRedirect('/volunteer')
 
-
+@login_required()
 def emergencyContactForm(request):
     print(request.method)
 
@@ -83,7 +98,8 @@ def emergencyContactForm(request):
             print(data)
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
             return 
-
+        
+@login_required()
 def coreInfoForm(request):
     match request.method: #Handle request types
         case 'GET': #GET request
@@ -100,5 +116,7 @@ def coreInfoForm(request):
             print(data)
             createVolunteer(data, request.user)
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
-            return (emergencyContactForm(request))
+            #return (emergencyContactForm(request)) 
+            return HTTPResponseHXRedirect('/volunteer')  
+
 
