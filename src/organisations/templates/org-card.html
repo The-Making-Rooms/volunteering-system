@@ -1,0 +1,9 @@
+<a href="organisations/{{org.id}}"><div class="card text-bg-dark mx-2" style="width:18rem;">
+    <img src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" class="card-img h-25" alt="...">
+    <div class="card-img-overlay d-flex align-items-end" style="background: rgb(0,0,0); background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,212,255,0) 100%);" >
+      <h5 class="card-title">{{ org.name }}</h5>
+      
+    </div>
+
+</div>
+</a>

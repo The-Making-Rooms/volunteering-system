@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="m-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            Opportunity details
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ opportunity.name }}</h5>
+            <p class="card-text">{{ opportunity.description }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Timings
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Start date</th>
+                    <td>{{ opportunity.start_date }}</td>
+                </tr>
+                <tr>
+                    <th>End date</th>
+                    <td>{{ opportunity.end_date }}</td>
+                </tr>
+
+                <tr>
+                    <th>Recurring</th>
+                    <td>
+                        {% for rule in text_rules_inclusion %}
+                            {{ rule }}<br>
+                        {% endfor %}
+                    </td>
+                </tr>
+            </table>
+
+                
+
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Benefits
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for benefit in benefits %}
+                    <li>{{ benefit.description }}</li>
+                {% endfor %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+```

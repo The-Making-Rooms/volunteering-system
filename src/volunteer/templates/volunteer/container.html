@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+
+  @keyframes fade-out {
+    to { opacity: 0; }
+  }
+
+  @keyframes slide-from-right {
+    from { transform: translateX(90px); }
+  }
+
+  @keyframes slide-to-left {
+    to { transform: translateX(-90px); }
+  }
+
+  .slide-it {
+    view-transition-name: slide-it;
+  }
+
+  ::view-transition-old(slide-it) {
+    animation: 180ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+  }
+  ::view-transition-new(slide-it) {
+    animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+  }
+</style>
+{% block content %}
+<div class="card">
+    <div class="card-header">
+      Welcome to Chip In!
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Before you start your volunteering journey, we need a little more info.</h5>
+      <p class="card-text">Click the next button below to make your profile!</p>
+      <a href="#" class="btn btn-primary" hx-get="/volunteer/coreinfoform" hx-swap="innerHTML transition:true" hx-target="closest div">Go somewhere</a>
+    </div>
+  </div>
+  {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+<div class="htmx-navigator">
+    <h1>Organisation home</h1>
+
+    <h2>In your Area</h2>
+    <div class="d-flex overflow-auto w-vw" hx-boost="true">
+        {% for org in organisations %}
+            {% include "org-card.html" %}
+        {% endfor %}
+    </div>
+
+    <h2>Latest Oppertunities</h2>
+    <div class="d-flex overflow-auto w-vw" hx-boost="true">
+        {% for opp in opportunities %}
+            {% include "opp-card.html" %}
+        {% endfor %}
+</div>
+{% endblock %}

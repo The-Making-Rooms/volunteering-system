@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "org-carousel.html" %}
+<div class="m-4">
+<div class="card mb-4">
+    <div class="card-header">
+      Organisation details
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">{{ organisation.name }}</h5>
+      <p class="card-text">{{ organisation.description }}</p>
+    </div>
+  </div>
+<div class="card mb-4">
+    <div class="card-header">
+      Social Media Links
+    </div>
+    <div class="card-body">
+        {% for link in links %}
+            <a href="{{ link.link }}" class="btn btn-primary">{{ link.name }}</a>
+        {% endfor %}
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      Location
+    </div>
+    <div class="card-body">
+        {% for link in links %}
+            <a href="{{ link.link }}" class="btn btn-primary">{{ link.name }}</a>
+        {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+```
