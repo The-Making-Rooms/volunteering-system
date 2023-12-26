@@ -4,11 +4,11 @@ from django.conf import settings
 # Create your models here.
 class Volunteer(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='avatars/')
+    avatar = models.ImageField(upload_to='avatars/', blank=True)
     date_of_birth = models.DateField()
     phone_number = models.CharField(max_length=11)
     bio = models.TextField()
-    CV = models.FileField(upload_to='CV/')
+    CV = models.FileField(upload_to='CV/', blank=True)
 
 class VolunteerAddress(models.Model):
     first_line = models.CharField(max_length=200)

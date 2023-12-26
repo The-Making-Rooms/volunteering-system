@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from volunteer.models import Volunteer
+from volunteer.models import Volunteer, VolunteerAddress
 from django.core.exceptions import ObjectDoesNotExist
 import random
+from datetime import datetime
 # Create your views here.
 
 def index(request):
@@ -19,6 +20,28 @@ def index(request):
     else:
         return HttpResponse('Not logged in')
     
+def createVolunteer(data, user):
+    print(data['DateOfBirth'])
+    new_volunteer = Volunteer(
+        user = user,
+        #avatar = models.ImageField(upload_to='avatars/')
+        date_of_birth = datetime.strptime(data['DateOfBirth'], '%Y-%m-%d'),
+        phone_number = data['PhoneNumber'],
+        bio = '',
+        #CV = models.FileField(upload_to='CV/', blank=True)
+    )
+
+    new_volunteer.save()
+
+    volunteerAddress = VolunteerAddress(
+        first_line = data['inputAddress'],
+        second_line = data['inputAddress2'],
+        postcode = data['postCode'],
+        city = data['city'],
+        volunteer = new_volunteer,
+    )
+
+    volunteerAddress.save()
 
 def emergencyContactInput(request):
     match request.method:
@@ -75,6 +98,7 @@ def coreInfoForm(request):
         case 'POST':
             data = request.POST
             print(data)
+            createVolunteer(data, request.user)
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
             return (emergencyContactForm(request))
 
