@@ -1,20 +1,33 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from volunteer.models import Volunteer, VolunteerAddress
+from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts
 from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
-
+from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from datetime import datetime
+
 # Create your views here.
 
-class HTTPResponseHXRedirect(HttpResponseRedirect):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self["HX-Redirect"] = self["Location"]
 
-    status_code = 200
+
+
+
+def check_valid_origin(func, expected_url_end, redirect_path):
+    def inner(request):
+        match request.method:
+            case 'GET':
+                try:
+                    validPath = request.headers['HX-Current-URL'].split('/')[-2] == expected_url_end
+                except KeyError:
+                    return HttpResponseRedirect(redirect_path)
+                if validPath:
+                    func()
+                else:
+                    return HttpResponseRedirect(redirect_path)
+        return inner()
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -22,12 +35,12 @@ def index(request):
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
-            return HttpResponse('Profile Found.. Loading ' + str(current_user.id))
+            return render(request, 'volunteer/index.html', {'hx': check_if_hx(request)})
                     
         except ObjectDoesNotExist:
-            return render(request, 'volunteer/container.html')
+            return render(request, 'volunteer/container.html', {'hx': check_if_hx(request)})
     else:
-        return HttpResponse('Not logged in')
+        return render(request, 'commonui/not_logged_in.html', {'hx': check_if_hx(request)})
     
 def createVolunteer(data, user):
     print(data['DateOfBirth'])
@@ -54,11 +67,34 @@ def createVolunteer(data, user):
         city = data['city'],
         volunteer = new_volunteer,
     )
-
     volunteerAddress.save()
 
+def create_emergency_contacts(user, data):
+    volunteer_profile = Volunteer.objects.get(user=user)
+
+    print(len(data))
+
+    if len(data) > 1:
+        n_contacts = int((len(data)-1)/4)
+        print(n_contacts)
+
+        for x in range (1,n_contacts+1):
+            start_index = ((x*4) - 4)
+            print(x, start_index, start_index+3)
+            new_contact = EmergencyContacts(
+            name = list(data.values())[start_index],
+            relation = list(data.values())[start_index+1],
+            phone_number = list(data.values())[start_index+2],
+            email = list(data.values())[start_index+3],
+            volunteer = volunteer_profile,
+            )
+            new_contact.save()
+    else:
+        return
+
+
 @login_required()
-def emergencyContactInput(request):
+def emergencyContactInput(request):#This is a partial which represents the 'add contact' cards on the onboarding screen
     match request.method:
         case 'GET':
             try:
@@ -67,9 +103,9 @@ def emergencyContactInput(request):
                 return HttpResponseRedirect('/volunteer')
             if validPath:
                 random_key = ''.join(random.choice('0123456789ABCDEF') for i in range(16))
-                print(random_key)
+                print(random_key) #HTML forms need unique key names, otherwise the data will be combined
                 return render(request,
-                               'volunteer/emergency-contact-form.html',
+                               'volunteer/emergency-contact-form.html', #This is not the complete form, ONLY the partial
                                {
                                    'name': 'name-'+random_key,
                                    'email': 'email-'+random_key,
@@ -78,6 +114,7 @@ def emergencyContactInput(request):
                                })
             else:
                 return HttpResponseRedirect('/volunteer')
+            
 
 @login_required()
 def emergencyContactForm(request):
@@ -90,14 +127,14 @@ def emergencyContactForm(request):
             except KeyError:
                 return HttpResponseRedirect('/volunteer')
             if validPath:
-                return render(request, 'volunteer/emergency-contacts.html')
+                return render(request, 'volunteer/emergency-contacts.html', {'hx': check_if_hx(request)})
             else:
                 return HttpResponseRedirect('/volunteer')
         case 'POST':
             data = request.POST
-            print(data)
+            create_emergency_contacts(request.user, data)
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
-            return 
+            return HTTPResponseHXRedirect('/volunteer')
         
 @login_required()
 def coreInfoForm(request):
@@ -108,7 +145,7 @@ def coreInfoForm(request):
             except KeyError:
                 return HttpResponseRedirect('/volunteer') #Redirect if incorrectly accessed
             if validPath:
-                return render(request, 'volunteer/core-info.html') #Return form if correct
+                return render(request, 'volunteer/core-info.html', {'hx': check_if_hx(request)}) #Return form if correct
             else:
                 return HttpResponseRedirect('/volunteer')  #Could be coming from HTMX but not from the correct URL
         case 'POST':
@@ -116,7 +153,5 @@ def coreInfoForm(request):
             print(data)
             createVolunteer(data, request.user)
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
-            #return (emergencyContactForm(request)) 
-            return HTTPResponseHXRedirect('/volunteer')  
-
-
+            return (emergencyContactForm(request)) 
+            #return HTTPResponseHXRedirect('/volunteer')  

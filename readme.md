@@ -1,6 +1,6 @@
 # The Volunteer System
 
-  
+
 
 ## Getting Started:
 
@@ -37,5 +37,8 @@
 
 
 		cd src
+        python manage.py makemigrations
+        pyhton manage.py migrate
+
 		python manage.py runserver
 

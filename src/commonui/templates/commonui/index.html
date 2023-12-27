@@ -1,32 +1,26 @@
-{% extends "base.html" %}
+{% extends "commonui/navigation-template.html" %}
 
-{% block content %}
+{% block page_content %}
 
 
-<div class="d-flex flex-column h-100">
-    {% include "topbar.html"%}
-    <div class="htmx-navigator p-4 h-full flex-grow-1">
-        <h1>Organisation home</h1>
 
-        <h2>In your Area</h2>
-        <div class="d-flex overflow-auto w-vw" hx-boost="true">
-            {% for org in organisations %}
-                {% include "org-card.html" %}
-            {% endfor %}
-        </div>
-
-        <h2>Latest Oppertunities</h2>
-        <div class="d-flex overflow-auto w-vw" hx-boost="true">
-            {% for opp in opportunities %}
-                {% include "opp-card.html" %}
-            {% endfor %}
-        </div>
+<div class="htmx-navigator p-4 h-full flex-grow-1">
+    <h1>Home</h1>
+    <br>
+    <h3>In your Area</h3>
+    <div class="d-flex overflow-auto w-vw" hx-boost="true">
+        {% for org in organisations %}
+            {% include "org-card.html" %}
+        {% endfor %}
     </div>
-
-    {% include "navbar.html"%}
+    <br>
+    <h3>Latest Oppertunities</h3>
+    <div class="d-flex overflow-auto w-vw" hx-boost="true">
+        {% for opp in opportunities %}
+            {% include "opp-card.html" %}
+        {% endfor %}
+    </div>
+    
 </div>
-
-
-
 
 {% endblock %}
