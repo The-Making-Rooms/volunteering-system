@@ -12,8 +12,6 @@ from datetime import datetime
 
 
 
-
-
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
         match request.method:

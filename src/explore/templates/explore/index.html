@@ -1,0 +1,36 @@
+{% extends 'commonui/navigation-template.html' %}
+
+{% block page_content %}
+
+<div class="card">
+    <div class="card-header">Browse by theme</div>
+    <div class="card-body">
+        <div class="container">
+            <div class="row g-3 w-100">
+                
+                <div class="col">
+                    <div class="rounded-4" style="background-color: #{{theme.hex_colour}}; width: 12rem; height: 8rem;">
+                        <div class="h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="/media/{{ theme.image}}" style="width:4rem;">
+                            {{ theme.name}}
+                        </div>
+                       
+                    </div>
+                    
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for theme in themes %}
+<div class="card w-96 bg-gradient-to-tr from-slate-50 to-[#{{theme.hex_colour|lower}}] text-primary-content">
+    <div class="card-body">
+      <h2 class="card-title">{{theme.name}}</h2>
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock %}

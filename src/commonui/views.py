@@ -23,8 +23,8 @@ def check_if_hx(request):
 def index(request):
     template = loader.get_template("commonui/index.html")
 
-    orgs = Organisation.objects.all()
-    opps = Opportunity.objects.all()
+    orgs = Organisation.objects.filter(featured=True)
+    opps = Opportunity.objects.filter(featured=True)
     org_objects = []
 
     opp_objects = []
@@ -46,7 +46,6 @@ def index(request):
             "id": org.id,
             "name": org.name,
             "description": org.description,
-            "location": org.location,
             "images": Image.objects.filter(organisation=org),
         }
         try:

@@ -5,7 +5,16 @@ from djrichtextfield.models import RichTextField
 class Organisation(models.Model):
     name = models.CharField(max_length=200)
     description = RichTextField()
-    location = models.CharField(max_length=200)
+    featured = models.BooleanField(default=False)
+
+class Location(models.Model):
+    name = models.CharField(max_length=200)
+    description = RichTextField()
+    first_line = models.CharField(max_length=200)
+    second_line = models.CharField(max_length=200)
+    postcode = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
 
 class Link(models.Model):
     name = models.CharField(max_length=200)
@@ -21,3 +30,12 @@ class Image(models.Model):
 class Video(models.Model):
     video = models.FileField(upload_to='videos/')
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+
+class thematicCategory(models.Model):
+    hex_colour = models.CharField(max_length = 7)
+    name = models.CharField(max_length = 100)
+    image = models.ImageField(upload_to='thematic/')
+
+class organisationnThematicLink(models.Model):
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    theme = models.ForeignKey('thematicCategory', on_delete=models.CASCADE)

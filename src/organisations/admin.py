@@ -1,6 +1,6 @@
 from typing import Any
 from django.contrib import admin
-from organisations.models import Link, Organisation, Image, Video
+from organisations.models import Link, Organisation, Image, Video, thematicCategory, organisationnThematicLink
 # Register your models here.
 
 class LinkInline(admin.TabularInline):
@@ -14,13 +14,17 @@ class ImageInline(admin.TabularInline):
 class VideoInline(admin.TabularInline):
     model = Video
     extra = 1
+
+class ThematicInLine(admin.TabularInline):
+    model = organisationnThematicLink
+    extra = 1
     
 @admin.register(Organisation)
 class OrganisationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location')
-    search_fields = ('name', 'location')
-    inlines = [LinkInline, ImageInline, VideoInline]
+    list_display = ['name']
+    search_fields = ['name']
+    inlines = [LinkInline, ImageInline, VideoInline, ThematicInLine]
 
-
-
-
+@admin.register(thematicCategory)
+class ThematicAdmin(admin.ModelAdmin):
+    pass
