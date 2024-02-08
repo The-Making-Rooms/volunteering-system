@@ -1,0 +1,35 @@
+{% extends "commonui/navigation-template.html" %}
+
+{% block page_content %}
+
+<p class="text-2xl font-bold">Register for: {{ opportunity.name }}</p>
+
+
+{% if supp_reqs|length != 0%}
+<p class="mb-3">This opportunity needs you to fill in some additional information to continue</p>
+
+    <form>
+    {% csrf_token %}
+
+    {% for req in supp_reqs %}
+    <div class="collapse collapse-arrow bg-base-200 mb-3">
+        <input type="radio" name="my-accordion-2" checked="checked" /> 
+        <div class="collapse-title text-xl font-medium">
+            {{ req.info.title }}
+        </div>
+        <div class="collapse-content"> 
+            <p>{{ req.info.description }}</p>
+            <input type="text" placeholder="Type here" class="input w-full max-w-xs mt-3" />
+        </div>
+    </div>
+    {% endfor %}
+
+
+    <p class="mb-3 text-slate-500">By continuing, you agree for Chip In to store the information you have provided, and share this with the organisation that is hosting this opportunity. For more information on how Chip In stores and manages your data, please refer to our <a class="text-blue-400 underline">Privacy Policy</a></p>
+    <button class="btn btn-primary justify-end">Submit</button>
+
+
+{% endif %}
+
+
+{% endblock %}

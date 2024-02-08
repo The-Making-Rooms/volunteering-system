@@ -1,0 +1,14 @@
+
+{% if results|length > 0 %}
+<p>Found {{ results|length }} {% if results|length == 1 %} result {% else %} results {% endif %}</p>
+<div class="grid grid-cols-6 gap-3">
+    {% for opp in results %}
+    {% include "opp-card.html" %}
+
+    {% endfor %}
+</div>
+{% else %}
+<p>No results found</p>
+{% endif %}
+
+

@@ -17,6 +17,13 @@ class VolunteerAddress(models.Model):
     city = models.CharField(max_length=200)
     volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
 
+
+class VolunteerSupplementaryInfo(models.Model):
+    last_updated = models.DateField()
+    data = models.CharField(max_length=200)
+    volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
+    info = models.ForeignKey('SupplementaryInfo', on_delete=models.CASCADE)
+
 class EmergencyContacts(models.Model):
     name = models.CharField(max_length=200)
     relation = models.CharField(max_length=200)
@@ -33,16 +40,11 @@ class VolunteerInterest(models.Model):
     tag = models.ForeignKey('opportunities.Tag', on_delete=models.CASCADE)
     volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
 
-class VolunteerSupplementaryInfo():
-    last_updated = models.DateField()
-    data = models.CharField(max_length=200)
-    volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
-    info = models.ForeignKey('SupplementaryInfo', on_delete=models.CASCADE)
 
-class SupplementaryInfo():
+class SupplementaryInfo(models.Model):
     title = models.CharField(max_length=200)
     description =  models.CharField(max_length=200)
 
-class SupplementaryInfoGrantee():
+class SupplementaryInfoGrantee(models.Model):
     org = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
-    info = models.ForeignKey('SupplementaryInfo', on_delete=models.CASCADE)
+    info = models.ForeignKey('VolunteerSupplementaryInfo', on_delete=models.CASCADE)

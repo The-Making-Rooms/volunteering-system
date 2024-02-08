@@ -2,39 +2,48 @@
 
 {% block page_content %}
 
-{% include "org-carousel.html" %}
-<div class="m-4 h-100">
-<div class="card mb-4">
-    <div class="card-header">
-      Organisation details
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">{{ organisation.name }}</h5>
-      <p class="card-text">{{ organisation.description }}</p>
-    </div>
-  </div>
-<div class="card mb-4">
-    <div class="card-header">
-      Social Media Links
-    </div>
-    <div class="card-body">
-        {% for link in links %}
-            <a href="{{ link.link }}" class="btn btn-primary">{{ link.name }}</a>
-        {% endfor %}
-    </div>
-  </div>
+<div class="carousel w-full rounded-xl mb-5">
 
-  <div class="card mb-4">
-    <div class="card-header">
-      Location
+  {% for image in images %}
+      <div id="slide{{forloop.counter}}" class="carousel-item relative w-full">
+          <img src="{{ image.image.url }}" class="w-full" />
+          <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+              <a href="#slide{{forloop.counter|add:'-1'}}" class="btn btn-circle">❮</a> 
+              <a href="#slide{{forloop.counter|add:'1'}}" class="btn btn-circle">❯</a>
+          </div>
+      </div> 
+  {% endfor %}
+
+
+</div>
+
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">{{ organisation.name }}</h2>
+    <div class="divider"></div> 
+    <p>{{ organisation.description }}</p>
+    <div class="divider"></div> 
+    <div class="card-actions justify-center">
+      <button class="btn btn-primary">Ask A Question</button>
     </div>
-    <div class="card-body">
-        {% for link in links %}
+  </div>
+</div>
+
+{% if links %}
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">Social Media Links</h2>
+    <div class="divider"></div> 
+    <div class="card-actions justify-center">
+      {% for link in links %}
             <a href="{{ link.link }}" class="btn btn-primary">{{ link.name }}</a>
         {% endfor %}
     </div>
   </div>
 </div>
+{% endif %}
+
+
 
 {% endblock %}
 ```

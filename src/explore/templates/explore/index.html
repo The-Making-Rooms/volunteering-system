@@ -2,35 +2,30 @@
 
 {% block page_content %}
 
-<div class="card">
-    <div class="card-header">Browse by theme</div>
-    <div class="card-body">
-        <div class="container">
-            <div class="row g-3 w-100">
-                
-                <div class="col">
-                    <div class="rounded-4" style="background-color: #{{theme.hex_colour}}; width: 12rem; height: 8rem;">
-                        <div class="h-100 d-flex flex-column align-items-center justify-content-center">
-                            <img src="/media/{{ theme.image}}" style="width:4rem;">
-                            {{ theme.name}}
-                        </div>
-                       
-                    </div>
-                    
-                </div>
-
-                
-            </div>
-        </div>
-    </div>
+<div class="join w-full mb-3">
+  <input class="input input-bordered w-full max-w" type="text" name="name" id="name"
+    hx-post="/explore/search"
+    hx-trigger="keyup changed delay:500ms"
+    hx-target="#search-panel"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    placeholder="Search..."
+>
 </div>
 
-{% for theme in themes %}
-<div class="card w-96 bg-gradient-to-tr from-slate-50 to-[#{{theme.hex_colour|lower}}] text-primary-content">
-    <div class="card-body">
-      <h2 class="card-title">{{theme.name}}</h2>
-    </div>
-  </div>
-{% endfor %}
+
+<div id="search-panel" >
+<div class="grid grid-cols-2 gap-4">
+  <button class="btn h-32 bg-gradient-to-tr from-[#2c5163] to-[#3695C0] text-2xl text-white">Sport</button>
+  <button class="btn h-32 bg-gradient-to-tr from-[#554824] to-[#E9BA37] text-2xl text-white">Environment</button>
+  <button class="btn h-32 bg-gradient-to-tr from-[#307269] to-[#00FFDF] text-2xl text-white">Art</button>
+  <button class="btn h-32 bg-gradient-to-tr from-[#342c6b] to-[#8078BA] text-2xl text-white">Culture</button>
+  <button class="btn h-32 bg-gradient-to-tr from-[#2d6629] to-[#9BCE97] text-2xl text-white">Food</button>
+  <button class="btn h-32 bg-gradient-to-tr from-[#421e29] to-[#B02B54] text-2xl text-white">Heritage</button>
+</div>
+</div>
+
+
+
 
 {% endblock %}
+

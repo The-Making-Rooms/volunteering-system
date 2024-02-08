@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from django.contrib.auth.models import User
-from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts, VolunteerConditions, VolunteerInterest, VolunteerSupplementaryInfo, SupplementaryInfo, SupplementaryInfoGrantee
+from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts, VolunteerConditions, VolunteerInterest
 from organisations.models import Organisation, Image as OrganisationImage, Location as OrganisationLocation, thematicCategory as OrganisationTheme, organisationnThematicLink as OrganisationThematicLink
 js_info_dict = {
     'packages': ('recurrence', ),
@@ -59,20 +59,6 @@ class VolunteerInterestSerializer(serializers.HyperlinkedModelSerializer):
         model = VolunteerInterest
         fields = ['url', 'tag', 'volunteer']
 
-class VolunteerSupplementaryInfoSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = VolunteerSupplementaryInfo
-        fields = ['url', 'last_updated', 'data', 'volunteer', 'info']
-
-class SupplementaryInfoSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = SupplementaryInfo
-        fields = ['url', 'title', 'description']
-
-class SupplementaryInfoGranteeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = SupplementaryInfoGrantee
-        fields = ['url', 'org', 'info']
 
 class OrganisationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -172,4 +158,5 @@ urlpatterns = [
     re_path(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+    path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

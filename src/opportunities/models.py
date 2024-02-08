@@ -45,3 +45,7 @@ class LinkedTags(models.Model):
 
 class Tag(models.Model):
     tag = models.CharField(max_length=100)
+
+class SupplimentaryInfoRequirement(models.Model):
+    opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
+    info = models.ForeignKey('volunteer.SupplementaryInfo', on_delete=models.CASCADE)

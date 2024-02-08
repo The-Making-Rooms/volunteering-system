@@ -2,38 +2,200 @@
 
 {% block page_content %}
 
-<div class="h-100 p-3">
-<div class="card mb-3">
-    <div class="card-header">About you</div>
-    <div class="card-body">
-        <h4 class="card-title">Title</h4>
-        <p class="card-text">Text</p>
-    </div>
-</div>
 
-<div class="card mb-3">
-    <div class="card-header">Emergency Contacts</div>
-    <div class="card-body">
-        <h4 class="card-title">Title</h4>
-        <p class="card-text">Text</p>
-    </div>
-</div>
+<div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+        <div class="card-actions items-center">
+            <p class="text-2xl font-bold">About You</p>
+            <button class="btn btn-primary justify-end">Update</button>
+        </div>
+        <div class="divider my-2 "></div> 
 
-<div class="card mb-3">
-    <div class="card-header">Conditions</div>
-    <div class="card-body">
-        <h4 class="card-title">Title</h4>
-        <p class="card-text">Text</p>
-    </div>
-</div>
+        <div class="overflow-x-auto">
+            <table class="table">
+              <!-- head -->
+              <tbody>
+                <!-- row 1 -->
+                <tr>
+                  <th>Name</th>
+                  <td>{{user.first_name}} {{user.last_name}}</td>
+                </tr>
+                <!-- row 2 -->
+                <tr>
+                  <th>Date of Birth</th>
+                  <td>{{volunteer.date_of_birth}}</td>
 
-<div class="card mb-3">
-    <div class="card-header">Registrations</div>
-    <div class="card-body">
-        <h4 class="card-title">Title</h4>
-        <p class="card-text">Text</p>
+                </tr>
+                <!-- row 3 -->
+                <tr>
+                  <th>Email</th>
+                  <td>{{ user.email }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
     </div>
-</div>
+  </div>
+
+
+
+  <div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+        <div class="card-actions items-center">
+            <p class="text-2xl font-bold">Emergency Contacts</p>
+            <button class="btn btn-primary justify-end">Update</button>
+        </div>
+        <div class="divider my-2 "></div> 
+
+        <div class="overflow-x-auto">
+            <div class="overflow-x-auto">
+                <table class="table">
+                  <!-- head -->
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Relation</th>
+                      <th>Phone Number</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- row 1 -->
+
+                    {% for contact in emergency_contacts %}
+                    <tr>
+                      <th>{{ contact.name }}</th>
+                      <td>{{ contact.relation }}</td>
+                      <td>{{ contact.phone_number }}</td>
+                      <td>{{ contact.email }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+        <div class="card-actions items-center">
+            <p class="text-2xl font-bold">Addresses</p>
+            <button class="btn btn-primary justify-end">Update</button>
+        </div>
+        <div class="divider my-2 "></div> 
+
+        <div class="overflow-x-auto">
+            <div class="overflow-x-auto">
+                <table class="table">
+                  <!-- head -->
+                  <thead>
+                    <tr>
+                      <th>First Line</th>
+                      <th>Second Line</th>
+                      <th>Postcode</th>
+                      <th>City</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- row 1 -->
+
+                    {% for address in addresses %}
+                    <tr>
+                      <th>{{ address.first_line }}</th>
+                      <td>{{ address.second_line }}</td>
+                      <td>{{ address.postcode }}</td>
+                      <td>{{ address.city }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+    <div class="card-body p-5">
+        <div class="card-actions items-center">
+            <p class="text-2xl font-bold">Conditions</p>
+            <button class="btn btn-primary justify-end">Update</button>
+        </div>
+        <div class="divider my-2 "></div> 
+
+        <div class="overflow-x-auto">
+            <div class="overflow-x-auto">
+
+                {% if condition|length != 0 %}
+                <table class="table">
+                  <!-- head -->
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Disclosure</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% for condition in conditions %}
+                    <tr>
+                      <th>{{ condition.name }}</th>
+                      <td>{{ condition.disclosures }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                {% else %}
+                <p>No conditions disclosed</p>
+                {% endif %}
+              </div>
+          </div>
+      
+    </div>
+  </div>
+
+
+  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+    <div class="card-body p-5">
+        <div class="card-actions items-center">
+            <p class="text-2xl font-bold">Registrations</p>
+            <button class="btn btn-primary justify-end">Update</button>
+        </div>
+        <div class="divider my-2 "></div> 
+
+        <div class="overflow-x-auto">
+            <div class="overflow-x-auto">
+
+                {% if registrations|length != 0 %}
+                <table class="table">
+                  <!-- head -->
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Disclosure</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    {% for registration in registrations %}
+                    <tr>
+                      <th>{{ registration.organisation.name }}</th>
+                      <td>{{ condition.disclosures }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                {% else %}
+                <p>You haven't signed up for anything yet. why not <a hx-get="/explore" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline">explore</a> instead?</p>
+                {% endif %}
+              </div>
+          </div>
+      
+    </div>
+  </div>
+
 
 </div>
 {% endblock %}

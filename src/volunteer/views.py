@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts
+from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts, VolunteerConditions
+from opportunities.models import Registration
 from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
@@ -33,7 +34,17 @@ def index(request):
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
-            return render(request, 'volunteer/index.html', {'hx': check_if_hx(request)})
+
+            context = {
+                'hx': check_if_hx(request),
+                'volunteer': volunteer_profile,
+                'user': current_user,
+                'emergency_contacts': EmergencyContacts.objects.filter(volunteer=volunteer_profile),
+                'addresses': VolunteerAddress.objects.filter(volunteer=volunteer_profile),
+                'conditions': VolunteerConditions.objects.filter(volunteer=volunteer_profile),
+                'registrations': Registration.objects.filter(user=current_user),
+            }#
+            return render(request, 'volunteer/index.html', context=context)
                     
         except ObjectDoesNotExist:
             return render(request, 'volunteer/container.html', {'hx': check_if_hx(request)})

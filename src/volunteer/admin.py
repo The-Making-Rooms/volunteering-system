@@ -1,5 +1,5 @@
 from django.contrib import admin
-from volunteer.models import Volunteer, VolunteerAddress, VolunteerConditions, VolunteerInterest, EmergencyContacts
+from volunteer.models import Volunteer, VolunteerAddress, VolunteerConditions, VolunteerInterest, EmergencyContacts, SupplementaryInfo, SupplementaryInfoGrantee
 # Register your models here.
 class VolunteerAddressInline(admin.TabularInline):
     model = VolunteerAddress
@@ -18,5 +18,16 @@ class EmergencyContactInline(admin.TabularInline):
     extra = 1
 
 @admin.register(Volunteer)
-class OpportunityAdmin(admin.ModelAdmin):
+class VolunteerAdmin(admin.ModelAdmin):
     inlines = [VolunteerAddressInline, VolunteerConditionsInline, VolunteerInterestInline, EmergencyContactInline]
+
+@admin.register(SupplementaryInfo)
+class SupplementaryInfoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description')
+    
+    pass
+
+@admin.register(SupplementaryInfoGrantee)
+class SupplementaryInfoGranteeAdmin(admin.ModelAdmin):
+    list_display = ('org', 'info')
+

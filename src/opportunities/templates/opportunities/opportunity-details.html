@@ -1,6 +1,81 @@
 {% extends "commonui/navigation-template.html" %}
 
 {% block page_content %}
+
+<div class="carousel w-full rounded-xl mb-5">
+
+    {% for image in opp_images %}
+        <div id="slide{{forloop.counter}}" class="carousel-item relative w-full">
+            <img src="{{ image.image.url }}" class="w-full" />
+            <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                <a href="#slide{{forloop.counter|add:'-1'}}" class="btn btn-circle">❮</a> 
+                <a href="#slide{{forloop.counter|add:'1'}}" class="btn btn-circle">❯</a>
+            </div>
+        </div> 
+    {% endfor %}
+
+
+  </div>
+
+  <div class="card w-full bg-base-300 shadow-xl mb-5">
+    <div class="card-body">
+      <h2 class="card-title">{{ opportunity.name }}</h2>
+      <button class="btn rounded-full" hx-get="/organisations/{{ opportunity.organisation.id }}" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">{{ opportunity.organisation.name}}</button>
+      <div class="divider"></div> 
+      <p>{{ opportunity.description }}</p>
+      <div class="divider"></div> 
+      <div class="card-actions justify-center">
+        <button class="btn btn-primary" hx-get="/opportunities/{{ opportunity.id }}/register" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">Register</button>
+        <button class="btn btn-primary">Ask A Question</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-300 shadow-xl mb-5">
+    <div class="card-body">
+      <h2 class="card-title">Role Schedule</h2>
+      <div class="divider"></div> 
+      <div class="card-actions justify-center">
+        <table class="table">
+            <tr>
+                <th>Start date</th>
+                <td>{{ opportunity.start_date }}</td>
+            </tr>
+            <tr>
+                <th>End date</th>
+                <td>{{ opportunity.end_date }}</td>
+            </tr>
+
+            <tr>
+                <th>Recurring</th>
+                <td>
+                    {% for rule in text_rules_inclusion %}
+                        {{ rule }}<br>
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-300 shadow-xl mb-5">
+    <div class="card-body">
+      <h2 class="card-title">Role Details</h2>
+      <div class="divider"></div> 
+      <div class="card-actions justify-end">
+        <ul>
+            {% for benefit in benefits %}
+                <li>{{ benefit.description }}</li>
+            {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+<!--
+
+
 <div class="m-4 h-100">
     <div class="card mb-4">
         <div class="card-header">
@@ -56,5 +131,6 @@
     </div>
 
 </div>
+
+-->
 {% endblock %}
-```

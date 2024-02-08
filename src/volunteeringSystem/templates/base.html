@@ -1,5 +1,6 @@
 {% load compress %}
 {% load static %}
+{% load pwa %}
 
 <!doctype html>
 <html lang="en" class="" style="height: 100%;">
@@ -11,6 +12,8 @@
     <link rel="stylesheet"
         href="{% static 'src/output.css' %}">
     {% endcompress %}
+    
+    {% progressive_web_app_meta %}
     
 </head>
   <body style="height: 100%;">

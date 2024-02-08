@@ -1,38 +1,40 @@
 {% load compress %}
 {% load static %}
+{% load pwa %}
+
 <!doctype html>
 {% if not hx or hx == False  %}
     <html lang="en" class="" style="height: 100%;">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Volunteering System - {{ url_name }}</title>
+            <title>Volunteering System</title>
             {% compress css %}
             <link rel="stylesheet"
                 href="{% static 'src/output.css' %}">
             {% endcompress %}
+            {% progressive_web_app_meta %}
         </head>
 
         <body style="height: 100%;">
-{% endif %}
 
             <div class="d-flex flex-column h-100">
                 {% include "topbar.html"%}
-            
-            
-                {% block page_content %}
-            
-            
-                {% endblock %}
-            
-            
-                {% include "navbar.html"%}
-            </div>
 
-            <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
+
+{% endif %}
+        <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80">
+            {{hx}}
+            {% block page_content %}
         
-{% if not hx or hx == False %}    
-
+        
+            {% endblock %}
+        </div>
+            
+{% if not hx or hx == False %}
+            {% include "navbar.html"%}
+            </div>
+            <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
         </body>
     </html>
 {% endif %}

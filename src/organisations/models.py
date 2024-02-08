@@ -19,7 +19,7 @@ class Location(models.Model):
 class Link(models.Model):
     name = models.CharField(max_length=200)
     link = models.CharField(max_length=200)
-    icon = models.ImageField()
+    icon = models.ImageField(null=True, blank=True)
     description = models.CharField(max_length=200)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
 
@@ -39,3 +39,5 @@ class thematicCategory(models.Model):
 class organisationnThematicLink(models.Model):
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
     theme = models.ForeignKey('thematicCategory', on_delete=models.CASCADE)
+
+
