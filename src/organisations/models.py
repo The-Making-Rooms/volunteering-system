@@ -9,18 +9,20 @@ class Organisation(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
-    description = RichTextField()
+    description = RichTextField(null=True, blank=True)
     first_line = models.CharField(max_length=200)
-    second_line = models.CharField(max_length=200)
+    second_line = models.CharField(max_length=200, null=True, blank=True)
     postcode = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
 
 class Link(models.Model):
     name = models.CharField(max_length=200)
     link = models.CharField(max_length=200)
     icon = models.ImageField(null=True, blank=True)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, null=True, blank=True)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
 
 class Image(models.Model):

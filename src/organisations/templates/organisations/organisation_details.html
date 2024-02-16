@@ -44,6 +44,46 @@
 {% endif %}
 
 
+{% if locations %}
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">Location</h2>
+    <div class="divider"></div> 
+    
+    
+    <script type="module">
+      let map;
+  
+      async function initMap() {
+
+        const { Map } = await google.maps.importLibrary("maps");
+        map = new Map(document.getElementById("map"), {
+          center: { lat: {{locations.0.latitude}}, lng: {{locations.0.longitude}} },
+          zoom: 18,
+        });
+
+        {% for site in locations %}
+        new google.maps.Marker({
+          position: { lat: {{site.latitude}}, lng: {{site.longitude}} },
+          map,
+          title: "{{ site.name }}",
+        });
+        {% endfor %}
+      
+      }
+  
+      initMap();
+  
+      </script>
+      <div id="map" class="w-full h-96"></div>
+    <div class="divider"></div> 
+    <div class="card-actions justify-center">
+      <button class="btn btn-primary">Check directions</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 
 {% endblock %}
 ```

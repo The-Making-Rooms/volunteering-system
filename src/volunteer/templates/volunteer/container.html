@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'navigation_template.html' %}
 
 <style>
   @keyframes fade-in {
@@ -30,15 +30,20 @@
     600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
   }
 </style>
+
 {% block content %}
-<div class="card">
-    <div class="card-header">
-      Welcome to Chip In!
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">Before you start your volunteering journey, we need a little more info.</h5>
-      <p class="card-text">Click the next button below to make your profile!</p>
-      <a href="#" class="btn btn-primary" hx-get="/volunteer/coreinfoform" hx-swap="innerHTML transition:true" hx-target="closest div">Go somewhere</a>
-    </div>
-  </div>
+<div class="card w-full bg-base-200 mb-3">
+  <div class="card-body p-5">
+      <div class="card-actions items-center">
+          <p class="text-2xl font-bold">Welcome to chip in!</p>
+      </div>
+      <div class="divider my-2 "></div> 
+        <div class="overflow-x-auto">
+          <h5 class="card-title">Before you start your volunteering journey, we need a little more info.</h5>
+          <p class="card-text">Click the next button below to make your profile!</p>
+          <a href="#" class="btn btn-primary" hx-get="/volunteer/coreinfoform" hx-swap="innerHTML transition:true" hx-target="closest div">Go somewhere</a>
+        </div>
+      </div>
+</div>
+
   {% endblock %}
