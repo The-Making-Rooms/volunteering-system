@@ -147,7 +147,6 @@ router.register(r'organisationthemes', OrganisationThemeViewSet)
 router.register(r'organisationthematiclinks', OrganisationThematicLinkViewSet)
 
 urlpatterns = [
-    
     path("organisations/", include("organisations.urls")),
     path("opportunities/", include("opportunities.urls")),
     path("volunteer/", include("volunteer.urls")),
@@ -160,4 +159,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
     path('org_admin/', include('org_admin.urls')),
+    path('webpush/', include('webpush.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

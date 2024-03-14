@@ -44,6 +44,7 @@ def index(request):
         "hx" : check_if_hx(request),
         "organisations": org_objects,
         "opportunities":  opp_objects,
+        "link_active": "explore",
     }
     return render(request, 'explore/index.html', context=context)
 
@@ -97,7 +98,8 @@ def search(request):
         "search" : True,
         "results" : result_objs,
         "opp_images" : images,
-        "hx" : check_if_hx(request)
+        "hx" : check_if_hx(request),
+        
     }
 
     return render(request, 'explore/search.html', context=context)

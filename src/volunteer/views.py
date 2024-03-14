@@ -43,11 +43,16 @@ def index(request):
                 'addresses': VolunteerAddress.objects.filter(volunteer=volunteer_profile),
                 'conditions': VolunteerConditions.objects.filter(volunteer=volunteer_profile),
                 'registrations': Registration.objects.filter(user=current_user),
-            }#
+                'link_active': 'volunteer',
+            }
+
             return render(request, 'volunteer/index.html', context=context)
                     
         except ObjectDoesNotExist:
             return render(request, 'volunteer/container.html', {'hx': check_if_hx(request)})
+        except Exception as e:
+            print(e)
+
     else:
         return render(request, 'commonui/not_logged_in.html', {'hx': check_if_hx(request)})
     

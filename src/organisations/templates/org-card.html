@@ -13,6 +13,8 @@
 
 -->
 
+<!--
+
 
 <div class="card bg-base-100 shadow-xl image-full {% if search %}w-100{% else%} w-96 carousel-item {% endif %}">
     <figure><img src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
@@ -24,3 +26,15 @@
       </div>
     </div>
 </div>
+-->
+<a href="/organisations/{{org.id}}">
+<div class="max-w-96 h-60 border border-gray-600 rounded-xl flex justify-center items-center {% if search %}min-w-48{% else%} w-96 carousel-item {% endif %}">
+  <div class="rounded-xl relative z-0 w-full h-full">
+    <img class="rounded-xl object-cover h-full w-full " src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" alt="Image of {{ org.description|truncatewords:10}}" />
+    <div class="p-5 absolute inset-0 rounded-xl  flex flex-col justify-end h-full w-full z-10 bg-gradient-to-b from-[#ffffff00] to-[#000000]">
+      <h2 class="text-white text-2xl">{{ org.name }}</h2>
+      <p class="text-gray-400">{{ org.description|truncatewords:10}}</p>
+    </div>
+  </div> 
+</div>
+</a>

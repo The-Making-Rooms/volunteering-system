@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
@@ -8,6 +8,7 @@ from googlemaps import Client as GoogleMaps
 from .forms import SuppInfoForm
 from datetime import datetime, date
 from django.forms import formset_factory
+
 
 from commonui.views import check_if_hx
 
@@ -40,6 +41,11 @@ def detail(request, opportunity_id):
     for rule in opportunity.recurrences.rrules:
         text_rules_inclusion.append(rule.to_text())
 
+    exists = False
+    current_user = request.user
+    if current_user.is_authenticated:
+        Registration.objects.filter(user=current_user, opportunity=opportunity).exists()
+        exists = True
     context = {
         "opportunity": opportunity,
         "benefits": benefits,
@@ -47,7 +53,8 @@ def detail(request, opportunity_id):
         "locations": location,
         "opp_images": opp_images,
         "opp_videos": opp_videos,
-        "hx" : check_if_hx(request)
+        "hx" : check_if_hx(request),
+        "exists": exists,
     }
 
     return HttpResponse(template.render(context, request))
@@ -139,3 +146,5 @@ def register(request, opportunity_id):
                 "hx": check_if_hx(request)
             }
             return render(request, 'opportunities/register.html', context=context)
+    else:
+        return HttpResponseRedirect('/volunteer')

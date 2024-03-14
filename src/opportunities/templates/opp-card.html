@@ -1,4 +1,8 @@
 
+<!--
+
+
+
 <div class="card bg-base-100 shadow-xl image-full  {% if search %}w-100 {% else%} w-96 carousel-item{% endif %}">
   <figure><img class="object-fill" src="{% if opp.images.0.image.url %} {{opp.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
   <div class="card-body before:bg-[#0000007d] ">
@@ -9,3 +13,16 @@
     </div>
   </div>
 </div>
+-->
+
+<a href="/opportunities/{{opp.id}}">
+<div class="max-w-96 h-60 border border-gray-600 rounded-xl flex justify-center items-center {% if search %}min-w-48{% else%} w-96 carousel-item {% endif %}">
+  <div class="rounded-xl relative z-0 w-full h-full">
+    <img class="rounded-xl object-cover h-full w-full " src="{% if opp.images.0.image.url %} {{opp.images.0.image.url}} {% else %} # {% endif %}" alt="Image of {{ opp.organisation.description|truncatewords:10}}" />
+    <div class="p-5 absolute inset-0 rounded-xl  flex flex-col justify-end h-full w-full z-10 bg-gradient-to-b from-[#ffffff00] to-[#000000]">
+      <h2 class="text-white text-2xl">{{ opp.name }}</h2>
+      <p class="text-gray-400">{{ opp.organisation.name }}</p>
+    </div>
+  </div> 
+</div>
+</a>

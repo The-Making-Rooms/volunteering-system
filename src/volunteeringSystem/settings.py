@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from os import path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,8 +50,15 @@ INSTALLED_APPS = [
     'compressor',
      "django_extensions",
      'pwa',
-     'org_admin',
+     'org_admin', 
+     'webpush',
 ]
+
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": "BNRVbyR3auCqhbrnRcQcBXiAdDoP_-wVe16VMCpSaXJ9TN1PqbtwRQXOnHoDmg013wiFotc5y8hHWl3Bn4YcwE0", #Update in nav_template
+    "VAPID_PRIVATE_KEY":"kO5i2K4COSjMISdogh4C7NQuf91NSi5Gpwnp4m8h7C4",
+    "VAPID_ADMIN_EMAIL": "info@makingrooms.org"
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +69,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -158,7 +167,7 @@ COMPRESS_ROOT = BASE_DIR / 'static'
 COMPRESS_ENABLED = True
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
-
+PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static' / 'js' / 'sw.js'
 CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.uzair.io']
 PWA_APP_NAME = 'Volunteering App'
 PWA_APP_DESCRIPTION = "Find Volunteering Opportunities in your area!"
@@ -239,3 +248,4 @@ PWA_APP_SCREENSHOTS = [
       "type": "image/png"
     }
 ]
+

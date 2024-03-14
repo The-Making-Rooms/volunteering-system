@@ -4,6 +4,8 @@ from django.template import loader
 from organisations.models import Organisation, Link, Image, Video
 from opportunities.models import Opportunity, Image as OpportunityImage
 from django.contrib.auth import authenticate, login
+from webpush import send_user_notification
+
 
 #create uswer
 from django.contrib.auth.models import User
@@ -62,7 +64,11 @@ def index(request):
         "organisations": org_objects,
         "opportunities":  opp_objects,
         "hx": check_if_hx(request),
+        "link_active": "index",
     }
+
+    payload = {"head": "Welcome!", "body": "Hello World"}
+
     return HttpResponse(template.render(context, request))
 
 
