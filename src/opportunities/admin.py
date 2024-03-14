@@ -1,5 +1,5 @@
 from django.contrib import admin
-from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement
+from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration
 
 # Register your models here.
 class BenefitInline(admin.TabularInline):
@@ -28,3 +28,9 @@ class OpportunityAdmin(admin.ModelAdmin):
 @admin.register(SupplimentaryInfoRequirement)
 class SupplimentaryInfoRequirementAdmin(admin.ModelAdmin):
     list_display = ('opportunity', 'info')
+
+@admin.register(Registration)
+class RegistrationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'opportunity')
+    search_fields = ('user', 'opportunity')
+    pass

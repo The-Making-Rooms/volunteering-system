@@ -159,4 +159,5 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
     path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
+    path('org_admin/', include('org_admin.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

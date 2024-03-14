@@ -6,25 +6,32 @@ from opportunities.models import Opportunity, Image as OpportunityImage
 from commonui.views import check_if_hx
 from googlemaps import Client as GoogleMaps
 
-
-
-# Create your views here.
-
-
+# Create your views here
 def detail(request, organisation_id):
     template = loader.get_template("organisations/organisation_details.html")
 
     org = Organisation.objects.get(id=organisation_id)
-
+    opps = Opportunity.objects.filter(organisation=org)
     location = Location.objects.filter(organisation=org)
 
-    print('CHEEESE')
+    opp_objects = []
+    for opp in opps:
+        opp_object = {
+            "id": opp.id,
+            "name": opp.name,
+            "images": OpportunityImage.objects.filter(opportunity=opp),
+        }
+        try:
+            print (opp_object['images'][0].image.url)
+        except:
+            pass
+        opp_objects.append(opp_object)
 
     for site in location:
         print(site.longitude, site.latitude)
         if site.longitude is None or site.latitude is None:
             print('NO LONGITUDE OR LATITUDE')
-            gmaps = GoogleMaps('AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY')
+            gmaps = GoogleMaps('AIzaSyBE66q11LMi6uYnd7_-9W8HIKzMOniqw6U')
             geocode_result = gmaps.geocode(site.first_line + " " + site.postcode)
             site.longitude = geocode_result[0]['geometry']['location']['lng']
             site.latitude = geocode_result[0]['geometry']['location']['lat']
@@ -42,6 +49,7 @@ def detail(request, organisation_id):
         "images": images,
         "videos": videos,
         "locations": location,
+        "opportunities": opp_objects,
         "hx": check_if_hx(request)
     }
     return HttpResponse(template.render(context, request))

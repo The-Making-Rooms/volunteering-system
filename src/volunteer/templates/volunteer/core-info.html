@@ -1,37 +1,37 @@
-<form>
+<form class="grid grid-cols-1 gap-2">
     {% csrf_token %}
     <div class="row">
 
         <div class="col">
-          <input type="text" class="form-control" placeholder="First name" aria-label="First name" name="FirstName">
+          <input type="text" class="form-control input input-bordered w-full max-w-xs" placeholder="First name" aria-label="First name" name="FirstName">
         </div>
         <div class="col">
-          <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" name="LastName">
+          <input type="text" class="form-control input input-bordered w-full max-w-xs" placeholder="Last name" aria-label="Last name" name="LastName">
         </div>
       </div>
   
     <div class="mb-3">
-        <input type="date" class="form-control" id="DateOfBirth" placeholder="Date of Birth (DD/MM/YYYY)" name="DateOfBirth">
+        <input type="date" class="form-control input input-bordered w-full max-w-xs" id="DateOfBirth" placeholder="Date of Birth (DD/MM/YYYY)" name="DateOfBirth">
     </div>
 
     <div class="mb-3">
-        <input type="tel" class="form-control" placeholder="Phone Number" id="PhoneNumber" name="PhoneNumber">
+        <input type="tel" class="form-control input input-bordered w-full max-w-xs" placeholder="Phone Number" id="PhoneNumber" name="PhoneNumber">
     </div>
 
     <div class="col-12">
  
-        <input type="text" class="form-control" id="inputAddress" placeholder="First Line of Address" name="inputAddress">
+        <input type="text" class="form-control input input-bordered w-full max-w-xs" id="inputAddress" placeholder="First Line of Address" name="inputAddress">
       </div>
       <div class="col-12">
-        <input type="text" class="form-control" id="inputAddress2" placeholder="Second Line of Address" name="inputAddress2">
+        <input type="text" class="form-control input input-bordered w-full max-w-xs" id="inputAddress2" placeholder="Second Line of Address" name="inputAddress2">
       </div>
 
     <div class="row g-2">
         <div class="col-sm-7">
-          <input type="text" class="form-control" placeholder="City" aria-label="City" name="city">
+          <input type="text" class="form-control input input-bordered w-full max-w-xs" placeholder="City" aria-label="City" name="city">
         </div>
         <div class="col-sm">
-          <input type="text" class="form-control" placeholder="Post Code" aria-label="Post Code" name="postCode">
+          <input type="text" class="form-control input input-bordered w-full max-w-xs" placeholder="Post Code" aria-label="Post Code" name="postCode">
         </div>
       </div>
 

@@ -25,7 +25,7 @@
       <p>{{ opportunity.description }}</p>
       <div class="divider"></div> 
       <div class="card-actions justify-center">
-        <button class="btn btn-primary" hx-get="/opportunities/{{ opportunity.id }}/register" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">Register</button>
+        <button class="btn btn-primary {% if exists %} btn-disabled {%endif%}" hx-get="/opportunities/{{ opportunity.id }}/register" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">{% if exists %} You are already Registered {% else %} Register {% endif %}</button>
         <button class="btn btn-primary">Ask A Question</button>
       </div>
     </div>
@@ -72,6 +72,46 @@
       </div>
     </div>
   </div>
+
+  {% if locations %}
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">Location</h2>
+    <div class="divider"></div> 
+    
+    
+    <script type="module">
+      let map;
+  
+      async function initMap() {
+
+        const { Map } = await google.maps.importLibrary("maps");
+        map = new Map(document.getElementById("map"), {
+          center: { lat: {{locations.0.latitude}}, lng: {{locations.0.longitude}} },
+          zoom: 18,
+        });
+
+        {% for site in locations %}
+        new google.maps.Marker({
+          position: { lat: {{site.latitude}}, lng: {{site.longitude}} },
+          map,
+          title: "{{ site.name }}",
+        });
+        {% endfor %}
+      
+      }
+  
+      initMap();
+  
+      </script>
+      <div id="map" class="w-full h-96"></div>
+    <div class="divider"></div> 
+    <div class="card-actions justify-center">
+      <a href="https://www.google.com/maps/dir/?api=1" class="btn btn-primary">Check directions</button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!--
 

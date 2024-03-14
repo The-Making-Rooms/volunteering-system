@@ -1,0 +1,23 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<p>About your Organisation</p>
+
+<form action="update_organisation" method="post">
+    {% csrf_token %}
+    {{ organisation_form.non_field_errors }}
+
+    <label class="form-control w-full max-w-xs">
+        <div class="label">
+          <span class="label-text" >Organisation name</span>
+        </div>
+        
+        {{ organisation_form.name }}
+
+
+      </label>
+
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

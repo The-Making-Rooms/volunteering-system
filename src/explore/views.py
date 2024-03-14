@@ -1,12 +1,49 @@
 from django.shortcuts import render
-from organisations.models import thematicCategory, organisationnThematicLink
+from organisations.models import thematicCategory, organisationnThematicLink, Organisation
+from organisations.models import Image as OrgImage
 from opportunities.models import Opportunity, Location, Image, Video, LinkedTags, Tag
 from commonui.views import check_if_hx
 # Create your views here.
 
 def index(request):
+
+
+    orgs = Organisation.objects.all()
+    opps = Opportunity.objects.all()
+    org_objects = []
+
+    opp_objects = []
+    for opp in opps:
+        opp_object = {
+            "id": opp.id,
+            "name": opp.name,
+            "images": Image.objects.filter(opportunity=opp),
+        }
+        try:
+            print (opp_object['images'][0].image.url)
+        except:
+            pass
+        opp_objects.append(opp_object)
+
+    
+    for org in orgs:
+        org_object = {
+            "id": org.id,
+            "name": org.name,
+            "description": org.description,
+            "images": OrgImage.objects.filter(organisation=org),
+        }
+        try:
+            print (org_object['images'][0].image.url)
+        except:
+            pass
+        org_objects.append(org_object)
+
     context = {
-        "hx" : check_if_hx(request)
+        "search" : True,
+        "hx" : check_if_hx(request),
+        "organisations": org_objects,
+        "opportunities":  opp_objects,
     }
     return render(request, 'explore/index.html', context=context)
 
@@ -27,23 +64,26 @@ def search(request):
 
 
     #run query matching params
-    results = Opportunity.objects.all()
+    results_opp = Opportunity.objects.all()
+    results_org = Organisation.objects.all()
+
     if theme:
-        results = results.filter(organisation__thematic_category__name=theme)
+        results_opp = results_opp.filter(organisation__thematic_category__name=theme)
     if stringsearch == '':
         pass
     if stringsearch:    
-        results = results.filter(name__icontains=stringsearch)
+        results_opp = results_opp.filter(name__icontains=stringsearch)
     if organisation:
-        results = results.filter(organisation__name__icontains=organisation)
+        results_opp = results_opp.filter(organisation__name__icontains=organisation)
     if tag:
-        results = results.filter(linkedtags__tag__tag__icontains=tag)
+        results_opp = results_opp.filter(linkedtags__tag__tag__icontains=tag)
 
-    images = Image.objects.filter(opportunity__in=results)
+    images = Image.objects.filter(opportunity__in=results_opp)
+    
     
 
     result_objs = []
-    for result in results:
+    for result in results_opp:
         res_obj = {
             "id": result.id,
             "name": result.name,

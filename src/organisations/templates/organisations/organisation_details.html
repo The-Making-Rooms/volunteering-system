@@ -2,11 +2,11 @@
 
 {% block page_content %}
 
-<div class="carousel w-full rounded-xl mb-5">
+<div class="carousel w-full rounded-xl mb-5 max-h-60">
 
   {% for image in images %}
       <div id="slide{{forloop.counter}}" class="carousel-item relative w-full">
-          <img src="{{ image.image.url }}" class="w-full" />
+          <img src="{{ image.image.url }}" class="w-full object-cover" />
           <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
               <a href="#slide{{forloop.counter|add:'-1'}}" class="btn btn-circle">❮</a> 
               <a href="#slide{{forloop.counter|add:'1'}}" class="btn btn-circle">❯</a>
@@ -84,6 +84,25 @@
 </div>
 {% endif %}
 
+{% if opportunities %}
+
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">Oppertunities from this organisation</h2>
+    <div class="divider"></div> 
+    
+    <div class="carousel carousel-center w-full h-64 p-4 space-x-4 rounded-box">
+      {% for opp in opportunities %}
+          {% include "opp-card.html" %}
+      {% endfor %}
+    </div>
+
+
+  </div>
+</div>
+
+
+{% endif %}
 
 {% endblock %}
 ```

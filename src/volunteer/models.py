@@ -48,3 +48,4 @@ class SupplementaryInfo(models.Model):
 class SupplementaryInfoGrantee(models.Model):
     org = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
     info = models.ForeignKey('VolunteerSupplementaryInfo', on_delete=models.CASCADE)
+    volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)

@@ -5,6 +5,9 @@ from organisations.models import Organisation, Link, Image, Video
 from opportunities.models import Opportunity, Image as OpportunityImage
 from django.contrib.auth import authenticate, login
 
+#create uswer
+from django.contrib.auth.models import User
+
 class HTTPResponseHXRedirect(HttpResponseRedirect):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -77,3 +80,21 @@ def authenticate_user(request):
 
     else:
         return render(request, 'commonui/not_logged_in.html', {'hx':check_if_hx(request), 'login_failed': True})
+    
+
+def create_account(request):
+    if request.method == "POST":
+
+        print(request.POST)
+
+        email = request.POST["email"]
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = User.objects.create_user(username, email, password)
+        user.save()
+        user = authenticate(request, username=username, password=password)
+        login(request, user)
+
+        return HTTPResponseHXRedirect('/volunteer')
+    else:
+        return render(request, 'commonui/create_user_account.html', {'hx': check_if_hx(request)})

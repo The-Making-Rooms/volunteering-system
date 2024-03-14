@@ -8,10 +8,10 @@ import random
 from django.contrib.auth.decorators import login_required
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from datetime import datetime
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
 
 # Create your views here.
-
-
 
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
@@ -164,3 +164,19 @@ def coreInfoForm(request):
             request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
             return (emergencyContactForm(request)) 
             #return HTTPResponseHXRedirect('/volunteer')  
+
+def sign_up(request):
+    if request.method == 'GET':
+        return render(request, 'volunteer/sign_up.html', {'hx': check_if_hx(request)})
+    elif request.method == 'POST':
+        data = request.POST
+        print(data)
+        #create django user
+        user = User.objects.create_user(data['email'], data['email'], data['password'])
+        user.save()
+        #create volunteer -> redirect to onboarding
+        return HTTPResponseHXRedirect('/volunteer')
+
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect('/volunteer')

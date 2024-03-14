@@ -21,6 +21,7 @@
         <span class="label-text">Remember me</span> 
         <input type="checkbox" class="toggle" checked />
       </label>
+     <p>Don't have an account? Why not <a hx-get="/create_account" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline">Sign Up</a></p>
     </div>
     <button hx-post="/authenticate" class="btn btn-primary"  hx-target=".htmx-navigator" hx-swap="outerHTML">Submit</button>
   </div>

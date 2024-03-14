@@ -1,4 +1,4 @@
-{% extends 'navigation_template.html' %}
+{% extends 'commonui/navigation-template.html' %}
 
 <style>
   @keyframes fade-in {
@@ -31,7 +31,7 @@
   }
 </style>
 
-{% block content %}
+{% block page_content %}
 <div class="card w-full bg-base-200 mb-3">
   <div class="card-body p-5">
       <div class="card-actions items-center">
@@ -40,8 +40,8 @@
       <div class="divider my-2 "></div> 
         <div class="overflow-x-auto">
           <h5 class="card-title">Before you start your volunteering journey, we need a little more info.</h5>
-          <p class="card-text">Click the next button below to make your profile!</p>
-          <a href="#" class="btn btn-primary" hx-get="/volunteer/coreinfoform" hx-swap="innerHTML transition:true" hx-target="closest div">Go somewhere</a>
+          <p class="card-text mb-3">Click the next button below to make your profile!</p>
+          <a href="#" class="btn btn-primary" hx-get="/volunteer/coreinfoform" hx-swap="innerHTML transition:true" hx-target="closest div">Next</a>
         </div>
       </div>
 </div>

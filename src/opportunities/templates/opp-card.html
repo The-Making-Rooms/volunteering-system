@@ -1,7 +1,7 @@
 
-<div class="carousel-item card bg-base-100 shadow-xl image-full {% if search %}w-100 h-20{% else%} w-96{% endif %}">
-  <figure><img src="{% if opp.images.0.image.url %} {{opp.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
-  <div class="card-body">
+<div class="card bg-base-100 shadow-xl image-full  {% if search %}w-100 {% else%} w-96 carousel-item{% endif %}">
+  <figure><img class="object-fill" src="{% if opp.images.0.image.url %} {{opp.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
+  <div class="card-body before:bg-[#0000007d] ">
     <h2 class="card-title text-white">{{ opp.name }} {{ opp.organisation.name }}</h2>
     <p class="text-white">{{ org.description|truncatewords:10}}</p>
     <div class="card-actions justify-end">

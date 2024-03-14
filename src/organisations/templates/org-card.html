@@ -14,13 +14,13 @@
 -->
 
 
-<div class="carousel-item card w-96 bg-base-100 shadow-xl image-full">
+<div class="card bg-base-100 shadow-xl image-full {% if search %}w-100{% else%} w-96 carousel-item {% endif %}">
     <figure><img src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
     <div class="card-body">
       <h2 class="card-title text-white">{{ org.name }}</h2>
       <p class="text-white">{{ org.description|truncatewords:10}}</p>
       <div class="card-actions justify-end">
-        <a href="organisations/{{org.id}}" class="btn btn-primary">View</a>
+        <a href="/organisations/{{org.id}}" class="btn btn-primary">View</a>
       </div>
     </div>
 </div>

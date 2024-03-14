@@ -23,7 +23,6 @@ class ThematicInLine(admin.TabularInline):
     model = organisationnThematicLink
     extra = 1
 
-    
 @admin.register(Organisation)
 class OrganisationAdmin(admin.ModelAdmin):
     list_display = ['name']

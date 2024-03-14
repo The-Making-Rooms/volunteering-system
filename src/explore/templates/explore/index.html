@@ -14,17 +14,29 @@
 
 
 <div id="search-panel" >
-<div class="grid grid-cols-2 gap-4">
-  <button class="btn h-32 bg-gradient-to-tr from-[#2c5163] to-[#3695C0] text-2xl text-white">Sport</button>
-  <button class="btn h-32 bg-gradient-to-tr from-[#554824] to-[#E9BA37] text-2xl text-white">Environment</button>
-  <button class="btn h-32 bg-gradient-to-tr from-[#307269] to-[#00FFDF] text-2xl text-white">Art</button>
-  <button class="btn h-32 bg-gradient-to-tr from-[#342c6b] to-[#8078BA] text-2xl text-white">Culture</button>
-  <button class="btn h-32 bg-gradient-to-tr from-[#2d6629] to-[#9BCE97] text-2xl text-white">Food</button>
-  <button class="btn h-32 bg-gradient-to-tr from-[#421e29] to-[#B02B54] text-2xl text-white">Heritage</button>
-</div>
+  <div class="grid grid-cols-2 gap-4">
+    <button class="btn h-32 bg-gradient-to-tr from-[#2c5163] to-[#3695C0] text-2xl text-white">Sport</button>
+    <button class="btn h-32 bg-gradient-to-tr from-[#554824] to-[#E9BA37] text-2xl text-white">Environment</button>
+    <button class="btn h-32 bg-gradient-to-tr from-[#307269] to-[#00FFDF] text-2xl text-white">Art</button>
+    <button class="btn h-32 bg-gradient-to-tr from-[#342c6b] to-[#8078BA] text-2xl text-white">Culture</button>
+    <button class="btn h-32 bg-gradient-to-tr from-[#2d6629] to-[#9BCE97] text-2xl text-white">Food</button>
+    <button class="btn h-32 bg-gradient-to-tr from-[#421e29] to-[#B02B54] text-2xl text-white">Heritage</button>
+  </div>
 </div>
 
+<h1 class="text-2xl my-5 font-bold">Explore all Opportunities</h1>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 justify-between">
+  {% for opp in opportunities %}
+  {% include "opp-card.html" %}
+  {% endfor %}
+</div>
 
+<h1 class="text-2xl my-5 font-bold">Explore all Organisations</h1>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 justify-between">
+  {% for org in organisations %}
+  {% include "org-card.html" %}
+  {% endfor %}
+</div>
 
 
 {% endblock %}

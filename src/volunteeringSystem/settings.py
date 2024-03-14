@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'compressor',
      "django_extensions",
      'pwa',
+     'org_admin',
 ]
 
 MIDDLEWARE = [
