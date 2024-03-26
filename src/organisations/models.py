@@ -1,11 +1,15 @@
 from django.db import models
 from djrichtextfield.models import RichTextField
+from org_admin.models import OrgnaisationAdmin
 
 # Create your models here.
 class Organisation(models.Model):
     name = models.CharField(max_length=200)
     description = RichTextField()
     featured = models.BooleanField(default=False)
+
+    def get_orgnanisation_admin_users(self):
+        return OrgnaisationAdmin.objects.filter(organisation=self).values_list('user', flat=True)
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
@@ -18,10 +22,14 @@ class Location(models.Model):
     longitude = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
 
-class Link(models.Model):
-    name = models.CharField(max_length=200)
-    link = models.CharField(max_length=200)
+class LinkType(models.Model):
     icon = models.ImageField(null=True, blank=True)
+    name = models.CharField(max_length=200)
+
+class Link(models.Model):
+    type = models.ForeignKey('LinkType', on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=200)
+    url = models.CharField(max_length=200)
     description = models.CharField(max_length=200, null=True, blank=True)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
 

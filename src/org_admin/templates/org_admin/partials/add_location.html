@@ -1,0 +1,30 @@
+<!--
+    class Location(models.Model):
+    name = models.CharField(max_length=200)
+    description = RichTextField(null=True, blank=True)
+    first_line = models.CharField(max_length=200)
+    second_line = models.CharField(max_length=200, null=True, blank=True)
+    postcode = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+-->
+
+<div>
+    <p class="font-bold text-2xl">Add a Location</p>
+    <div class="divider"></div>
+    <form>
+        {% csrf_token %}
+        <input value="{{ location.id }}" class="input input-bordered" type="hidden" name="locationID" placeholder="Organisation">
+        <input value="{{ org_id }}" class="input input-bordered" type="hidden" name="organisation" placeholder="Organisation">
+        <input value="{{ location.name }}" class="input input-bordered" type="text" name="name" placeholder="Main Offices">
+        <input value="{{ location.description }}" class="input input-bordered" type="text" name="description" placeholder="Home of ABC C.I.C">
+        <input value="{{ location.first_line }}" class="input input-bordered" type="text" name="first_line" placeholder="First Line">
+        <input value="{{ location.second_line }}" class="input input-bordered" type="text" name="second_line" placeholder="Second Line">
+        <input value="{{ location.postcode }}" class="input input-bordered" type="text" name="postcode" placeholder="Postcode">
+        <input value="{{ location.city }}" class="input input-bordered" type="text" name="city" placeholder="City">
+        <div class="divider"></div>
+        <button class="btn btn-primary" type="submit" hx-post="/org_admin/add_location/" hx-target=".htmx-navigator" hx-swap="outerHTML">{% if location.id %}Save{%else%}Add Location{%endif%}</button>
+    </form>
+</div>

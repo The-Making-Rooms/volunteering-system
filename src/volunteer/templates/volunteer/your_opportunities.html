@@ -1,0 +1,56 @@
+{% extends 'commonui/navigation-template.html' %}
+
+{% block page_content %}
+
+<div>
+    <div class="w-full">
+        <div class="card shadow-lg p-3">
+            <h1 class="text-2xl font-bold mb-3">Your Opportuinities</h1>
+
+            <dialog id="my_modal_1" class="modal">
+                <div class="modal-box">
+                  <h3 class="font-bold text-lg">Hello!</h3>
+                  <p class="py-4">Press ESC key or click the button below to close</p>
+                  <div class="modal-action">
+                    <form method="dialog">
+                      <!-- if there is a button in form, it will close the modal -->
+                      <button class="btn">Close</button>
+                    </form>
+                  </div>
+                </div>
+              </dialog>
+
+            {% for loop in data %}
+
+            <div class="card w-full bg-base-200 mb-3">
+                <div class="card-body p-5">
+                    <div class="card-actions items-center">
+                        <p class="text-2xl font-bold">{{ loop.registration.opportunity.name }}</p>
+                        
+                        <a class="btn btn-primary" href="/opportunities/{{ loop.registration.opportunity.id }}">View Opportunity Details</a>
+                    </div>
+                    <div class="divider my-2 "></div> 
+
+                    <div class="overflow-x-auto">
+                        <p>Volunteer since: {{ loop.registration.date_created }}</p>
+                        <p>Volunteer status: {% if loop.status.0.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to Approve {% else %} {{ loop.status.0.registration_status.status }} {% endif %}</p>
+                        <p>Next Upcoming Event: {{ loop.next_occurance }}</p>
+                    </div>
+
+                    <div class="divider my-2 "></div>
+
+                    <div>
+                        <button class="btn btn-primary justify-end mr-3">I can't make it</button>
+                        <button class="btn btn-primary justify-end mr-3">Pause</button>
+                        <button class="btn btn-primary justify-end mr-3">Complete</button>
+                    </div>
+                </div>
+             </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% include "navbar.html" %}
+
+{% endblock %}

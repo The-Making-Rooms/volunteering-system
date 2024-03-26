@@ -1,0 +1,42 @@
+{% extends "commonui/navigation-template.html" %}
+
+{% block page_content %}
+    <div class="w-full h-full">
+        <div class="flex flex-col" style="min-height: calc(100svh - 12rem);">
+
+            <h1 class="text-2xl font-bold mb-3">Chat wth {{ chat.organisation.name }}</h1>
+            <p>{% if chat.broadcast %}This is a broadcast chat.{% else %}Chats can be seen by system admins. Please do not share private or personal information over chat.{% endif %}</p>
+
+            <div class='flex flex-col-reverse overflow-x-auto'>
+            <div class='flex flex-col'>
+                {% for message in messages %}
+                {% if message.sender.id == user %}
+                    <div class="p-3 rounded-2xl bg-blue-500 my-2 max-w-fit text-white self-end">
+                        <p class="text-xs text-gray-200">{{message.sender.first_name }}</p>
+                        <p class="">{{ message.content }}</p>
+                        <p class="text-xs text-gray-200">{{ message.timestamp }}</p>
+                    </div>
+                {% else %}
+                <div class="p-3 rounded-2xl bg-gray-500 my-2 max-w-fit text-white break-words">
+                    <p class="text-sm">{{ message.content }}</p>
+                    <p class="text-xs text-gray-200">{{ message.timestamp }}</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+            
+            <form>
+                {% csrf_token %}
+                <div class="flex flex-row">
+                    <input type="text" placeholder="Type here" name="message" class="input input-bordered w-full mr-3" />
+                    <button class="btn btn-primary" hx-post="/communications/{{ chat.id }}/send/" hx-target=".htmx-navigator"  hx-swap="outerHTML">Send</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    {% include "navbar.html" %}
+
+{% endblock %}

@@ -7,11 +7,10 @@ from django.conf import settings
 class Opportunity(models.Model):
     name = models.CharField(max_length=200)
     description = RichTextField()
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
     recurrences = RecurrenceField(null=True)
     organisation = models.ForeignKey('organisations.organisation', on_delete=models.CASCADE)
     featured = models.BooleanField(default=False)
+
 class Benefit(models.Model):
     description = models.CharField(max_length=200)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
@@ -27,9 +26,18 @@ class Location(models.Model):
     longitude = models.FloatField()
     latitude = models.FloatField()
 
+class RegistrationStatus(models.Model):
+    status = models.CharField(max_length=200)
+    
+class VolunteerRegistrationStatus(models.Model):
+    registration_status = models.ForeignKey('RegistrationStatus', on_delete=models.CASCADE)
+    date = models.DateField()
+    Opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
+
 class Registration(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')

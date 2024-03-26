@@ -1,0 +1,33 @@
+<!--
+    class VolunteerConditionsForm(ModelForm):
+    class Meta:
+        model = VolunteerConditions
+        fields = ['disclosures']
+-->
+<div>
+  {{errors}}
+</div>
+
+<form>
+  {% csrf_token %}
+  <label class="form-control w-full max-w-xs">
+    <div class="label">
+      <span class="label-text">Details</span>
+    </div>
+    <textarea name="disclosures" class="textarea textarea-bordered" placeholder="Let us know of any details and adustments you may require.">{{condition.disclosures}}</textarea>
+  </label>
+
+  <a
+  href="#"
+  class="btn btn-primary col-span-2"
+  
+  {% if edit %}
+  hx-post="/volunteer/volunteer_conditions_form/{{condition.id}}/"
+  {% else %}
+  hx-post="/volunteer/volunteer_conditions_form/"
+  {% endif %}
+  
+  hx-swap="innerHTML transition:true"
+  hx-target="closest div"
+  >Save</a>
+</form>

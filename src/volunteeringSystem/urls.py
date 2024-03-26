@@ -160,4 +160,5 @@ urlpatterns = [
     path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
     path('org_admin/', include('org_admin.urls')),
     path('webpush/', include('webpush.urls')),
+    path('communications/', include('communications.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

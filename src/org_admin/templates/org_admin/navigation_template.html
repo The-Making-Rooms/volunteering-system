@@ -3,7 +3,7 @@
 
 <!doctype html>
 {% if not hx or hx == False  %}
-    <html lang="en" class="" style="height: 100%;">
+    <html lang="en" class="" style="height: 100%;" data-theme="chipin">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,21 +29,18 @@
                     </div> 
                     <div class="flex-1 px-2 mx-2">Volunteer Organisation Admin</div>
                     <div class="flex-none hidden lg:block">
-                      <ul class="menu menu-horizontal">
+                      <ul class="menu menu-horizontal hx-boost="true"">
                         <!-- Navbar menu content here -->
-                        <li><a>Dashboard</a></li>
-                        <li><a>Organisation Details</a></li>
-                        <li><a>Opportunities</a></li>
-                        <li><a>Communication</a></li>
+                        <li><a href="/org_admin/">Dashboard</a></li>
+                        <li><a href="/org_admin/details">Organisation Details</a></li>
+                        <li><a href="/org_admin/opportunities">Opportunities</a></li>
+                        <li><a href="/org_admin/communication">Communication</a></li>
                       </ul>
                     </div>
                   </div>
                 
-
-
 {% endif %}
         <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3">
-            {{hx}}
             {% block page_content %}
             {% endblock %}
         </div>
@@ -52,12 +49,12 @@
 </div> 
             <div class="drawer-side">
             <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label> 
-            <ul class="menu p-4 w-80 min-h-full bg-base-200">
+            <ul class="menu p-4 w-80 min-h-full bg-base-200" hx-boost="true">
                 <!-- Sidebar content here -->
-                <li><a>Dashboard</a></li>
-                <li><a>Organisation Details</a></li>
-                <li><a>Opportunities</a></li>
-                <li><a>Communication</a></li>
+                <li><a href="/org_admin/">Dashboard</a></li>
+                <li><a href="/org_admin/details">Organisation Details</a></li>
+                <li><a href="/org_admin/opportunities">Opportunities</a></li>
+                <li><a href="/org_admin/communication">Communication</a></li>
             </ul>
             </div>
             </div>
@@ -65,6 +62,7 @@
                 ({key: "AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY", v: "weekly"});</script>
             
             <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
+            
         </body>
     </html>
 {% endif %}

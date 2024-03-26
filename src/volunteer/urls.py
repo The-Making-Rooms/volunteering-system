@@ -4,9 +4,21 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="volunteer"),
-    path("coreinfoform/", views.coreInfoForm, name="coreInfoForm"),
-    path("emergency-contact/", views.emergencyContactForm, name="emergency-contact"),
-    path("emergency-contact-form", views.emergencyContactInput, name="emergency-contact-form"),
+    path("your-opportunities/", views.your_opportunities, name="your-opportunities"),
+    path("volunteer_form/", views.volunteer_form, name="volunteer_form"),
+    #Form Views
+    path("emergency_contact_form/", views.emergency_contact_form, name="emergency_contacts_form"),
+    path("volunteer_conditions_form/", views.volunteer_conditions_form, name="volunteer_conditions_form"),
+    path("volunteer_address_form/", views.volunteer_address_form, name="volunteer_address_form"),
+    #Form edit views
+    path("emergency_contact_form/<int:contact_id>/", views.emergency_contact_form, name="emergency_contact_form"),
+    path("volunteer_conditions_form/<int:condition_id>/", views.volunteer_conditions_form, name="volunteer_conditions_form"),
+    path("volunteer_address_form/<int:address_id>/", views.volunteer_address_form, name="volunteer_address_form"),
+    #Form delete views
+    path("emergency_contact_form/<int:contact_id>/delete", views.emergency_contact_form, name="emergency_contact_form", kwargs={"delete": True}),
+    path("volunteer_conditions_form/<int:condition_id>/delete", views.volunteer_conditions_form, name="volunteer_conditions_form", kwargs={"delete": True}),
+    path("volunteer_address_form/<int:address_id>/delete", views.volunteer_address_form, name="volunteer_address_form", kwargs={"delete": True}),
+    #User views
     path("sign-up/", views.sign_up, name="sign-up"),
     path("logout/", views.user_logout, name="logout"),
 ]

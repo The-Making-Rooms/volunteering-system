@@ -1,5 +1,5 @@
 from django.contrib import admin
-from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration
+from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration, RegistrationStatus, VolunteerRegistrationStatus
 
 # Register your models here.
 class BenefitInline(admin.TabularInline):
@@ -18,6 +18,13 @@ class VideoInline(admin.TabularInline):
     model = Video
     extra = 1
 
+@admin.register(RegistrationStatus)
+class RegistrationStatusAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(VolunteerRegistrationStatus)
+class VolunteerRegistrationStatusAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(Opportunity)
 class OpportunityAdmin(admin.ModelAdmin):

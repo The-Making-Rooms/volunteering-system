@@ -5,8 +5,39 @@ from organisations.models import Organisation, Link, Image, Video, Location
 from opportunities.models import Opportunity, Image as OpportunityImage
 from commonui.views import check_if_hx
 from googlemaps import Client as GoogleMaps
+from communications.models import Chat
+from org_admin.models import OrgnaisationAdmin
+from commonui.views import HTTPResponseHXRedirect
+
+
 
 # Create your views here
+
+def create_chat(request, organisation_id):
+    user = request.user
+
+    try:
+        chat = Chat.objects.get(organisation_id=organisation_id, participants=user)
+        return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+    except Chat.DoesNotExist:
+        pass
+    
+
+    organisation = Organisation.objects.get(id=organisation_id)
+    org_admin = OrgnaisationAdmin.objects.filter(organisation=organisation)
+    users = []
+    for admin in org_admin:
+        users.append(admin.user)
+    users.append(user)
+    # participants = models.ManyToManyField(User, related_name='chats')
+    chat = Chat(
+        organisation = organisation,
+    )
+    chat.save()
+    chat.participants.add(*users)
+    
+    return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+
 def detail(request, organisation_id):
     template = loader.get_template("organisations/organisation_details.html")
 

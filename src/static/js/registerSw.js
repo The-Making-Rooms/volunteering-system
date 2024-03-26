@@ -25,7 +25,7 @@ const initialiseState = (reg) => {
 }
 
 const showNotAllowed = (message) => {
-    const button = document.querySelector('form>button');
+    const button = document.querySelector('.notification-error');
     button.innerHTML = `${message}`;
     button.setAttribute('disabled', 'true');
 };

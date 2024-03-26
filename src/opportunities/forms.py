@@ -11,7 +11,7 @@ class SuppInfoForm(ModelForm):
         super(SuppInfoForm, self).__init__(*args, **kwargs)
         self.fields['info'].widget = forms.HiddenInput()
 
-        #tables were smashed and brain cels died but it works...
+        #tables were smashed and brain cells died but it works...
         #-------------------------------------------------------
         if kwargs.get('initial'):
             self.fields['info'].initial = kwargs.get('initial')

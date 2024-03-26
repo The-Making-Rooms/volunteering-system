@@ -1,0 +1,69 @@
+{{ errors }}
+<form class="grid grid-cols-2 gap-2 p-2">
+  {% csrf_token %}
+
+<!--
+  class Volunteer(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', blank=True)
+    date_of_birth = models.DateField()
+    phone_number = models.CharField(max_length=11)
+    bio = models.TextField()
+    CV = models.FileField(upload_to='CV/', blank=True)
+    -->
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text">First Name</span>
+      </div>
+      <input value="{{ user.first_name }}" name="first_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text">Last Name</span>
+      </div>
+      <input value="{{ user.last_name }}" name="last_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full col-span-2">
+      <div class="label">
+        <span class="label-text">Date of Birth</span>
+      </div>
+      <input
+    type="date"
+    value="{{ volunteer.date_of_birth|date:"Y-m-d" }}"
+    class="form-control input input-bordered w-full col-span-2"
+    id="date_of_birth"
+    placeholder="Date of Birth (DD/MM/YYYY)"
+    name="date_of_birth"
+  />
+    </label>
+
+  
+
+    <label class="form-control w-full col-span-2">
+      <div class="label">
+        <span class="label-text">Phone Number</span>
+      </div>
+      <input value="{{ volunteer.phone_number }}" name="phone_number" type="text" placeholder="Type here" class="input input-bordered w-full" />
+    </label>
+
+    <label class="form-control w-full col-span-2">
+      <div class="label">
+        <span class="label-text">Bio</span>
+      </div>
+      <textarea name="bio" class="textarea h-24 textarea-bordered w-full" placeholder="Type here">{{ volunteer.bio }}</textarea>
+
+  <a
+    href="#"
+    class="btn btn-primary col-span-2"
+    hx-post="/volunteer/volunteer_form/"
+    hx-swap="innerHTML transition:true"
+    hx-target="closest div"
+    >Save</a
+  >
+</form>
+
+<div class="card-header" hx-swap-oob="innerHTML:.card-header">
+  Name and Address
+</div>

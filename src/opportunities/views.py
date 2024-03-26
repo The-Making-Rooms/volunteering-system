@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation
 from django.template import loader
@@ -8,9 +8,11 @@ from googlemaps import Client as GoogleMaps
 from .forms import SuppInfoForm
 from datetime import datetime, date
 from django.forms import formset_factory
+from communications.models import Chat
+
+from commonui.views import check_if_hx, HTTPResponseHXRedirect
 
 
-from commonui.views import check_if_hx
 
 # Create your views here.
 def detail(request, opportunity_id):
@@ -44,8 +46,7 @@ def detail(request, opportunity_id):
     exists = False
     current_user = request.user
     if current_user.is_authenticated:
-        Registration.objects.filter(user=current_user, opportunity=opportunity).exists()
-        exists = True
+        exists = Registration.objects.filter(user=current_user, opportunity=opportunity).exists()
     context = {
         "opportunity": opportunity,
         "benefits": benefits,
@@ -94,6 +95,14 @@ def register(request, opportunity_id):
             #check if user is already registered
             if Registration.objects.filter(user=current_user, opportunity=opportunity).exists():
                 return HttpResponse('You are already registered for this opportunity')
+            
+            if supp_info_reqs.count() == 0:
+                registration = Registration(
+                    user = current_user,
+                    opportunity = opportunity
+                )
+                registration.save()
+                return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
 
             formset = SuppInfoFormSet(request.POST)
             if formset.is_valid():
@@ -123,15 +132,23 @@ def register(request, opportunity_id):
                         )
                         supp_info_grantee.save()
 
-
                 #create the registration object
                 registration = Registration(
                     user = current_user,
                     opportunity = opportunity
                 )
                 registration.save()
+
+                #create the volunteer registration status object
+                volunteer_registration_status = VolunteerRegistrationStatus(
+                    status = RegistrationStatus.objects.get(status='awaiting_approval'),
+                    date = date.today(),
+                    Opportunity = opportunity,
+                )
+                volunteer_registration_status.save()
+
                 
-                return HttpResponse('Registration Successful')
+                return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
             else:
                 return HttpResponse('Form is not valid')
         else:

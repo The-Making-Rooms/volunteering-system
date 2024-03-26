@@ -1,31 +1,24 @@
-{% extends "commonui/navigation-template.html" %}
-
-{% block page_content %}
+{% extends "commonui/navigation-template.html" %} {% block page_content %}
 <div>
   {% if organisations %}
-    <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">Featured Organisations</h1>
+  <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">
+    Featured Organisations
+  </h1>
 
-    <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
-        {% for org in organisations %}
-            {% include "org-card.html" %}
-        {% endfor %} 
-    </div>
+  <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
+    {% for org in organisations %} {% include "org-card.html" %} {% endfor %}
+  </div>
 
-  {% endif %}
+  {% endif %} {% if opportunities %}
 
+  <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">
+    Featured Opportunities
+  </h1>
 
-  {% if opportunities %}
-
-      <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">Featured Opportunities</h1>
-      
-      <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
-        {% for opp in opportunities %}
-            {% include "opp-card.html" %}
-        {% endfor %}
-      </div>
+  <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
+    {% for opp in opportunities %} {% include "opp-card.html" %} {% endfor %}
+  </div>
 
   {% endif %}
-
 </div>
-{% include "navbar.html" %}
-{% endblock %}
+{% include "navbar.html" %} {% endblock %}

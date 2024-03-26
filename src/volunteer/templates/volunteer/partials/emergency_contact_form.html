@@ -1,0 +1,59 @@
+<!--
+        class EmergencyContacts(models.Model):
+    name = models.CharField(max_length=200)
+    relation = models.CharField(max_length=200)
+    phone_number = models.CharField(max_length=11)
+    email = models.CharField(max_length=200)
+-->
+
+<div class="error-display">
+{{errors}}
+</div>
+
+  <form>
+    {% csrf_token %}
+      <input type="hidden" name="id" value="{{contact.id}}" />
+      <input type="hidden" name="volunteer" value="{{volunteer_id}}" />
+
+      <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Contact Full Name</span>
+          </div>
+          <input type="text" value="{{contact.name}}" name="name" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      </label>
+
+      <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Relation</span>
+          </div>
+          <input type="text" value="{{contact.relation}}" name="relation" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      </label>
+
+      <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Phone Number</span>
+          </div>
+          <input type="text" value="{{contact.phone_number}}" name="phone_number" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      </label>
+
+      <label class="form-control w-full max-w-xs">
+          <div class="label">
+            <span class="label-text">Email</span>
+          </div>
+          <input type="text" value="{{contact.email}}" name="email" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      </label>
+
+      <a
+      href="#"
+      class="btn btn-primary col-span-2"
+      {% if edit %}
+      hx-post="/volunteer/emergency_contact_form/{{contact.id}}/"
+      {% else %}
+      hx-post="/volunteer/emergency_contact_form/"
+      {% endif %}
+      hx-swap="innerHTML transition:true"
+      hx-target="closest div"
+      >Save</a>
+
+  </form>
+

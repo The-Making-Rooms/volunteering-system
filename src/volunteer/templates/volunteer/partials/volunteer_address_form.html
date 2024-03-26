@@ -1,0 +1,79 @@
+<!--
+    class VolunteerAddressForm(ModelForm):
+    class Meta:
+        model = VolunteerAddress
+        fields = ['first_line', 'second_line', 'postcode', 'city']
+-->
+
+<div>
+  {{errors}}
+</div>
+
+<form>
+    {% csrf_token %}
+  <label class="form-control w-full max-w-xs">
+    <div class="label">
+      <span class="label-text">First Line</span>
+    </div>
+    <input
+      type="text"
+      placeholder="Type here"
+      class="input input-bordered w-full max-w-xs"
+      value="{{address.first_line}}"
+      name="first_line"
+    />
+  </label>
+
+  <label class="form-control w-full max-w-xs">
+    <div class="label">
+      <span class="label-text">Second Line</span>
+    </div>
+    <input
+      type="text"
+      placeholder="Type here"
+      class="input input-bordered w-full max-w-xs"
+      value="{{address.second_line}}"
+      name="second_line"
+    />
+  </label>
+
+  <label class="form-control w-full max-w-xs">
+    <div class="label">
+      <span class="label-text">Postcode</span>
+    </div>
+    <input
+      type="text"
+      placeholder="Type here"
+      class="input input-bordered w-full max-w-xs"
+      value="{{address.postcode}}"
+      name="postcode"
+    />
+  </label>
+
+  <label class="form-control w-full max-w-xs">
+    <div class="label">
+      <span class="label-text">City</span>
+    </div>
+    <input
+      type="text"
+      placeholder="Type here"
+      class="input input-bordered w-full max-w-xs"
+      value="{{address.city}}"
+      name="city"
+    />
+  </label>
+
+  <a
+  href="#"
+  class="btn btn-primary col-span-2"
+  
+  {% if edit %}
+  hx-post="/volunteer/volunteer_address_form/{{address.id}}/"
+  {% else %}
+  hx-post="/volunteer/volunteer_address_form/"
+  {% endif %}
+  
+  hx-swap="innerHTML transition:true"
+  hx-target="closest div"
+  >Save</a>
+</form>

@@ -3,50 +3,133 @@
 {% load pwa %}
 {% load webpush_notifications %}
 
-<!doctype html>
-{% if not hx or hx == False  %}
-    <html lang="en" class="" style="height: 100%;" data-theme="chipin">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-            <title>Volunteering System</title>
-        
-            {% compress css %}
-            <link rel="stylesheet" href="{% static 'src/output.css' %}">
-            {% endcompress %}
-            {% progressive_web_app_meta %}
-            <meta name="vapid-key" content="BNRVbyR3auCqhbrnRcQcBXiAdDoP_-wVe16VMCpSaXJ9TN1PqbtwRQXOnHoDmg013wiFotc5y8hHWl3Bn4YcwE0">
-            {% if user.id %}
-                <meta name="user_id" content="{{ user.id }}">
-            {% endif %}
-        </head>
-
-        <body style="height: 100%;">
-
-            <div class="d-flex flex-column h-100">
-                {% include "topbar.html"%}
-
-
-{% endif %}
-        <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80">
-    
-            {% block page_content %}
-        
-        
-            {% endblock %}
-            
-        </div>
-            
+<!DOCTYPE html>
 {% if not hx or hx == False %}
-        {% include "navbar.html"%}
-            <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-                ({key: "AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY", v: "weekly"});</script>
-            <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
-             
-            <script src="{% static '/js/registerSw.js' %}"></script>
+<html lang="en" class="" style="height: 100%" data-theme="chipin">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Volunteering System</title>
 
-        </body>
-    </html>
+    <style>
+      .loader {
+        display: none;
+      }
+      .htmx-request .loader {
+        display: inline;
+      }
+      .htmx-request.loader {
+        display: inline;
+      }
+
+      .spinner {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #ff7c02; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 0.5s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
+      rel="stylesheet"
+    />
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}" />
+
+    {% endcompress %} {% progressive_web_app_meta %}
+    <meta
+      name="vapid-key"
+      content="BNRVbyR3auCqhbrnRcQcBXiAdDoP_-wVe16VMCpSaXJ9TN1PqbtwRQXOnHoDmg013wiFotc5y8hHWl3Bn4YcwE0"
+    />
+    {% if user.id %}
+    <meta name="user_id" content="{{ user.id }}" />
+    {% endif %}
+  </head>
+
+  <body class="h-full" data-loading-class="hidden">
+    <div class="d-flex flex-column h-full">
+      {% include "topbar.html"%} {% endif %}
+
+      <div class="relative">
+        <div
+          class="hidden loader htmx-indicator absolute z-10 w-full bg-black h-full"
+        >
+          <div
+            class="flex justify-center items-center w-full"
+            style="height: calc(100vh - 9rem)"
+          >
+            <div class="spinner"></div>
+          </div>
+        </div>
+        <div
+          class="z-0 relative htmx-navigator mx-5 md:mx-20 xl:mx-40 2xl:mx-80 pb-24"
+        >
+          {% block page_content %} {% endblock %}
+        </div>
+      </div>
+
+      {% if not hx or hx == False %} {% include "navbar.html"%}
+    </div>
+    <script>
+      ((g) => {
+        var h,
+          a,
+          k,
+          p = "The Google Maps JavaScript API",
+          c = "google",
+          l = "importLibrary",
+          q = "__ib__",
+          m = document,
+          b = window;
+        b = b[c] || (b[c] = {});
+        var d = b.maps || (b.maps = {}),
+          r = new Set(),
+          e = new URLSearchParams(),
+          u = () =>
+            h ||
+            (h = new Promise(async (f, n) => {
+              await (a = m.createElement("script"));
+              e.set("libraries", [...r] + "");
+              for (k in g)
+                e.set(
+                  k.replace(/[A-Z]/g, (t) => "_" + t[0].toLowerCase()),
+                  g[k]
+                );
+              e.set("callback", c + ".maps." + q);
+              a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+              d[q] = f;
+              a.onerror = () => (h = n(Error(p + " could not load.")));
+              a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+              m.head.append(a);
+            }));
+        d[l]
+          ? console.warn(p + " only loads once. Ignoring:", g)
+          : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
+      })({ key: "AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY", v: "weekly" });
+    </script>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.9"
+      integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/loading-states.js"></script>
+    <script src="{% static '/js/registerSw.js' %}"></script>
+  </body>
+</html>
 {% endif %}
-
-

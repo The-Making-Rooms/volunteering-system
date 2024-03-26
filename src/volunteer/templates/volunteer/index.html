@@ -1,206 +1,247 @@
-{% extends 'commonui/navigation-template.html' %}
-{% load webpush_notifications %}
-{% block page_content %}
+{% extends 'commonui/navigation-template.html' %} {% block page_content %}
 <div>
   <div class="card w-full bg-base-200 mb-3">
-      <div class="card-body p-5">
-          <div class="card-actions items-center">
-              <p class="text-2xl font-bold">About You</p>
-              <button class="btn btn-primary justify-end">Update</button>
-          </div>
-          <div class="divider my-2 "></div> 
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">About You</p>
+        <button
+          class="btn btn-primary"
+          hx-get="/volunteer/volunteer_form"
+          hx-on:htmx:after-request="my_modal_2.showModal();"
+          hx-target="#modalDiv"
+          hx-swap="innerHTML"
+        >
+          Update
+        </button>
+      </div>
+      <div class="divider my-2"></div>
 
-          <div class="overflow-x-auto">
-              <table class="table">
-                <!-- head -->
-                <tbody>
-                  <!-- row 1 -->
-                  <tr>
-                    <th>Name</th>
-                    <td>{{user.first_name}} {{user.last_name}}</td>
-                  </tr>
-                  <!-- row 2 -->
-                  <tr>
-                    <th>Date of Birth</th>
-                    <td>{{volunteer.date_of_birth}}</td>
-
-                  </tr>
-                  <!-- row 3 -->
-                  <tr>
-                    <th>Email</th>
-                    <td>{{ user.email }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <!-- head -->
+          <tbody>
+            <!-- row 1 -->
+            <tr>
+              <th>Name</th>
+              <td>{{user.first_name}} {{user.last_name}}</td>
+            </tr>
+            <!-- row 2 -->
+            <tr>
+              <th>Date of Birth</th>
+              <td>{{volunteer.date_of_birth}}</td>
+            </tr>
+            <!-- row 3 -->
+            <tr>
+              <th>Email</th>
+              <td>{{ user.email }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
-
-
-    <div class="card w-full bg-base-200 mb-3">
-      <div class="card-body p-5">
-          <div class="card-actions items-center">
-              <p class="text-2xl font-bold">Emergency Contacts</p>
-              <button class="btn btn-primary justify-end">Update</button>
-          </div>
-          <div class="divider my-2 "></div> 
-
-          <div class="overflow-x-auto">
-              <div class="overflow-x-auto">
-                  <table class="table">
-                    <!-- head -->
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Relation</th>
-                        <th>Phone Number</th>
-                        <th>Email</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- row 1 -->
-
-                      {% for contact in emergency_contacts %}
-                      <tr>
-                        <th>{{ contact.name }}</th>
-                        <td>{{ contact.relation }}</td>
-                        <td>{{ contact.phone_number }}</td>
-                        <td>{{ contact.email }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-            </div>
-        
-      </div>
-    </div>
-
-    <div class="card w-full bg-base-200 mb-3">
-      <div class="card-body p-5">
-          <div class="card-actions items-center">
-              <p class="text-2xl font-bold">Addresses</p>
-              <button class="btn btn-primary justify-end">Update</button>
-          </div>
-          <div class="divider my-2 "></div> 
-
-          <div class="overflow-x-auto">
-              <div class="overflow-x-auto">
-                  <table class="table">
-                    <!-- head -->
-                    <thead>
-                      <tr>
-                        <th>First Line</th>
-                        <th>Second Line</th>
-                        <th>Postcode</th>
-                        <th>City</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- row 1 -->
-
-                      {% for address in addresses %}
-                      <tr>
-                        <th>{{ address.first_line }}</th>
-                        <td>{{ address.second_line }}</td>
-                        <td>{{ address.postcode }}</td>
-                        <td>{{ address.city }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-            </div>
-        
-      </div>
-    </div>
-
-    <div class="card w-full bg-base-200 text-neutral-conten mb-3">
-      <div class="card-body p-5">
-          <div class="card-actions items-center">
-              <p class="text-2xl font-bold">Conditions</p>
-              <button class="btn btn-primary justify-end">Update</button>
-          </div>
-          <div class="divider my-2 "></div> 
-
-          <div class="overflow-x-auto">
-              <div class="overflow-x-auto">
-
-                  {% if condition|length != 0 %}
-                  <table class="table">
-                    <!-- head -->
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Disclosure</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                      {% for condition in conditions %}
-                      <tr>
-                        <th>{{ condition.name }}</th>
-                        <td>{{ condition.disclosures }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                  {% else %}
-                  <p>No conditions disclosed</p>
-                  {% endif %}
-                </div>
-            </div>
-        
-      </div>
-    </div>
-
-
-    <div class="card w-full bg-base-200 text-neutral-conten mb-3">
-      <div class="card-body p-5">
-          <div class="card-actions items-center">
-              <p class="text-2xl font-bold">Registrations</p>
-              <button class="btn btn-primary justify-end">Update</button>
-          </div>
-          <div class="divider my-2 "></div> 
-
-          <div class="overflow-x-auto">
-              <div class="overflow-x-auto">
-
-                  {% if registrations|length != 0 %}
-                  <table class="table">
-                    <!-- head -->
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Disclosure</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                      {% for registration in registrations %}
-                      <tr>
-                        <th>{{ registration.organisation.name }}</th>
-                        <td>{{ condition.disclosures }}</td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                  {% else %}
-                  <p>You haven't signed up for anything yet. why not <a hx-get="/explore" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline">explore</a> instead?</p>
-                  {% endif %}
-                </div>
-            </div>
-        
-      </div>
-    </div>
-
-    <button class="btn btn-primary justify-end" hx-get="logout" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">Sign Out</button>
-    <button onclick="registerSw()" class="btn btn-primary justify-end" >Enable Push Notifications</button>
-
   </div>
+
+  <div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">Emergency Contacts</p>
+        <button
+          class="btn btn-primary"
+          hx-get="/volunteer/emergency_contact_form/"
+          hx-on:htmx:after-request="my_modal_2.showModal();"
+          hx-target="#modalDiv"
+          hx-swap="innerHTML"
+        >
+          Add
+        </button>
+      </div>
+      <div class="divider my-2"></div>
+
+      <div class="overflow-x-auto">
+        <div class="overflow-x-auto">
+          {% if emergency_contacts|length > 0 %}
+          <table class="table">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Relation</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- row 1 -->
+
+              {% for contact in emergency_contacts %}
+              <tr>
+                <th>{{ contact.name }}</th>
+                <td>{{ contact.relation }}</td>
+                <td>{{ contact.phone_number }}</td>
+                <td>{{ contact.email }}</td>
+                <td>
+                  <button
+                    class="btn btn-primary"
+                    hx-get="/volunteer/emergency_contact_form/{{ contact.id }}"
+                    hx-on:htmx:after-request="my_modal_2.showModal();"
+                    hx-target="#modalDiv"
+                    hx-swap="innerHTML"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td><a class="btn btn-danger" hx-get="/volunteer/emergency_contact_form/{{ contact.id }}/delete">Delete</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% else %}
+          <p>No emergency contacts added</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">Addresses</p>
+        <button
+          class="btn btn-primary"
+          hx-get="/volunteer/volunteer_address_form/"
+          hx-on:htmx:after-request="my_modal_2.showModal();"
+          hx-target="#modalDiv"
+          hx-swap="innerHTML"
+        >
+          Add
+        </button>
+      </div>
+      <div class="divider my-2"></div>
+
+      <div class="overflow-x-auto">
+        <div class="overflow-x-auto">
+          <table class="table">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th>First Line</th>
+                <th>Second Line</th>
+                <th>Postcode</th>
+                <th>City</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- row 1 -->
+
+              {% for address in addresses %}
+              <tr>
+                <th>{{ address.first_line }}</th>
+                <td>{{ address.second_line }}</td>
+                <td>{{ address.postcode }}</td>
+                <td>{{ address.city }}</td>
+                <td>
+                  <button
+                    class="btn btn-primary"
+                    hx-get="/volunteer/volunteer_address_form/{{ address.id }}"
+                    hx-on:htmx:after-request="my_modal_2.showModal();"
+                    hx-target="#modalDiv"
+                    hx-swap="innerHTML"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td><a class="btn btn-danger" hx-get="/volunteer/volunteer_address_form/{{ address.id }}/delete">Delete</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">Conditions</p>
+        <button
+          class="btn btn-primary"
+          hx-get="/volunteer/volunteer_conditions_form/"
+          hx-on:htmx:after-request="my_modal_2.showModal();"
+          hx-target="#modalDiv"
+          hx-swap="innerHTML"
+        >
+          Add
+        </button>
+      </div>
+      <div class="divider my-2"></div>
+
+      <div class="overflow-x-auto">
+        <div class="overflow-x-auto">
+          {% if conditions|length > 0 %}
+          <table class="table">
+            <!-- head -->
+            <thead>
+              <tr>
+                <th>Details</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for condition in conditions %}
+              <tr>
+                <td>{{ condition.disclosures }}</td>
+                <td>
+                  <button
+                    class="btn btn-primary"
+                    hx-get="/volunteer/volunteer_conditions_form/{{ condition.id }}"
+                    hx-on:htmx:after-request="my_modal_2.showModal();"
+                    hx-target="#modalDiv"
+                    hx-swap="innerHTML"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td><a class="btn btn-danger" hx-get="/volunteer/volunteer_conditions_form/{{ condition.id }}/delete">Delete</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p>No conditions disclosed</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button
+    class="btn btn-primary justify-end"
+    hx-get="logout"
+    hx-target=".htmx-navigator"
+    hx-push-url="true"
+    hx-swap="outerHTML"
+  >
+    Sign Out
+  </button>
+  <button onclick="registerSw()" class="btn btn-primary justify-end">
+    Enable Push Notifications
+  </button>
 </div>
 
-{% include "navbar.html" %}
+<!-- Open the modal using ID.showModal() method -->
+<dialog id="my_modal_2" class="modal">
+  <div id="modalDiv" class="modal-box">
+    <h3 class="font-bold text-lg">Hello!</h3>
+    <p class="py-4">Press ESC key or click outside to close</p>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
-{% endblock %}
+{% include "navbar.html" %} {% endblock %}

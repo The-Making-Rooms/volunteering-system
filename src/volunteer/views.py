@@ -1,8 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from volunteer.models import Volunteer, VolunteerAddress, EmergencyContacts, VolunteerConditions
-from opportunities.models import Registration
+from volunteer.models import (
+    Volunteer,
+    VolunteerAddress,
+    EmergencyContacts,
+    VolunteerConditions,
+)
+from opportunities.models import Registration, VolunteerRegistrationStatus
 from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
@@ -10,15 +15,25 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+from .forms import (
+    VolunteerForm,
+    VolunteerAddressForm,
+    EmergencyContactsForm,
+    VolunteerConditionsForm,
+)
 
 # Create your views here.
+
 
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
         match request.method:
-            case 'GET':
+            case "GET":
                 try:
-                    validPath = request.headers['HX-Current-URL'].split('/')[-2] == expected_url_end
+                    validPath = (
+                        request.headers["HX-Current-URL"].split("/")[-2]
+                        == expected_url_end
+                    )
                 except KeyError:
                     return HttpResponseRedirect(redirect_path)
                 if validPath:
@@ -36,152 +51,347 @@ def index(request):
             print(volunteer_profile)
 
             context = {
-                'hx': check_if_hx(request),
-                'volunteer': volunteer_profile,
-                'user': current_user,
-                'emergency_contacts': EmergencyContacts.objects.filter(volunteer=volunteer_profile),
-                'addresses': VolunteerAddress.objects.filter(volunteer=volunteer_profile),
-                'conditions': VolunteerConditions.objects.filter(volunteer=volunteer_profile),
-                'registrations': Registration.objects.filter(user=current_user),
-                'link_active': 'volunteer',
+                "hx": check_if_hx(request),
+                "volunteer": volunteer_profile,
+                "user": current_user,
+                "emergency_contacts": EmergencyContacts.objects.filter(
+                    volunteer=volunteer_profile
+                ),
+                "addresses": VolunteerAddress.objects.filter(
+                    volunteer=volunteer_profile
+                ),
+                "conditions": VolunteerConditions.objects.filter(
+                    volunteer=volunteer_profile
+                ),
+                "registrations": Registration.objects.filter(user=current_user),
+                "link_active": "volunteer",
             }
 
-            return render(request, 'volunteer/index.html', context=context)
-                    
+            return render(request, "volunteer/index.html", context=context)
+
         except ObjectDoesNotExist:
-            return render(request, 'volunteer/container.html', {'hx': check_if_hx(request)})
+            return render(
+                request, "volunteer/container.html", {"hx": check_if_hx(request)}
+            )
         except Exception as e:
             print(e)
 
     else:
-        return render(request, 'commonui/not_logged_in.html', {'hx': check_if_hx(request)})
-    
-def createVolunteer(data, user):
-    print(data['DateOfBirth'])
+        return render(
+            request, "commonui/not_logged_in.html", {"hx": check_if_hx(request)}
+        )
 
-    user.first_name = data['FirstName']
-    user.last_name = data['LastName']
-    user.save()
 
-    new_volunteer = Volunteer(
-        user = user,
-        #avatar = models.ImageField(upload_to='avatars/')
-        date_of_birth = datetime.strptime(data['DateOfBirth'], '%Y-%m-%d'),
-        phone_number = data['PhoneNumber'],
-        bio = '',
-        #CV = models.FileField(upload_to='CV/', blank=True)
-    )
+def your_opportunities(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        try:
+            volunteer_profile = Volunteer.objects.get(user=current_user)
+            registrations = Registration.objects.filter(user=current_user)
 
-    new_volunteer.save()
+            data = []
+            for registration in registrations:
+                registration_data = {
+                    "registration": registration,
+                    "status": VolunteerRegistrationStatus.objects.filter(
+                        Opportunity=registration.opportunity
+                    ),
+                    "next_occurance": registration.opportunity.recurrences.after(
+                        datetime.now(), inc=True, dtstart=datetime.now()
+                    ),
+                }
+                data.append(registration_data)
 
-    volunteerAddress = VolunteerAddress(
-        first_line = data['inputAddress'],
-        second_line = data['inputAddress2'],
-        postcode = data['postCode'],
-        city = data['city'],
-        volunteer = new_volunteer,
-    )
-    volunteerAddress.save()
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer": volunteer_profile,
+                "user": current_user,
+                "data": data,
+                "link_active": "your-opportunities",
+            }
 
-def create_emergency_contacts(user, data):
-    volunteer_profile = Volunteer.objects.get(user=user)
+            return render(request, "volunteer/your_opportunities.html", context=context)
 
-    print(len(data))
-
-    if len(data) > 1:
-        n_contacts = int((len(data)-1)/4)
-        print(n_contacts)
-
-        for x in range (1,n_contacts+1):
-            start_index = ((x*4) - 4)
-            print(x, start_index, start_index+3)
-            new_contact = EmergencyContacts(
-            name = list(data.values())[start_index],
-            relation = list(data.values())[start_index+1],
-            phone_number = list(data.values())[start_index+2],
-            email = list(data.values())[start_index+3],
-            volunteer = volunteer_profile,
+        except ObjectDoesNotExist:
+            return render(
+                request, "volunteer/container.html", {"hx": check_if_hx(request)}
             )
-            new_contact.save()
+        except Exception as e:
+            print(e)
+
     else:
-        return
+        return render(
+            request, "commonui/not_logged_in.html", {"hx": check_if_hx(request)}
+        )
 
 
-@login_required()
-def emergencyContactInput(request):#This is a partial which represents the 'add contact' cards on the onboarding screen
-    match request.method:
-        case 'GET':
+def get_volunteer_if_exists(user):
+    try:
+        volunteer_profile = Volunteer.objects.get(user=user)
+        return volunteer_profile
+    except ObjectDoesNotExist:
+        return None
+
+
+def volunteer_form(request):
+    if request.method == "GET":
+        context = {
+            "hx": check_if_hx(request),
+            "volunteer": get_volunteer_if_exists(request.user),
+        }
+        return render(
+            request, "volunteer/partials/volunteer_form.html", context=context
+        )
+
+    elif request.method == "POST":
+        data = request.POST
+        user = User.objects.get(username=request.user)
+        user.first_name = data["first_name"]
+        user.last_name = data["last_name"]
+        user.save()
+
+        if get_volunteer_if_exists(user):
+            volunteer = get_volunteer_if_exists(user)
+            volunteer_form = VolunteerForm(data, instance=volunteer)
+
+        if volunteer_form.is_valid():
+            volunteer = volunteer_form.save(commit=False)
+            volunteer.user = user
+            volunteer.save()
+            return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer": get_volunteer_if_exists(request.user),
+                "errors": volunteer_form.errors,
+            }
+            return render(
+                request, "volunteer/partials/volunteer_form.html", context=context
+            )
+
+
+def emergency_contact_form(request, contact_id=None, delete=False):
+    if request.method == "GET":
+        if contact_id:
             try:
-                validPath = request.headers['HX-Current-URL'].split('/')[-2] == 'volunteer'
-            except KeyError:
-                return HttpResponseRedirect('/volunteer')
-            if validPath:
-                random_key = ''.join(random.choice('0123456789ABCDEF') for i in range(16))
-                print(random_key) #HTML forms need unique key names, otherwise the data will be combined
-                return render(request,
-                               'volunteer/emergency-contact-form.html', #This is not the complete form, ONLY the partial
-                               {
-                                   'name': 'name-'+random_key,
-                                   'email': 'email-'+random_key,
-                                   'phone': 'phone-'+random_key,
-                                   'relationship': 'relation-'+random_key,
-                               })
-            else:
-                return HttpResponseRedirect('/volunteer')
-            
+                emergency_contact = EmergencyContacts.objects.get(id=contact_id)
+                if emergency_contact.volunteer.user == request.user:
+                    if delete:
+                        emergency_contact.delete()
+                        return HTTPResponseHXRedirect("/volunteer/")
+                    else:
+                        context = {
+                            "hx": check_if_hx(request),
+                            "volunteer_id": get_volunteer_if_exists(request.user),
+                            "contact": emergency_contact,
+                            "edit": True,
+                        }
+                        return render(
+                            request,
+                            "volunteer/partials/emergency_contact_form.html",
+                            context=context,
+                        )
+                else:
+                    return HTTPResponseHXRedirect("/volunteer/")
+            except ObjectDoesNotExist:
+                return HTTPResponseHXRedirect("/volunteer/")
 
-@login_required()
-def emergencyContactForm(request):
-    print(request.method)
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+            }
+            return render(
+                request,
+                "volunteer/partials/emergency_contact_form.html",
+                context=context,
+            )
 
-    match request.method:
-        case 'GET':
-            try:
-                validPath = request.headers['HX-Current-URL'].split('/')[-2] == 'volunteer'
-            except KeyError:
-                return HttpResponseRedirect('/volunteer')
-            if validPath:
-                return render(request, 'volunteer/emergency-contacts.html', {'hx': check_if_hx(request)})
-            else:
-                return HttpResponseRedirect('/volunteer')
-        case 'POST':
-            data = request.POST
-            create_emergency_contacts(request.user, data)
-            request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
-            return HTTPResponseHXRedirect('/volunteer')
-        
-@login_required()
-def coreInfoForm(request):
-    match request.method: #Handle request types
-        case 'GET': #GET request
-            try:
-                validPath = request.headers['HX-Current-URL'].split('/')[-2] == 'volunteer' #Should only be coming from the initial URL view, swapped by HTMX
-            except KeyError:
-                return HttpResponseRedirect('/volunteer') #Redirect if incorrectly accessed
-            if validPath:
-                return render(request, 'volunteer/core-info.html', {'hx': check_if_hx(request)}) #Return form if correct
-            else:
-                return HttpResponseRedirect('/volunteer')  #Could be coming from HTMX but not from the correct URL
-        case 'POST':
-            data = request.POST
-            print(data)
-            createVolunteer(data, request.user)
-            request.method = 'GET' #Change the requst method so the next function renders instead of trying to parse the data
-            return (emergencyContactForm(request)) 
-            #return HTTPResponseHXRedirect('/volunteer')  
-
-def sign_up(request):
-    if request.method == 'GET':
-        return render(request, 'volunteer/sign_up.html', {'hx': check_if_hx(request)})
-    elif request.method == 'POST':
+    elif request.method == "POST":
         data = request.POST
         print(data)
-        #create django user
-        user = User.objects.create_user(data['email'], data['email'], data['password'])
+        user = User.objects.get(username=request.user)
+        volunteer = get_volunteer_if_exists(user)
+        if contact_id:
+            emergency_contact = EmergencyContacts.objects.get(id=contact_id)
+            if emergency_contact.volunteer.user == request.user:
+                emergency_contact_form = EmergencyContactsForm(
+                    data, instance=emergency_contact
+                )
+            else:
+                return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            emergency_contact_form = EmergencyContactsForm(data)
+
+        if emergency_contact_form.is_valid():
+            emergency_contact = emergency_contact_form.save(commit=False)
+            emergency_contact.volunteer = volunteer
+            emergency_contact.save()
+            return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+                "errors": emergency_contact_form.errors,
+            }
+            return render(
+                request,
+                "volunteer/partials/emergency_contact_form.html",
+                context=context,
+            )
+
+
+def volunteer_address_form(request, address_id=None, delete=False):
+    if request.method == "GET":
+        if address_id:
+            try:
+                address = VolunteerAddress.objects.get(id=address_id)
+                if address.volunteer.user == request.user:
+                    if delete:
+                        address.delete()
+                        return HTTPResponseHXRedirect("/volunteer/")
+                    else:
+                        context = {
+                            "hx": check_if_hx(request),
+                            "volunteer_id": get_volunteer_if_exists(request.user),
+                            "address": address,
+                            "edit": True,
+                        }
+                        return render(
+                            request,
+                            "volunteer/partials/volunteer_address_form.html",
+                            context=context,
+                        )
+                else:
+                    return HTTPResponseHXRedirect("/volunteer/")
+            except ObjectDoesNotExist:
+                return HTTPResponseHXRedirect("/volunteer/")
+
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+            }
+            return render(
+                request,
+                "volunteer/partials/volunteer_address_form.html",
+                context=context,
+            )
+
+    elif request.method == "POST":
+        data = request.POST
+        print(data)
+        user = User.objects.get(username=request.user)
+        volunteer = get_volunteer_if_exists(user)
+        if address_id:
+            address = VolunteerAddress.objects.get(id=address_id)
+            if address.volunteer.user == request.user:
+                address_form = VolunteerAddressForm(data, instance=address)
+            else:
+                return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            address_form = VolunteerAddressForm(data)
+
+        if address_form.is_valid():
+            address = address_form.save(commit=False)
+            address.volunteer = volunteer
+            address.save()
+            return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+                "errors": address_form.errors,
+            }
+            return render(
+                request,
+                "volunteer/partials/volunteer_address_form.html",
+                context=context,
+            )
+
+
+def volunteer_conditions_form(request, condition_id=None, delete=False):
+    if request.method == "GET":
+        if condition_id:
+            try:
+                condition = VolunteerConditions.objects.get(id=condition_id)
+                if condition.volunteer.user == request.user:
+                    if delete:
+                        condition.delete()
+                        return HTTPResponseHXRedirect("/volunteer/")
+                    else:
+                        context = {
+                            "hx": check_if_hx(request),
+                            "volunteer_id": get_volunteer_if_exists(request.user),
+                            "condition": condition,
+                            "edit": True,
+                        }
+                        return render(
+                            request,
+                            "volunteer/partials/volunteer_conditions_form.html",
+                            context=context,
+                        )
+                else:
+                    return HTTPResponseHXRedirect("/volunteer/")
+            except ObjectDoesNotExist:
+                return HTTPResponseHXRedirect("/volunteer/")
+
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+            }
+            return render(
+                request,
+                "volunteer/partials/volunteer_conditions_form.html",
+                context=context,
+            )
+
+    elif request.method == "POST":
+        data = request.POST
+        print(data)
+        user = User.objects.get(username=request.user)
+        volunteer = get_volunteer_if_exists(user)
+        if condition_id:
+            condition = VolunteerConditions.objects.get(id=condition_id)
+            if condition.volunteer.user == request.user:
+                condition_form = VolunteerConditionsForm(data, instance=condition)
+            else:
+                return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            condition_form = VolunteerConditionsForm(data)
+
+        if condition_form.is_valid():
+            condition = condition_form.save(commit=False)
+            condition.volunteer = volunteer
+            condition.save()
+            return HTTPResponseHXRedirect("/volunteer/")
+        else:
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer_id": get_volunteer_if_exists(request.user),
+                "errors": condition_form.errors,
+            }
+            return render(
+                request,
+                "volunteer/partials/volunteer_conditions_form.html",
+                context=context,
+            )
+
+
+def sign_up(request):
+    if request.method == "GET":
+        return render(request, "volunteer/sign_up.html", {"hx": check_if_hx(request)})
+    elif request.method == "POST":
+        data = request.POST
+        print(data)
+        # create django user
+        user = User.objects.create_user(data["email"], data["email"], data["password"])
         user.save()
-        #create volunteer -> redirect to onboarding
-        return HTTPResponseHXRedirect('/volunteer')
+        # create volunteer -> redirect to onboarding
+        return HTTPResponseHXRedirect("/volunteer")
+
 
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect('/volunteer')
+    return HttpResponseRedirect("/volunteer")
