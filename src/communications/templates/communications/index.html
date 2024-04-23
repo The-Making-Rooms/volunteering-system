@@ -7,7 +7,7 @@
     <div class="w-full">
         <div class="card shadow-lg p-3">
             <h1 class="text-2xl font-bold mb-3">Communications</h1>
-
+            {% if chats %}
             {% for chat in chats %}
 
             <div class="card w-full bg-base-200 mb-3">
@@ -20,6 +20,12 @@
              </div>
             {% endfor %}
         </div>
+
+        {% else %}
+
+        <p>You have not communicated with any organisations yet</p>
+
+        {% endif %}
     </div>
 </div>
 

@@ -1,39 +1,21 @@
-<!--
-
-
-<a href="organisations/{{org.id}}"><div class="card text-bg-dark mx-2" style="width:18rem;">
-    <img src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" class="card-img h-25" alt="...">
-    <div class="card-img-overlay d-flex align-items-end" style="background: rgb(0,0,0); background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,212,255,0) 100%);" >
-      <h5 class="card-title">{{ org.name }}</h5>
-      
-    </div>
-
-</div>
-</a>
-
--->
-
-<!--
-
-
-<div class="card bg-base-100 shadow-xl image-full {% if search %}w-100{% else%} w-96 carousel-item {% endif %}">
-    <figure><img src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" alt="Shoes" /></figure>
-    <div class="card-body">
-      <h2 class="card-title text-white">{{ org.name }}</h2>
-      <p class="text-white">{{ org.description|truncatewords:10}}</p>
-      <div class="card-actions justify-end">
-        <a href="/organisations/{{org.id}}" class="btn btn-primary">View</a>
-      </div>
-    </div>
-</div>
--->
-<a href="/organisations/{{org.id}}">
-<div class="max-w-96 h-60 border border-gray-600 rounded-xl flex justify-center items-center {% if search %}min-w-48{% else%} w-96 carousel-item {% endif %}">
+<a href="/organisations/{{org.id}}" hx-boost="true" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" hx-indicator=".loader">
+<div class="cursor-pointer max-w-96 h-60 border border-gray-600 rounded-xl flex justify-center items-center {% if search %}min-w-48{% else%} w-80 md:w-96 carousel-item {% endif %}">
   <div class="rounded-xl relative z-0 w-full h-full">
     <img class="rounded-xl object-cover h-full w-full " src="{% if org.images.0.image.url %} {{org.images.0.image.url}} {% else %} # {% endif %}" alt="Image of {{ org.description|truncatewords:10}}" />
     <div class="p-5 absolute inset-0 rounded-xl  flex flex-col justify-end h-full w-full z-10 bg-gradient-to-b from-[#ffffff00] to-[#000000]">
+      {% if org.logo %}<img class="w-16 h-16 rounded-md mb-2" src="{{ org.logo.url }}" alt="Logo of {{ org.name }}" />{% endif %}
+      {% if org.type == "organisation" %}<div class="badge badge-primary my-1">Organisation</div>{% endif %}
+      {% if org.tags %}
+      <div class="flex flex-wrap">
+        {% for tag in org.tags %}
+        <div class="badge badge-primary mr-1">{{ tag.theme.name }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
       <h2 class="text-white text-2xl">{{ org.name }}</h2>
+      {% if not search %}
       <p class="text-gray-400">{{ org.description|truncatewords:10}}</p>
+      {% endif %}
     </div>
   </div> 
 </div>

@@ -12,7 +12,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Volunteering System</title>
+    <title>Chip In</title>
 
     <style>
       .loader {
@@ -63,7 +63,7 @@
 
   <body class="h-full" data-loading-class="hidden">
     <div class="d-flex flex-column h-full">
-      {% include "topbar.html"%} {% endif %}
+      {% include "topbar.html"%} 
 
       <div class="relative">
         <div
@@ -76,14 +76,22 @@
             <div class="spinner"></div>
           </div>
         </div>
+      
+      {% endif %}
+
+      
         <div
           class="z-0 relative htmx-navigator mx-5 md:mx-20 xl:mx-40 2xl:mx-80 pb-24"
         >
           {% block page_content %} {% endblock %}
         </div>
-      </div>
+      
 
-      {% if not hx or hx == False %} {% include "navbar.html"%}
+      {% if not hx or hx == False %} 
+    </div>
+      {% include "navbar.html"%}
+
+    
     </div>
     <script>
       ((g) => {

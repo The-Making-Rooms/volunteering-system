@@ -123,6 +123,7 @@
 
       <div class="overflow-x-auto">
         <div class="overflow-x-auto">
+          {% if addresses|length > 0 %}
           <table class="table">
             <!-- head -->
             <thead>
@@ -159,6 +160,7 @@
               {% endfor %}
             </tbody>
           </table>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -244,4 +246,6 @@
   </form>
 </dialog>
 
-{% include "navbar.html" %} {% endblock %}
+{% include "navbar.html" %}
+
+{% endblock %}

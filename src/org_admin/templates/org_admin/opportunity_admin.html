@@ -1,0 +1,38 @@
+{% extends 'org_admin/navigation_template.html' %} 
+{% block page_content %}
+
+<p class="text-2xl font-bol mb-5">Opportunities</p>
+{% if error %}
+{{ error }}
+{% endif %}
+
+<div class="p-5 rounded-lg bg-gray-700 mb-3">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Number of sign ups</th>
+                <th>Total Views</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for opportunity in opportunities %}
+            <tr>
+                <td>{{ opportunity.name }}</td>
+                <td>{{ opportunity.description|truncatewords:10 }}</td>
+                <td>{{ opportunity.registrations }}</td>
+                <td>{{ opportunity.views }}</td>
+                <td>
+                    <a href="/org_admin/opportunities/{{opportunity.id}}" class="btn btn-primary mb-3">View</a>
+                    <a href="/org_admin/opportunities/{{opportunity.id}}" class="btn btn-primary">Registrations</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

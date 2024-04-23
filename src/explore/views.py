@@ -17,6 +17,7 @@ def index(request):
         opp_object = {
             "id": opp.id,
             "name": opp.name,
+            "organisation": opp.organisation,
             "images": Image.objects.filter(opportunity=opp),
         }
         try:
@@ -31,6 +32,7 @@ def index(request):
             "id": org.id,
             "name": org.name,
             "description": org.description,
+            "logo": org.logo,
             "images": OrgImage.objects.filter(organisation=org),
         }
         try:
@@ -47,6 +49,53 @@ def index(request):
         "link_active": "explore",
     }
     return render(request, 'explore/index.html', context=context)
+
+def getTagResult(request, tag):
+        try:
+            tag = Tag.objects.get(tag=tag)
+            opps = LinkedTags.objects.filter(tag=tag)
+        except:
+            opps = []
+        try:
+            #capitalise first letter of tag
+            tag = tag[0].upper() + tag[1:]
+            theme = thematicCategory.objects.get(name=tag)
+            orgs = Organisation.objects.filter(id__in=organisationnThematicLink.objects.filter(theme=theme).values_list('organisation', flat=True))
+        except:
+            orgs = []
+    
+        result_objs = []
+        for result in opps:
+            res_obj = {
+            "type": "opportunity",
+            "id": result.id,
+            "name": result.name,
+            "description": result.description,
+            "organisation": result.organisation,
+            "images": Image.objects.filter(opportunity=result),
+            "tags": LinkedTags.objects.filter(opportunity=result)
+             }
+            result_objs.append(res_obj)
+            
+        
+        for org in orgs:
+            res_obj = {
+            "type": "organisation",
+            "id": org.id,
+            "name": org.name,
+            "description": org.description,
+            "logo": org.logo,
+            "images": OrgImage.objects.filter(organisation=org),
+            "tags": organisationnThematicLink.objects.filter(organisation=org)
+            }
+            result_objs.append(res_obj)
+            
+        context = {
+            "search" : True,
+            "results" : result_objs,
+            "hx" : check_if_hx(request),
+        }
+        return render(request, 'explore/search.html', context)
 
 def search(request):
 
@@ -68,36 +117,55 @@ def search(request):
     results_opp = Opportunity.objects.all()
     results_org = Organisation.objects.all()
 
-    if theme:
-        results_opp = results_opp.filter(organisation__thematic_category__name=theme)
-    if stringsearch == '':
-        pass
-    if stringsearch:    
-        results_opp = results_opp.filter(name__icontains=stringsearch)
-    if organisation:
-        results_opp = results_opp.filter(organisation__name__icontains=organisation)
-    if tag:
-        results_opp = results_opp.filter(linkedtags__tag__tag__icontains=tag)
+    #use stringsearch to filter results based on name, description, organisation name
 
-    images = Image.objects.filter(opportunity__in=results_opp)
-    
+    if stringsearch:
+        results_opp = results_opp.filter(name__icontains=stringsearch)
+        results_org = results_org.filter(name__icontains=stringsearch)
+        if len(results_opp) == 0:
+            results_opp = Opportunity.objects.all()
+            results_opp = results_opp.filter(description__icontains=stringsearch)
+        if len(results_opp) == 0:
+            results_opp = Opportunity.objects.all()
+            results_opp = results_opp.filter(organisation__name__icontains=stringsearch)
+        if len(results_org) == 0:
+            results_org = Organisation.objects.all()
+            results_org = results_org.filter(description__icontains=stringsearch)
+        if len(results_org) == 0:
+            results_org = Organisation.objects.all()
+            results_org = results_org.filter(organisation__name__icontains=stringsearch)
+        
     
 
     result_objs = []
     for result in results_opp:
         res_obj = {
+            "type": "opportunity",
             "id": result.id,
             "name": result.name,
             "description": result.description,
+            "organisation": result.organisation,
             "images": Image.objects.filter(opportunity=result),
             "tags": LinkedTags.objects.filter(opportunity=result)
+        }
+        result_objs.append(res_obj)
+
+    for result in results_org:
+        res_obj = {
+            "type": "organisation",
+            "id": result.id,
+            "name": result.name,
+            "description": result.description,
+            "logo": result.logo,
+            "images": OrgImage.objects.filter(organisation=result),
+            "tags": organisationnThematicLink.objects.filter(organisation=result)
         }
         result_objs.append(res_obj)
     
     context = {
         "search" : True,
         "results" : result_objs,
-        "opp_images" : images,
+
         "hx" : check_if_hx(request),
         
     }

@@ -10,6 +10,10 @@
       width: 100%;
       height: auto;
     }
+
+    .splide__arrow:disabled {
+      display: none;
+    }
   </style>
   
   <section id="image-carousel" class="splide" aria-label="Beautiful Images">
@@ -25,12 +29,29 @@
   </section>
   
   <script>
-    document.addEventListener( 'DOMContentLoaded', function () {
-      new Splide( '#image-carousel', {
+    var isLoaded = false;
+
+    function initSplide(){
+      if(isLoaded){
+        return;
+      }
+
+      new Splide("#image-carousel", {
         heightRatio: 0.5,
-      } ).mount();
-    } );
+      }).mount();
+      isLoaded = true;
+    }
+    
+    document.addEventListener("htmx:afterSettle", function () {
+      initSplide();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      initSplide();
+    });
+    
   </script>
+
   
 </div>
 
@@ -50,18 +71,12 @@
 
   <div class="card w-full bg-base-300 shadow-xl mb-5">
     <div class="card-body">
-      <h2 class="card-title">Role Schedule</h2>
+      <h2 class="card-title">When do I volunteer?</h2>
       <div class="divider"></div> 
       <div class="card-actions justify-center">
         <table class="table">
-            <tr>
-                <th>Start date</th>
-                <td>{{ opportunity.start_date }}</td>
-            </tr>
-            <tr>
-                <th>End date</th>
-                <td>{{ opportunity.end_date }}</td>
-            </tr>
+
+          {% if opportunity.recurrences.rrules|length != 0%}
 
             <tr>
                 <th>Recurring</th>
@@ -71,6 +86,35 @@
                     {% endfor %}
                 </td>
             </tr>
+            <tr>
+                <th>Start date</th>
+                <td>{{ opportunity.recurrences.dtstart|date:"d/m/Y (l)" }}</td> <!-- DD/MM/YY (Saturday)-->
+            </tr>
+            <tr>
+                <th>End date</th>
+                <td>{{ opportunity.recurrences.dtend|date:"d/m/Y" }}</td>
+            </tr>
+
+            {% endif %}
+
+            {% if opportunity.recurrences.rdates|length != 0 %}
+
+            <tr>
+                <th>Dates</th>
+                <td>
+                    {% for rdate in opportunity.recurrences.rdates %}
+                        {{ rdate|date:"d/m/Y (l)" }}<br>
+                    {% endfor %}
+                </td>
+            </tr>
+
+            {% endif %}
+
+            <tr>
+                <th>Timings</th>
+                <td>{{ opportunity.start_time|date:"H:i" }} - {{ opportunity.end_time|date:"H:i" }}</td>
+            </tr>
+
         </table>
       </div>
     </div>
@@ -78,10 +122,10 @@
 
   <div class="card w-full bg-base-300 shadow-xl mb-5">
     <div class="card-body">
-      <h2 class="card-title">Role Details</h2>
+      <h2 class="card-title">What will I get from this opportunity?</h2>
       <div class="divider"></div> 
       <div class="card-actions">
-        <ul>
+        <ul class="list-disc ml-5">
             {% for benefit in benefits %}
                 <li>{{ benefit.description }}</li>
             {% endfor %}

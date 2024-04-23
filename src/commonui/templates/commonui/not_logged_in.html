@@ -16,12 +16,12 @@
     {% csrf_token %}
     <input id="InputEmail1" name="email" type="email" placeholder="Email" class="input input-bordered w-full mb-3" />
     <input id="InputPassword1" name="password" type="password" placeholder="Password" class="input input-bordered w-full" />
-    <button hx-post="/authenticate" class="btn btn-primary mt-3"  hx-target=".htmx-navigator" hx-swap="outerHTML">Login</button>
+    <button hx-post="/authenticate" class="btn btn-primary mt-3"  hx-target=".htmx-navigator" hx-swap="outerHTML" hx-indicator=".loader">Login</button>
     </form>
 
   
-    <p class="text-center">Don't have an account? Why not <a hx-get="/create_account" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline">Sign Up</a></p>
-    <p class="text-center">Forgot your password? <a hx-get="/password_reset/" hx-target=".htmx-navigator" hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline">Reset it</a></p>
+    <p class="text-center">Don't have an account? Why not <a hx-get="/create_account" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline" hx-indicator=".loader">Sign Up</a></p>
+    <p class="text-center">Forgot your password? <a hx-get="/password_reset/" hx-target=".htmx-navigator" hx-push-url="true" hx-swap="outerHTML" class="text-blue-400 underline" hx-indicator=".loader">Reset it</a></p>
 
   </div>
 </div>

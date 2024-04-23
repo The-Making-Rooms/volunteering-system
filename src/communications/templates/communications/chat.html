@@ -11,7 +11,7 @@
             <div class='flex flex-col'>
                 {% for message in messages %}
                 {% if message.sender.id == user %}
-                    <div class="p-3 rounded-2xl bg-blue-500 my-2 max-w-fit text-white self-end">
+                    <div class="p-3 rounded-2xl bg-blue-500 my-2 max-w-fit text-white self-end" {% if not message.seen %} hx-get="/communications/mark_seen/{{message.id}}/" hx-trigger="revealed" hx-swap="none" {% endif %}>
                         <p class="text-xs text-gray-200">{{message.sender.first_name }}</p>
                         <p class="">{{ message.content }}</p>
                         <p class="text-xs text-gray-200">{{ message.timestamp }}</p>

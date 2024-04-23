@@ -1,0 +1,10 @@
+<div>
+    <h1 class="font-bold text-2xl mb-3">Stop volunteering for: {{registration.opportunity.name}}?</h1>
+    <p class="mb-3">Are you sure you want to stop volunteering for this event?</p>
+    <form hx-post="">
+        {% csrf_token %}
+    
+        <input class="btn btn-primary" hx-post="/volunteer/stop_volunteering/{{registration.id}}" hx-target=".htmx-navigator" name="submitValue" type="submit" value="Yes">
+        <input class="btn btn-primary" hx-post="/volunteer/stop_volunteering/{{registration.id}}" hx-target=".htmx-navigator" name="submitValue" type="submit" value="No">
+    </form>
+</div>

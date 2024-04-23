@@ -1,7 +1,19 @@
-{% extends "commonui/navigation-template.html" %} {% block page_content %}
+{% extends "commonui/navigation-template.html" %}
+
+{% block page_content %}
+
+
+{% if user.is_authenticated %}
+<div class="mb-5">
+  <p class="text-2xl font-bold">Welcome, {{ user.first_name }}</p>
+  <p>Explore opportunitites on chip in</p>
+</div>
+{% endif %}
+
+
 <div>
   {% if organisations %}
-  <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">
+  <h1 class="flex-none text-xl pb-0 font-semibold text-white">
     Featured Organisations
   </h1>
 
@@ -11,7 +23,7 @@
 
   {% endif %} {% if opportunities %}
 
-  <h1 class="flex-none text-2xl p-4 pb-0 font-semibold text-white">
+  <h1 class="flex-none text-xl pb-0 font-semibold text-white">
     Featured Opportunities
   </h1>
 

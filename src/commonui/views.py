@@ -68,6 +68,8 @@ def index(request):
         opp_object = {
             "id": opp.id,
             "name": opp.name,
+            "description": opp.description,
+            "organisation": opp.organisation,
             "images": OpportunityImage.objects.filter(opportunity=opp),
         }
         try:
@@ -80,6 +82,7 @@ def index(request):
         org_object = {
             "id": org.id,
             "name": org.name,
+            "logo": org.logo,
             "description": org.description,
             "images": Image.objects.filter(organisation=org),
         }

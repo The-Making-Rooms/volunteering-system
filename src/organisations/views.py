@@ -15,6 +15,9 @@ from commonui.views import HTTPResponseHXRedirect
 
 def create_chat(request, organisation_id):
     user = request.user
+    
+    if not user.is_authenticated:
+        return HTTPResponseHXRedirect('/volunteer')
 
     try:
         chat = Chat.objects.get(organisation_id=organisation_id, participants=user)

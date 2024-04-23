@@ -1,56 +1,84 @@
-{% extends 'commonui/navigation-template.html' %}
+{% extends 'commonui/navigation-template.html' %} {% block page_content %}
 
-{% block page_content %}
+<dialog id="my_modal_2" class="modal">
+  <div id="modalDiv" class="modal-box">
+    <h3 class="font-bold text-lg">Hello!</h3>
+    <p class="py-4">Press ESC key or click outside to close</p>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 <div>
-    <div class="w-full">
-        <div class="card shadow-lg p-3">
-            <h1 class="text-2xl font-bold mb-3">Your Opportuinities</h1>
+  <div class="w-full">
+    <div class="card shadow-lg p-3">
+      <h1 class="text-2xl font-bold mb-3">Your Opportuinities</h1>
 
-            <dialog id="my_modal_1" class="modal">
-                <div class="modal-box">
-                  <h3 class="font-bold text-lg">Hello!</h3>
-                  <p class="py-4">Press ESC key or click the button below to close</p>
-                  <div class="modal-action">
-                    <form method="dialog">
-                      <!-- if there is a button in form, it will close the modal -->
-                      <button class="btn">Close</button>
-                    </form>
-                  </div>
-                </div>
-              </dialog>
+      {% if data %} {% for loop in data %}
 
-            {% for loop in data %}
+      <div class="card w-full bg-base-200 mb-3">
+        <div class="card-body p-5">
+          <div class="card-actions items-center">
+            <div class="flex flex-1 items-center">
+              {% if loop.registration.opportunity.organisation.logo %}<img class="w-16 h-16 rounded-md mr-3" src="{{ loop.registration.opportunity.organisation.logo.url }}" alt="Logo of {{ loop.registration.opportunity.organisation.name }}" />{% endif %}
+              <div class="flex flex-col">
+                <p class="text-2xl font-bold">
+                  {{ loop.registration.opportunity.name }}
+                </p>
+                <div class="badge badge-accent my-1">{{loop.registration.opportunity.organisation.name}}</div>
+              </div>
+            </div>
 
-            <div class="card w-full bg-base-200 mb-3">
-                <div class="card-body p-5">
-                    <div class="card-actions items-center">
-                        <p class="text-2xl font-bold">{{ loop.registration.opportunity.name }}</p>
-                        
-                        <a class="btn btn-primary" href="/opportunities/{{ loop.registration.opportunity.id }}">View Opportunity Details</a>
-                    </div>
-                    <div class="divider my-2 "></div> 
+            <a
+              class="btn btn-primary"
+              href="/opportunities/{{ loop.registration.opportunity.id }}"
+              >View Opportunity Details</a
+            >
+          </div>
+          <div class="divider my-2"></div>
 
-                    <div class="overflow-x-auto">
-                        <p>Volunteer since: {{ loop.registration.date_created }}</p>
-                        <p>Volunteer status: {% if loop.status.0.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to Approve {% else %} {{ loop.status.0.registration_status.status }} {% endif %}</p>
-                        <p>Next Upcoming Event: {{ loop.next_occurance }}</p>
-                    </div>
+          <div class="overflow-x-auto">
+            <p>Volunteer since: {{ loop.registration.date_created }}</p>
+            <p>
+              Volunteer status: 
+              {% if loop.status.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to Approve 
+              {% else %} 
+              {{ loop.status.registration_status.status }} 
+              {% endif %}
+            </p>
+            <p>Next Upcoming Event: {{ loop.next_occurance|date:"d/m/Y" }} - {{loop.registration.opportunity.start_time}}</p>
+          </div>
+          {% if loop.status.0.registration_status.status != 'awaiting_approval' %}
+          <div class="divider my-2"></div>
 
-                    <div class="divider my-2 "></div>
+          <div>
+            <button class="btn btn-primary justify-end mr-3" hx-get="/volunteer/register_absence/{{loop.registration.id}}" {% if loop.absent %} disabled {%endif%}>
+              {% if loop.absent %}You have notified of a absence{% else%}I can't make it{%endif%}
+            </button>
+            
+            <button class="btn btn-primary justify-end mr-3" >Pause</button>
+            <button
+                    class="btn btn-primary"
+                    hx-get="/volunteer/stop_volunteering/{{ loop.registration.id }}"
+                    hx-on:htmx:after-request="my_modal_2.showModal();"
+                    hx-target="#modalDiv"
+                    hx-swap="innerHTML"
+                  >
+                    Stop Volunteering
+                  </button>
 
-                    <div>
-                        <button class="btn btn-primary justify-end mr-3">I can't make it</button>
-                        <button class="btn btn-primary justify-end mr-3">Pause</button>
-                        <button class="btn btn-primary justify-end mr-3">Complete</button>
-                    </div>
-                </div>
-             </div>
-            {% endfor %}
+          </div>
+          {% endif %}
         </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </div>
 
-{% include "navbar.html" %}
+{% else %}
 
-{% endblock %}
+<p>You have not signed up for any opportunities yet. Why not <a class="text-blue-400 underline" href="/explore">Explore</a></p>
+
+{% endif %} {% include "navbar.html" %} {% endblock %}

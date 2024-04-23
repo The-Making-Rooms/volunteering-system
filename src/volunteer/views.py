@@ -7,7 +7,7 @@ from volunteer.models import (
     EmergencyContacts,
     VolunteerConditions,
 )
-from opportunities.models import Registration, VolunteerRegistrationStatus
+from opportunities.models import Registration, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus
 from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
@@ -23,8 +23,6 @@ from .forms import (
 )
 
 # Create your views here.
-
-
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
         match request.method:
@@ -63,7 +61,6 @@ def index(request):
                 "conditions": VolunteerConditions.objects.filter(
                     volunteer=volunteer_profile
                 ),
-                "registrations": Registration.objects.filter(user=current_user),
                 "link_active": "volunteer",
             }
 
@@ -80,50 +77,108 @@ def index(request):
         return render(
             request, "commonui/not_logged_in.html", {"hx": check_if_hx(request)}
         )
-
-
-def your_opportunities(request):
+    
+def notify_absence(request, id):
     if request.user.is_authenticated:
         current_user = request.user
-        try:
+        volunteer_profile = Volunteer.objects.get(user=current_user)
+        registration = Registration.objects.get(id=id)
+        
+        if registration.volunteer == volunteer_profile:
+            absence = RegistrationAbsence(registration=registration)
+            absence.save()
+            return HTTPResponseHXRedirect("/volunteer/your-opportunities")
+            
+                
+def stop_volunteering(request, id):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            current_user = request.user
+            if request.POST["submitValue"] != "Yes":
+                return HTTPResponseHXRedirect("/volunteer/your-opportunities")
+            registration = Registration.objects.get(id=id)
+            if registration.volunteer.user != current_user:
+                return HTTPResponseHXRedirect("/volunteer/your-opportunities")
+            
+            try:
+                stopped_status = RegistrationStatus.objects.get(status="stopped")
+            except ObjectDoesNotExist:
+                stopped_status = RegistrationStatus(status="stopped")
+                stopped_status.save()
+            
+            stopped_vol_status = VolunteerRegistrationStatus(registration=registration, registration_status=stopped_status, date=datetime.now())
+            stopped_vol_status.save()
+            return HTTPResponseHXRedirect("/volunteer/your-opportunities")
+        else:
+            current_user = request.user
             volunteer_profile = Volunteer.objects.get(user=current_user)
-            registrations = Registration.objects.filter(user=current_user)
+            registration = Registration.objects.get(id=id)
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer": volunteer_profile,
+                "registration": registration,
+                "link_active": "your-opportunities",
+            }
+            return render(request, "volunteer/partials/stop_volunteering.html", context=context)
 
+def your_opportunities(request):
+    if request.user.is_authenticated == False:
+        return render(
+            request, "commonui/not_logged_in.html", {"hx": check_if_hx(request)}
+        )
+
+    elif Volunteer.objects.filter(user=request.user).exists() != True:
+            return render(
+                request, "volunteer/container.html", {"hx": check_if_hx(request)}
+            )
+    else:
+    
+
+            volunteer_profile = Volunteer.objects.get(user=request.user)
+            registrations = Registration.objects.filter(volunteer=volunteer_profile)
+            
+            
             data = []
             for registration in registrations:
+                print(registration)
+                print(VolunteerRegistrationStatus.objects.filter(registration=registration).order_by("-date").first().registration_status.status)
+                if VolunteerRegistrationStatus.objects.filter(registration=registration).order_by("-date").first().registration_status.status == "stopped":
+                    continue
+                is_absent = False
+                try:
+                    last_occurence = registration.opportunity.recurrences.before(datetime.now())
+                    #print ("Last:",last_occurence)
+                    next_occurence = registration.opportunity.recurrences.after(datetime.now())
+                    #print ("Next", next_occurence)
+                    if RegistrationAbsence.objects.filter(registration=registration, date__gte=last_occurence, date__lte=next_occurence).exists():
+                        is_absent = True
+                except ValueError:
+                    next_occurence = registration.opportunity.recurrences.after(datetime.now())
+                    if RegistrationAbsence.objects.filter(registration=registration, date__lte=next_occurence).exists():
+                        is_absent = True
+                except ValueError:  # if there is no next occurence
+                    next_occurence = None
+                    
+                        
+                print(is_absent)
+                
+                
                 registration_data = {
                     "registration": registration,
-                    "status": VolunteerRegistrationStatus.objects.filter(
-                        Opportunity=registration.opportunity
-                    ),
-                    "next_occurance": registration.opportunity.recurrences.after(
-                        datetime.now(), inc=True, dtstart=datetime.now()
-                    ),
+                    "status": VolunteerRegistrationStatus.objects.filter(registration=registration).order_by("-date").first(),
+                    "next_occurance": next_occurence,
+                    "absent": is_absent,
                 }
                 data.append(registration_data)
 
             context = {
                 "hx": check_if_hx(request),
                 "volunteer": volunteer_profile,
-                "user": current_user,
+                "user": request.user,
                 "data": data,
                 "link_active": "your-opportunities",
             }
-
             return render(request, "volunteer/your_opportunities.html", context=context)
-
-        except ObjectDoesNotExist:
-            return render(
-                request, "volunteer/container.html", {"hx": check_if_hx(request)}
-            )
-        except Exception as e:
-            print(e)
-
-    else:
-        return render(
-            request, "commonui/not_logged_in.html", {"hx": check_if_hx(request)}
-        )
-
 
 def get_volunteer_if_exists(user):
     try:
@@ -131,7 +186,6 @@ def get_volunteer_if_exists(user):
         return volunteer_profile
     except ObjectDoesNotExist:
         return None
-
 
 def volunteer_form(request):
     if request.method == "GET":
@@ -150,25 +204,34 @@ def volunteer_form(request):
         user.last_name = data["last_name"]
         user.save()
 
-        if get_volunteer_if_exists(user):
+        try:
             volunteer = get_volunteer_if_exists(user)
             volunteer_form = VolunteerForm(data, instance=volunteer)
 
-        if volunteer_form.is_valid():
-            volunteer = volunteer_form.save(commit=False)
-            volunteer.user = user
-            volunteer.save()
-            return HTTPResponseHXRedirect("/volunteer/")
-        else:
+            if volunteer_form.is_valid():
+                volunteer = volunteer_form.save(commit=False)
+                volunteer.user = user
+                volunteer.save()
+                return HTTPResponseHXRedirect("/volunteer/")
+            else:
+                context = {
+                    "hx": check_if_hx(request),
+                    "volunteer": get_volunteer_if_exists(request.user),
+                    "errors": volunteer_form.errors,
+                }
+                return render(
+                    request, "volunteer/partials/volunteer_form.html", context=context
+                )
+        except Exception as e:
             context = {
-                "hx": check_if_hx(request),
-                "volunteer": get_volunteer_if_exists(request.user),
-                "errors": volunteer_form.errors,
-            }
+                    "hx": check_if_hx(request),
+                    "volunteer": get_volunteer_if_exists(request.user),
+                    "errors": e,
+                }
+            
             return render(
                 request, "volunteer/partials/volunteer_form.html", context=context
             )
-
 
 def emergency_contact_form(request, contact_id=None, delete=False):
     if request.method == "GET":

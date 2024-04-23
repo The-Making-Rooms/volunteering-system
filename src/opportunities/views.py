@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation
 from django.template import loader
@@ -22,6 +22,12 @@ def detail(request, opportunity_id):
     benefits = Benefit.objects.filter(opportunity=opportunity)
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
+    
+    print(opportunity.recurrences.rrules)
+    print(opportunity.recurrences.rdates)
+
+    view = OpportunityView(opportunity=opportunity)
+    view.save()
 
     if location.count() == 0:
         location = OrgLocation.objects.filter(organisation=opportunity.organisation)
@@ -44,9 +50,13 @@ def detail(request, opportunity_id):
         text_rules_inclusion.append(rule.to_text())
 
     exists = False
+    active = False
     current_user = request.user
     if current_user.is_authenticated:
-        exists = Registration.objects.filter(user=current_user, opportunity=opportunity).exists()
+        exists = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
+        if exists:
+            active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
+        
     context = {
         "opportunity": opportunity,
         "benefits": benefits,
@@ -55,7 +65,7 @@ def detail(request, opportunity_id):
         "opp_images": opp_images,
         "opp_videos": opp_videos,
         "hx" : check_if_hx(request),
-        "exists": exists,
+        "exists": active,
     }
 
     return HttpResponse(template.render(context, request))
@@ -93,15 +103,32 @@ def register(request, opportunity_id):
 
         if request.method == 'POST':
             #check if user is already registered
-            if Registration.objects.filter(user=current_user, opportunity=opportunity).exists():
-                return HttpResponse('You are already registered for this opportunity')
+            check_1 = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
+            latest_registration = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).order_by('-date_created').first()
+            if latest_registration:
+                check_2 = VolunteerRegistrationStatus.objects.filter(registration=latest_registration).order_by('-date').first().registration_status.status == 'stopped'
+            else:
+                check_2 = False
+            if check_1:
+                if not check_2:
+                    print(check_1, check_2)
+                    return HttpResponse('You are already registered for this opportunity') 
+
             
             if supp_info_reqs.count() == 0:
                 registration = Registration(
-                    user = current_user,
+                    volunteer = Volunteer.objects.get(user=current_user),
                     opportunity = opportunity
                 )
                 registration.save()
+
+                volunteer_registration_status = VolunteerRegistrationStatus(
+                    registration_status = RegistrationStatus.objects.get(status='awaiting_approval'),
+                    date = date.today(),
+                    registration = registration,
+                )
+                volunteer_registration_status.save()
+
                 return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
 
             formset = SuppInfoFormSet(request.POST)
@@ -134,17 +161,18 @@ def register(request, opportunity_id):
 
                 #create the registration object
                 registration = Registration(
-                    user = current_user,
+                    volunteer = Volunteer.objects.get(user=current_user),
                     opportunity = opportunity
                 )
                 registration.save()
 
                 #create the volunteer registration status object
                 volunteer_registration_status = VolunteerRegistrationStatus(
-                    status = RegistrationStatus.objects.get(status='awaiting_approval'),
+                    registration_status = RegistrationStatus.objects.get(status='awaiting_approval'),
                     date = date.today(),
-                    Opportunity = opportunity,
+                    registration = registration,
                 )
+                print("Volunteer Registration Status: ", volunteer_registration_status)
                 volunteer_registration_status.save()
 
                 

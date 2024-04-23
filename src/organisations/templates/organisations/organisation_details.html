@@ -1,46 +1,76 @@
-{% extends "commonui/navigation-template.html" %}
+{% extends "commonui/navigation-template.html" %} {% block page_content %}
 
-{% block page_content %}
-
-<div class=" w-full rounded-xl mb-5">
-
+<div class="w-full rounded-xl mb-5">
   <style>
     .splide__slide img {
       width: 100%;
       height: auto;
     }
+
+    .splide__arrow:disabled {
+      display: none;
+    }
   </style>
-  
+
+
   <section id="image-carousel" class="splide" aria-label="Beautiful Images">
     <div class="splide__track">
       <ul class="splide__list">
         {% for image in images %}
-          <li class="splide__slide">
-            <img src="{{image.image.url}}" alt="">
-          </li>
+        <li class="splide__slide">
+          <img src="{{image.image.url}}" alt="" />
+        </li>
         {% endfor %}
       </ul>
     </div>
   </section>
-  
+
+
+
   <script>
-    document.addEventListener( 'DOMContentLoaded', function () {
-      new Splide( '#image-carousel', {
+    var isLoaded = false;
+
+    function initSplide(){
+      if(isLoaded){
+        return;
+      }
+
+      new Splide("#image-carousel", {
         heightRatio: 0.5,
-      } ).mount();
-    } );
+      }).mount();
+      isLoaded = true;
+    }
+    
+    document.addEventListener("htmx:afterSettle", function () {
+      initSplide();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      initSplide();
+    });
+    
   </script>
-  
+
+
 </div>
 
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
+    <div class="flex">
+    {% if organisation.logo %} <img src="{{ organisation.logo.url }}" alt="" class="w-24 h-24 rounded-md mr-5" /> {% endif %}
     <h2 class="card-title">{{ organisation.name }}</h2>
-    <div class="divider"></div> 
+    </div>
+    <div class="divider"></div>
     <p>{{ organisation.description }}</p>
-    <div class="divider"></div> 
+    <div class="divider"></div>
     <div class="card-actions justify-center">
-      <button class="btn btn-primary" hx-target=".htmx-navigator" hx-get="/organisations/{{ organisation.id }}/create_chat/">Ask A Question</button>
+      <button
+        class="btn btn-primary"
+        hx-target=".htmx-navigator"
+        hx-get="/organisations/{{ organisation.id }}/create_chat/"
+      >
+        Ask A Question
+      </button>
     </div>
   </div>
 </div>
@@ -49,27 +79,23 @@
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
     <h2 class="card-title">Social Media Links</h2>
-    <div class="divider"></div> 
+    <div class="divider"></div>
     <div class="card-actions justify-center">
       {% for link in links %}
-            <a href="{{ link.link }}" class="btn btn-primary">{{ link.name }}</a>
-        {% endfor %}
+      <a href="{{ link.url }}" target="_blank" class="btn btn-primary">{{ link.name }}</a>
+      {% endfor %}
     </div>
   </div>
 </div>
-{% endif %}
-
-
-{% if locations %}
+{% endif %} {% if locations %}
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
     <h2 class="card-title">Location</h2>
-    <div class="divider"></div> 
-    
-    
+    <div class="divider"></div>
+
     <script type="module">
       let map;
-  
+
       async function initMap() {
 
         const { Map } = await google.maps.importLibrary("maps");
@@ -85,40 +111,29 @@
           title: "{{ site.name }}",
         });
         {% endfor %}
-      
+
       }
-  
+
       initMap();
-  
-      </script>
-      <div id="map" class="w-full h-96"></div>
-    <div class="divider"></div> 
+    </script>
+    <div id="map" class="w-full h-96"></div>
+    <div class="divider"></div>
     <div class="card-actions justify-center">
       <button class="btn btn-primary">Check directions</button>
     </div>
   </div>
 </div>
-{% endif %}
-
-{% if opportunities %}
+{% endif %} {% if opportunities %}
 
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
     <h2 class="card-title">Oppertunities from this organisation</h2>
-    <div class="divider"></div> 
-    
+    <div class="divider"></div>
+
     <div class="carousel carousel-center w-full h-64 p-4 space-x-4 rounded-box">
-      {% for opp in opportunities %}
-          {% include "opp-card.html" %}
-      {% endfor %}
+      {% for opp in opportunities %} {% include "opp-card.html" %} {% endfor %}
     </div>
-
-
   </div>
 </div>
 
-
-{% endif %}
-
-{% endblock %}
-```
+{% endif %} {% endblock %} ```

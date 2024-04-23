@@ -38,6 +38,5 @@ class SupplimentaryInfoRequirementAdmin(admin.ModelAdmin):
 
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'opportunity')
-    search_fields = ('user', 'opportunity')
+    list_display = ('volunteer', 'opportunity', 'get_registration_status')
     pass

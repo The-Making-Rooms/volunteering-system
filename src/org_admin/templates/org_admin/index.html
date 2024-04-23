@@ -4,20 +4,42 @@
 
 <p class="text-2xl text-slate-200">Dashboard</p>
 
-<p class="text-lg text-slate-200">Welcome {{ admin.first_name }}, you are managing {{ organisation.name }}</p>
+<p class="text-lg text-slate-200">Welcome {{ user.first_name }}, you are managing {{ organisation.name }}</p>
 
-<div class="flex w-full p-3 h-56">
-    <div class="w-1/3 h-full bg-slate-700 rounded-xl p-3 mx-3">
+<div class="stats w-full bg-gray-700 mt-3">
+  
+  <div class="stat place-items-center">
+    <div class="stat-title">Volunteers</div>
+    <div class="stat-value">{{ total_volunteers }}</div>
+    <div class="stat-desc">Signed up for opportunities</div>
+  </div>
+  
+  <div class="stat place-items-center">
+    <div class="stat-title">Views</div>
+    <div class="stat-value">{{ total_views }}</div>
+    <div class="stat-desc">Past 24 Hours</div>
+  </div>
+  
+  <div class="stat place-items-center">
+    <div class="stat-title">Registrations</div>
+    <div class="stat-value">{{messages}}</div>
+    <div class="stat-desc">↘︎ 90 (14%)</div>
+  </div>
+  
+</div>
+
+<div class="flex w-full h-56 mt-3">
+    <div class="w-1/2 h-full bg-slate-700 rounded-xl p-3">
         <canvas id="myChart"></canvas>
     </div>
 
-    <div class="w-1/3 h-full bg-slate-700 rounded-xl p-3 mx-3">
+    <div class='w-3'>
+    </div>
+
+    <div class="w-1/2 h-full bg-slate-700 rounded-xl p-3 ">
         <canvas id="myChart2"></canvas>
     </div>
 
-    <div class="w-1/3 h-full bg-slate-700 rounded-xl p-3 mx-3">
-        <canvas id="myChart3"></canvas>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

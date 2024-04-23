@@ -5,11 +5,15 @@ from org_admin.models import OrgnaisationAdmin
 # Create your models here.
 class Organisation(models.Model):
     name = models.CharField(max_length=200)
+    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
     description = RichTextField()
     featured = models.BooleanField(default=False)
 
     def get_orgnanisation_admin_users(self):
         return OrgnaisationAdmin.objects.filter(organisation=self).values_list('user', flat=True)
+    
+    def __str__(self):
+        return self.name
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
@@ -27,7 +31,7 @@ class LinkType(models.Model):
     name = models.CharField(max_length=200)
 
 class Link(models.Model):
-    type = models.ForeignKey('LinkType', on_delete=models.CASCADE, blank=True, null=True)
+    link_type = models.ForeignKey('LinkType', on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200)
     url = models.CharField(max_length=200)
     description = models.CharField(max_length=200, null=True, blank=True)

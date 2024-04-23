@@ -37,7 +37,7 @@ EMAIL_HOST_PASSWORD = 'kjic dgye sriy nsvv'
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    "django.contrib.admin",  # required
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -58,7 +58,8 @@ INSTALLED_APPS = [
      'pwa',
      'org_admin', 
      'webpush',
-     'communications'
+     'communications',
+     
 ]
 
 WEBPUSH_SETTINGS = {
@@ -77,7 +78,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
+RECURRENCE_USE_TZ = False
+USE_TZ = False
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -176,7 +178,7 @@ STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static' / 'js' / 'sw.js'
 CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.uzair.io']
-PWA_APP_NAME = 'Volunteering App'
+PWA_APP_NAME = 'Chip In'
 PWA_APP_DESCRIPTION = "Find Volunteering Opportunities in your area!"
 PWA_APP_THEME_COLOR = '#0A0302'
 PWA_APP_BACKGROUND_COLOR = '#ffffff'
