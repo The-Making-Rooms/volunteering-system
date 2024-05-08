@@ -9,7 +9,7 @@ def index(request):
 
 
     orgs = Organisation.objects.all()
-    opps = Opportunity.objects.all()
+    opps = Opportunity.objects.filter(active=True)
     org_objects = []
 
     opp_objects = []
@@ -18,7 +18,7 @@ def index(request):
             "id": opp.id,
             "name": opp.name,
             "organisation": opp.organisation,
-            "images": Image.objects.filter(opportunity=opp),
+            "images": Image.objects.filter(opportunity=opp) if len(Image.objects.filter(opportunity=opp)) > 0 else OrgImage.objects.filter(organisation=opp.organisation),
         }
         try:
             print (opp_object['images'][0].image.url)
@@ -53,7 +53,8 @@ def index(request):
 def getTagResult(request, tag):
         try:
             tag = Tag.objects.get(tag=tag)
-            opps = LinkedTags.objects.filter(tag=tag)
+            linked_opps = LinkedTags.objects.filter(tag=tag)
+            opps = Opportunity.objects.filter(id__in=linked_opps.values_list('opportunity', flat=True))
         except:
             opps = []
         try:

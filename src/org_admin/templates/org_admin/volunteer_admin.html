@@ -1,36 +1,34 @@
-{% extends 'org_admin/navigation_template.html'%}
+{% extends 'org_admin/navigation_template.html'%} 
 
 {% block page_content %}
 
 <p class="text-2xl text-slate-200">Volunteers</p>
 
-<table class="table">
+<div class="p-5 rounded-lg bg-base-200 mb-3 ">
+  <table class="table border-seperate border-spacing-2 ">
     <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Last Name</json></th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th>Actions</th>
-        </tr>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+
+        <th>Actions</th>
+      </tr>
     </thead>
     <tbody>
-        {% for volunteer in unique_volunteers %}
-
-        <tr>
-            <td>{{ volunteer.user.first_name }}</td>
-            <td>{{ volunteer.user.last_name }}</td>
-            <td>{{ volunteer.user.email }}</td>
-            <td>{{ volunteer.phone }}</td>
-            <td>{{ volunteer.role }}</td>
-            <td>
-                <a href="#" class="btn btn-primary">View</a>
-                <a href="#" class="btn btn-danger">Contact</a>
-            </td>
-        </tr>
-        {% endfor %}
+      {% for volunteer in unique_volunteers %}
+      <tr class="odd:bg-base-100 even:bg-base-300 ">
+        <td>{{ volunteer.user.first_name }}</td>
+        <td>{{ volunteer.user.last_name }}</td>
+        <td>{{ volunteer.user.email }}</td>
+        <td>
+          <a href="{{volunteer.id}}/" class="btn btn-primary">View</a>
+          <a href="#" class="btn btn-danger">Contact</a>
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
-
+  </table>
+</div>
 
 {% endblock %}

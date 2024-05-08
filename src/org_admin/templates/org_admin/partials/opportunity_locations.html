@@ -1,0 +1,43 @@
+
+<div class="p-5 rounded-lg  bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Locations</p>
+    </div>
+
+    <div class="divider"></div>
+
+    {% include "org_admin/partials/map_finder.html"%}
+    <div class="divider"></div>
+    {% if locations|length == 0 %}
+    <p>No locations have been added yet</p>
+    {% else %}
+    <table class="table rounded-xl ">
+      <tr class="border-b border-gray-600">
+        <th>Name</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+      {% for location in locations %}
+      <tr>
+        <td>{{ location.name }}</td>
+        <td>{{ location.address }}</td>
+        <td>
+          <a
+            hx-get="/org_admin/opportunities/manage_location/delete/{{ location.id }}/"
+            class="btn bg-red-600"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </div>
+  
+
+
+  {% with active_link="locations" %}
+  {% include "org_admin/partials/tabs.html" %}
+  {% endwith %}

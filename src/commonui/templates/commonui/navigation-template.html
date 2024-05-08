@@ -48,6 +48,7 @@
       href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-video@0.8.0/dist/css/splide-extension-video.min.css">
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}" />
 
@@ -62,12 +63,12 @@
   </head>
 
   <body class="h-full" data-loading-class="hidden">
-    <div class="d-flex flex-column h-full">
+    <div class="d-flex flex-column">
       {% include "topbar.html"%} 
 
       <div class="relative">
         <div
-          class="hidden loader htmx-indicator absolute z-10 w-full bg-black h-full"
+          class="hidden loader htmx-indicator absolute z-10 w-full bg-base-100 h-full"
         >
           <div
             class="flex justify-center items-center w-full"
@@ -128,7 +129,7 @@
         d[l]
           ? console.warn(p + " only loads once. Ignoring:", g)
           : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
-      })({ key: "AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY", v: "weekly" });
+      })({ key: "AIzaSyCXSyAahlumsNr2gUNgoMuqHkY1CrqYSn0", v: "weekly" });
     </script>
     <script
       src="https://unpkg.com/htmx.org@1.9.9"
@@ -136,6 +137,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-video@0.8.0/dist/js/splide-extension-video.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/loading-states.js"></script>
     <script src="{% static '/js/registerSw.js' %}"></script>
   </body>

@@ -1,0 +1,68 @@
+<div class="p-5 rounded-lg  bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Gallery</p>
+      <p>Hover over images to delete. You will need more than 1 image to delete images</p>
+      <button
+        class="btn btn-primary"
+        hx-get="/org_admin/upload_media/opportunity_image/{{ opportunity.id }}"
+        hx-on:htmx:after-request="my_modal_2.showModal();"
+        hx-target="#modalDiv"
+        hx-swap="innerHTML"
+      >
+        Upload
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class='flex w-full overflow-auto flex-wrap justify-start'>
+        {% if opp_images|length > 0 or opp_videos|length > 0 %}
+        {% for video in opp_videos%}
+        <div class="mr-3 mb-3 relative w-48 h-40">
+          {% if opp_images|length >= 1%}
+          <div
+            class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0"
+          >
+            <button
+              class="btn btn-danger"
+              hx-get="/org_admin/delete_media/organisation_image/{{video.id}}/video/"
+            >
+              Delete
+            </button>
+          </div>
+          {% endif %}
+          <div>
+            <img
+              src="{{video.video_thumbnail.url}}"
+              alt=""
+              class="absolute w-full h-full z-0 object-cover rounded-xl"
+            />
+          </div>
+        </div>
+        {%endfor%}
+        {% for image in opp_images%} 
+        
+        <div class="mr-3 mb-3 relative w-48 h-40 ">
+          {% if opp_images|length >= 1 %}
+          <div class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0">
+            <button class="btn btn-danger" hx-get="/org_admin/delete_media/opportunity_image/{{image.id}}/image/">Delete</button>
+          </div>
+
+          {% endif %}
+
+          <div>
+            <img src="{{image.thumbnail_image.url}}" alt="" class="absolute w-full h-full z-0 object-cover rounded-xl" />
+          </div>
+        </div>
+        {%endfor%}
+        {% else %}
+        <p>No videos/images have been uploaded yet</p>
+        {% endif %}
+    </div>
+
+</div>
+
+
+{% with active_link="gallery" %}
+{% include "org_admin/partials/tabs.html" %}
+{% endwith %}

@@ -146,17 +146,28 @@ def your_opportunities(request):
                     continue
                 is_absent = False
                 try:
-                    last_occurence = registration.opportunity.recurrences.before(datetime.now())
-                    #print ("Last:",last_occurence)
-                    next_occurence = registration.opportunity.recurrences.after(datetime.now())
-                    #print ("Next", next_occurence)
-                    if RegistrationAbsence.objects.filter(registration=registration, date__gte=last_occurence, date__lte=next_occurence).exists():
+                    occourance = registration.opportunity.recurrences
+                    occourances = occourance.occurrences()
+                    print(occourance.dtstart, occourance.dtend, occourance.rrules, list(occourances))
+                    last_occurence = occourance.before(datetime.now())
+                    next_occurence = occourance.after(datetime.now())
+                    
+                    print ("Last:",last_occurence)
+                    
+                    print ("Next", next_occurence)
+                    if last_occurence == None:
+                        last_occurence = datetime.now()
+                    
+                    if next_occurence == None:
+                        is_absent = False
+                    
+                    elif RegistrationAbsence.objects.filter(registration=registration, date__gte=last_occurence, date__lte=next_occurence).exists():
                         is_absent = True
                 except ValueError:
                     next_occurence = registration.opportunity.recurrences.after(datetime.now())
                     if RegistrationAbsence.objects.filter(registration=registration, date__lte=next_occurence).exists():
                         is_absent = True
-                except ValueError:  # if there is no next occurence
+                except:
                     next_occurence = None
                     
                         

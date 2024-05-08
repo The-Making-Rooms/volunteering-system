@@ -1,72 +1,103 @@
-{% load compress %}
-{% load static %}
+{% load compress %} {% load static %}
 
-<!doctype html>
-{% if not hx or hx == False  %}
-    <html lang="en" class="" style="height: 100%;" data-theme="chipin">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Volunteering System - Orgnaisation Admin</title>
-        
-            {% compress css %}
-            <link rel="stylesheet" href="{% static 'src/output.css' %}">
-            {% endcompress %}
-
-        </head>
-
-        <body style="height: 100%;">
-
-            <div class="drawer">
-                <input id="my-drawer-3" type="checkbox" class="drawer-toggle" /> 
-                <div class="drawer-content flex flex-col">
-                  <!-- Navbar -->
-                  <div class="w-full navbar bg-base-300">
-                    <div class="flex-none lg:hidden">
-                      <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                      </label>
-                    </div> 
-                    <div class="flex-1 px-2 mx-2">Volunteer Organisation Admin</div>
-                    <div class="flex-none hidden lg:block">
-                      <ul class="menu menu-horizontal hx-boost="true"">
-                        <!-- Navbar menu content here -->
-                        <li><a href="/org_admin/">Dashboard</a></li>
-                        <li><a href="/org_admin/details">Organisation Details</a></li>
-                        <li><a href="/org_admin/opportunities">Opportunities</a></li>
-                        <li><a href="/org_admin/volunteers">Volunteers</a></li>
-                        <li><a href="/org_admin/communication">Communication</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                
-{% endif %}
-        <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3">
-            {% block page_content %}
-            {% endblock %}
-        </div>
-            
+<!DOCTYPE html>
 {% if not hx or hx == False %}
-</div> 
-            <div class="drawer-side">
-            <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label> 
-            <ul class="menu p-4 w-80 min-h-full bg-base-200" hx-boost="true">
-                <!-- Sidebar content here -->
-                <li><a href="/org_admin/">Dashboard</a></li>
-                <li><a href="/org_admin/details">Organisation Details</a></li>
-                <li><a href="/org_admin/opportunities">Opportunities</a></li>
-                <li><a href="/org_admin/volunteers">Volunteers</a></li>
-                <li><a href="/org_admin/communication">Communication</a></li>
+<html lang="en" class="" style="height: 100%" data-theme="chipin">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Volunteering System - Orgnaisation Admin</title>
+
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}" />
+    {% endcompress %}
+  </head>
+
+  <body style="height: 100%">
+    <div class="drawer">
+      <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content flex flex-col">
+        <!-- Navbar -->
+        <div class="w-full navbar bg-base-300">
+          <div class="flex-none lg:hidden">
+            <label
+              for="my-drawer-3"
+              aria-label="open sidebar"
+              class="btn btn-square btn-ghost"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                class="inline-block w-6 h-6 stroke-current"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </label>
+          </div>
+          <div class="flex-1 px-2 mx-2">
+            <img
+              src="{% static 'images/chip_in_logo.svg' %}"
+              alt="logo"
+              class="flex-none ml-5 w-20"
+            />
+          </div>
+          <div class="flex-none hidden lg:block">
+            <ul class="menu menu-horizontal" hx-boost="true" hx-target=".htmx-navigator" hx-swap="outerHTML">
+              <!-- Navbar menu content here -->
+              <li><a href="/org_admin/">Dashboard</a></li>
+              <li><a href="/org_admin/details">Organisation Details</a></li>
+              <li><a href="/org_admin/opportunities">Opportunities</a></li>
+              <li><a href="/org_admin/volunteers">Volunteers</a></li>
+              <li><a href="/org_admin/communication">Communication</a></li>
             </ul>
-            </div>
-            </div>
-            <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-                ({key: "AIzaSyA9FVyxMQjaCwmN_uHnvhXeSVGbwsTeMUY", v: "weekly"});</script>
-            
-            <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
-            
-        </body>
-    </html>
+          </div>
+        </div>
+
+        {% endif %}
+        <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3">
+          {% block page_content %} {% endblock %}
+        </div>
+
+        {% if not hx or hx == False %}
+      </div>
+      <div class="drawer-side">
+        <label
+          for="my-drawer-3"
+          aria-label="close sidebar"
+          class="drawer-overlay"
+        ></label>
+        <ul
+          class="menu p-4 w-80 min-h-full bg-base-200"
+          hx-boost="true"
+          hx-target=".htmx-navigator"
+        >
+        <img
+              src="{% static 'images/chip_in_logo.svg' %}"
+              alt="logo"
+              class="flex-none ml-5 w-20"
+            />
+            <div class="divider"></div>
+          <!-- Sidebar content here -->
+          <li><a href="/org_admin/">Dashboard</a></li>
+          <li><a href="/org_admin/details">Organisation Details</a></li>
+          <li><a href="/org_admin/opportunities">Opportunities</a></li>
+          <li><a href="/org_admin/volunteers">Volunteers</a></li>
+          <li><a href="/org_admin/communication">Communication</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <script
+      src="https://unpkg.com/htmx.org@1.9.9"
+      integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
 {% endif %}
-
-

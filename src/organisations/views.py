@@ -6,7 +6,7 @@ from opportunities.models import Opportunity, Image as OpportunityImage
 from commonui.views import check_if_hx
 from googlemaps import Client as GoogleMaps
 from communications.models import Chat
-from org_admin.models import OrgnaisationAdmin
+from org_admin.models import OrganisationAdmin
 from commonui.views import HTTPResponseHXRedirect
 
 
@@ -27,7 +27,7 @@ def create_chat(request, organisation_id):
     
 
     organisation = Organisation.objects.get(id=organisation_id)
-    org_admin = OrgnaisationAdmin.objects.filter(organisation=organisation)
+    org_admin = OrganisationAdmin.objects.filter(organisation=organisation)
     users = []
     for admin in org_admin:
         users.append(admin.user)
@@ -65,11 +65,7 @@ def detail(request, organisation_id):
         print(site.longitude, site.latitude)
         if site.longitude is None or site.latitude is None:
             print('NO LONGITUDE OR LATITUDE')
-            gmaps = GoogleMaps('AIzaSyBE66q11LMi6uYnd7_-9W8HIKzMOniqw6U')
-            geocode_result = gmaps.geocode(site.first_line + " " + site.postcode)
-            site.longitude = geocode_result[0]['geometry']['location']['lng']
-            site.latitude = geocode_result[0]['geometry']['location']['lat']
-            site.save()
+            site.delete()
 
 
     links = Link.objects.filter(organisation=org)

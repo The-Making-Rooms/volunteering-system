@@ -1,0 +1,16 @@
+<div class="p-3 bg-secondary-200">
+    {% if error %}
+    <p class="text-red-500">{{ error }}</p>
+    {% endif %}
+
+    <div class="form-control">
+        <p>{{question}}</p>
+        <div class="rating rating-lg">
+            <input type="radio" name="{{name}}" class="mask mask-star" />
+            <input type="radio" name="{{name}}" class="mask mask-star" />
+            <input type="radio" name="{{name}}" class="mask mask-star" />
+            <input type="radio" name="{{name}}" class="mask mask-star" />
+            <input type="radio" name="{{name}}" class="mask mask-star" />
+        </div>
+    </div>
+</div>

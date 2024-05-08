@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'djrichtextfield',
     'organisations',
     'volunteer',
+    'forms',
     'explore',
     'opportunities',
     'commonui',
@@ -177,7 +178,7 @@ COMPRESS_ENABLED = True
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static' / 'js' / 'sw.js'
-CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.uzair.io']
+CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.makingrooms.org']
 PWA_APP_NAME = 'Chip In'
 PWA_APP_DESCRIPTION = "Find Volunteering Opportunities in your area!"
 PWA_APP_THEME_COLOR = '#0A0302'

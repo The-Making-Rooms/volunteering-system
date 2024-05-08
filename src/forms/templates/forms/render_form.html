@@ -1,0 +1,21 @@
+{% extends 'commonui/navigation-template.html' %}
+
+{% block page_content %}
+
+{% for question in questions %}
+    <div class="p-3 bg-secondary rounded-xl mb-3">
+        {% if question.error %}
+        <p class="text-red-500">{{ question.error }}</p>
+        {% endif %}
+        {% if question.question.question_type == "text" %}
+        {% include "forms/form_elements/text.html" %}
+        {% elif question.question.question_type == "multi_choice" %}
+        {% include "forms/form_elements/multi-choice.html" %}
+        {% elif question.question.question_type == "boolean" %}
+        {% include "forms/form_elements/boolean.html" %}
+        {% endif %}
+    </div>
+{% endfor %}
+
+
+{% endblock %}

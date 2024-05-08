@@ -1,0 +1,30 @@
+<div class="w-full">
+  <p>Add a Benefit</p>
+  <p class="text-gray-500">
+    Click outside of this popup to dismiss without saving.
+  </p>
+  <div class="divider"></div>
+  <form>
+    {% csrf_token %}
+    <input
+      type="text"
+      name="description"
+      class="form-control input input-bordered mb-3 w-full"
+      placeholder="Benefit Description"
+      {% if benefit %}value="{{benefit.description}}"
+      {% endif %}
+      required
+    />
+    <button
+      class="btn btn-primary"
+      type="submit"
+      {% if benefit %}hx-post="/org_admin/opportunities/manage_benefit/edit/{{benefit.id}}/"
+      {%else%}hx-post="/org_admin/opportunities/manage_benefit/{{opportunity.id}}/"
+      {%endif%}
+      hx-target=".htmx-navigator"
+      hx-swap="outerHTML"
+    >
+      Add Benefit
+    </button>
+  </form>
+</div>

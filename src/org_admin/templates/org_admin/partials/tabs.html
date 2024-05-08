@@ -1,0 +1,9 @@
+<div hx-swap-oob="true" hx-target="#tab-contents" role="tablist" class="tabs tabs-boxed my-3" id="tab_container">
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/details/{{ opportunity.id }}/"   class="tab {% if active_link == "details" %}tab-active{% endif %}">Details</a>
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/benefits/{{ opportunity.id }}/"  class="tab {% if active_link == "benefits" %}tab-active{% endif %}">Benefits</a>
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/locations/{{ opportunity.id}}/"  class="tab {% if active_link == "locations" %}tab-active{% endif %}">Location</a>
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/schedule/{{ opportunity.id }}/"  class="tab {% if active_link == "schedule" %}tab-active{% endif %}">Schedule</a>
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/gallery/{{ opportunity.id }}/"   class="tab {% if active_link == "gallery" %}tab-active{% endif %}">Gallery</a>
+
+  </div>
+

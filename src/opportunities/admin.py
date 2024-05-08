@@ -1,9 +1,13 @@
 from django.contrib import admin
-from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration, RegistrationStatus, VolunteerRegistrationStatus
+from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration, RegistrationStatus, VolunteerRegistrationStatus, LinkedTags
 
 # Register your models here.
 class BenefitInline(admin.TabularInline):
     model = Benefit
+    extra = 1
+
+class LinkedTagsInline(admin.TabularInline):
+    model = LinkedTags
     extra = 1
 
 class LocationInline(admin.TabularInline):
@@ -30,7 +34,7 @@ class VolunteerRegistrationStatusAdmin(admin.ModelAdmin):
 class OpportunityAdmin(admin.ModelAdmin):
     list_display = ('name', 'organisation')
     search_fields = ('name', 'organisation')
-    inlines = [BenefitInline, LocationInline, ImageInline, VideoInline]
+    inlines = [BenefitInline, LocationInline, ImageInline, VideoInline, LinkedTagsInline]
 
 @admin.register(SupplimentaryInfoRequirement)
 class SupplimentaryInfoRequirementAdmin(admin.ModelAdmin):

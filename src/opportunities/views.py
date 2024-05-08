@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
-from organisations.models import Location as OrgLocation
+from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
 from googlemaps import Client as GoogleMaps
 from .forms import SuppInfoForm
@@ -32,19 +32,22 @@ def detail(request, opportunity_id):
     if location.count() == 0:
         location = OrgLocation.objects.filter(organisation=opportunity.organisation)
         
+    filtered_location = []
+        
     for site in location:
         print(site.longitude, site.latitude)
         if site.longitude is None or site.latitude is None:
             print('NO LONGITUDE OR LATITUDE')
-            gmaps = GoogleMaps('AIzaSyBE66q11LMi6uYnd7_-9W8HIKzMOniqw6U')
-            geocode_result = gmaps.geocode(site.first_line + " " + site.postcode)
-            site.longitude = geocode_result[0]['geometry']['location']['lng']
-            site.latitude = geocode_result[0]['geometry']['location']['lat']
-            site.save()
+            site.delete()
+        
             
+    
 
     opp_images = Image.objects.filter(opportunity=opportunity)
     opp_videos = Video.objects.filter(opportunity=opportunity)
+    
+    if len(opp_images) == 0:
+        opp_images = OrgImage.objects.filter(organisation=opportunity.organisation)
 
     for rule in opportunity.recurrences.rrules:
         text_rules_inclusion.append(rule.to_text())
@@ -53,10 +56,12 @@ def detail(request, opportunity_id):
     active = False
     current_user = request.user
     if current_user.is_authenticated:
-        exists = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
-        if exists:
-            active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
-        
+        try:
+            exists = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
+            if exists:
+                active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
+        except Volunteer.DoesNotExist:
+            active = False
     context = {
         "opportunity": opportunity,
         "benefits": benefits,
@@ -83,6 +88,13 @@ def register(request, opportunity_id):
 
     if request.user.is_authenticated:
         current_user = request.user
+        
+        try:
+            active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
+        except Volunteer.DoesNotExist:
+            return HTTPResponseHXRedirect('/volunteer')
+        
+        
         ##
         #check opportunity supplementary Inforequirements
         opportunity = Opportunity.objects.get(id=opportunity_id)

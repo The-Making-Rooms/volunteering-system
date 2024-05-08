@@ -1,0 +1,132 @@
+<div class="p-5 rounded-lg  bg-base-200 mb-3">
+
+<form>
+  {% csrf_token %}
+<p class="text-xl">Opportunity Schedule</p>
+      <p>You can choose to have an opportuinity that repeats on a given schedule, or set a list of dates that the opportuinity will run</p> 
+      <div class="divider my-1"></div>
+      
+      <div class="flex w-full">
+        <div class="w-full">
+          <p>Start Date</p>
+          <input
+            type="date"
+            name="start_date"
+            class="input input-bordered w-full mb-3"
+            value="{{start_date | date:'Y-m-d'}}"
+            />
+        </div>
+
+        <div class="divider divider-horizontal"></div>
+
+        <div class="w-full">
+          <p>End Date</p>
+          <input
+            type="date"
+            name="end_date"
+            class="input input-bordered w-full mb-3"
+            value="{{end_date | date:'Y-m-d'}}"
+          />
+        </div>
+      </div>
+ 
+
+      <div>
+        <p>Repeats</p>
+        <select
+          class="select select-bordered w-full mb-3"
+          name="recurrences"
+        >
+          <option {% if recurrences == 3 %}selected{% endif%} value="daily">Daily</option>
+          <option {% if recurrences == 2 %}selected{% endif%} value="weekly">Weekly</option>
+          <option {% if recurrences == 1 %}selected{% endif%} value="monthly">Monthly</option>
+          <option {% if recurrences == 0 %}selected{% endif%} value="yearly">Yearly</option>
+          <option {% if recurrences == 'none' %}selected{% endif%} value="never">Never</option>
+        </select>
+      </div>
+
+      <div class="divider my-1"></div>
+      <p>Each occurance</p>
+      <div class="flex">
+        <div class="w-full">
+      
+      <p>Starts at</p>
+      <input
+        type="time"
+        name="start_time"
+        class="input input-bordered w-full mb-3"
+        value="{{ opportunity.start_time|date:'H:i' }}"
+      />
+      </div>
+
+      <div class="divider divider-horizontal"></div>
+
+      <div class="w-full">
+      <p>Ends at</p>
+      <input
+        type="time"
+        name="end_time"
+        class="input input-bordered w-full mb-3"
+        value="{{ opportunity.end_time|date:'H:i' }}"
+      />
+      </div>
+      </div>
+
+<button class="btn btn-primary" type="submit" hx-post="/org_admin/opportunities/schedule/{{opportunity.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Save Schedule</button>
+    </form>
+
+
+<div class="divider my-1"></div>
+<div class="flex">
+  <div class="flex-1">
+    <p class="text-xl">Individual Dates</p>
+    <p>Add exceptions or individual dates here</p>
+  </div>
+<button
+  class="btn btn-primary"
+  hx-get="/org_admin/add_date/{{ opportunity.id }}"
+  hx-on:htmx:after-request="my_modal_2.showModal();"
+  hx-target="#modalDiv"
+  hx-swap="innerHTML"
+>
+  Add Date
+</button>
+</div>
+<div class="divider my-1"></div>
+{% if individual_dates|length > 0%}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Remove</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    {% for date in individual_dates %}
+    <tr>
+      <td>{{date|date:"d/m/Y"}}</td>
+      <td>
+        <button
+          class="btn btn-danger"
+          hx-get="/org_admin/delete_date/{{ opportunity.id }}/{{forloop.counter0}}"
+          hx-target=".htmx-navigator"
+          hx-swap="outerHTML"
+        >
+          Remove
+        </button>
+      </td>
+    </tr>
+    {%endfor%}
+    
+    
+  </tbody>
+</table>
+{%else%}
+<p class="text-center">No individual dates have been added yet</p>
+{%endif%}
+</div>
+
+{% with active_link="schedule" %}
+{% include "org_admin/partials/tabs.html" %}
+{% endwith %}

@@ -44,7 +44,7 @@ def get_chat_content(request, chat_id):
             "hx": check_if_hx(request),
             "chat": chat,
             "messages": messages,
-            "user": user.id,
+            "user": request.user,
             "link_active": "communications",
         },
     )

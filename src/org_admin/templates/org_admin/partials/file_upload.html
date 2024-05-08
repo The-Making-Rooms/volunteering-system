@@ -1,13 +1,30 @@
-<form class="w-full" id='form' hx-encoding='multipart/form-data' hx-post='{{ upload_url }}'>
-    {% csrf_token %}
-    <input type='file' name='file'>
-    <button class="btn btn-primary">
-        Upload
-    </button>
-    <progress class="progress progress-primary w-full" id='progress' value='0' max='100'></progress>
+<form
+  class="w-full"
+  id="uploader"
+  hx-encoding="multipart/form-data"
+  hx-post="{{ upload_url }}"
+>
+  {% csrf_token %}
+  <input
+    type="file"
+    class="file-input file-input-bordered file-input-primary w-full"
+    name="file"
+    accept="image/png, image/jpeg"
+  />
+  <div class="divider"></div>
+  <button class="btn btn-primary">Upload</button>
+  <progress
+    id="progress"
+    class="progress progress-primary w-full"
+    value="0"
+    max="100"
+  ></progress>
 </form>
 <script>
-    htmx.on('#form', 'htmx:xhr:progress', function(evt) {
-      htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
-    });
+  htmx.on("#uploader", "htmx:xhr:progress", function (evt) {
+    console.log("file upload begin");
+    htmx
+      .find("#progress")
+      .setAttribute("value", (evt.detail.loaded / evt.detail.total) * 100);
+  });
 </script>

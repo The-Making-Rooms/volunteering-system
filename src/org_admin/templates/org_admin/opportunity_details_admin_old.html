@@ -1,0 +1,381 @@
+{% extends 'org_admin/navigation_template.html' %}
+{% block page_content %}
+
+
+
+<p class="text-2xl font-bol mb-5">Editing opportunity: {{ opportunity.name }}</p>
+
+{% if success %}
+<div role="alert" class="alert alert-success mb-3">
+  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+  <span>{{ success }}</span>
+</div>
+{% endif %}
+
+{% if error %}
+<div role="alert" class="alert alert-error mb-3">
+  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="p-5 rounded-lg  bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Details</p>
+      <a href="/org_admin/opportunities/delete/{{ opportunity.id }}" class="btn bg-red-600">Delete</a>
+    </div>
+    <div class="divider"></div>
+    <form class="post-form">
+      
+      {% csrf_token %}
+      <input
+        type="text"
+        class="input input-bordered w-full mb-3"
+        placeholder="Opportunity Name"
+        name = "name"
+        value="{{ opportunity.name }}"
+      />
+      <br />
+      <textarea
+        class="textarea textarea-bordered w-full text-wrap"
+        name = "description"
+        placeholder="Opportunity Description"
+      >{{ opportunity.description }}</textarea
+      >
+
+      <input
+      type="checkbox"
+      name="active"
+      {% if opportunity.active %}checked{% endif %}
+      />
+
+      <label for="active">Active</label>
+
+      <input type="checkbox" name="featured" {% if opportunity.featured %}checked{% endif %} />
+      <label for="featured">Featured</label>
+
+      <div class="divider"></div>
+
+      <p class="text-xl">Opportunity Schedule</p>
+      <p>You can choose to have an opportuinity that repeats on a given schedule, or set a list of dates that the opportuinity will run</p> 
+      <div class="divider my-1"></div>
+      
+      <div class="flex w-full">
+        <div class="w-full">
+          <p>Start Date</p>
+          <input
+            type="date"
+            name="start_date"
+            class="input input-bordered w-full mb-3"
+            value="{{start_date | date:'Y-m-d'}}"
+            />
+        </div>
+
+        <div class="divider divider-horizontal"></div>
+
+        <div class="w-full">
+          <p>End Date</p>
+          <input
+            type="date"
+            name="end_date"
+            class="input input-bordered w-full mb-3"
+            value="{{end_date | date:'Y-m-d'}}"
+          />
+        </div>
+      </div>
+ 
+
+      <div>
+        <p>Repeats</p>
+        <select
+          class="select select-bordered w-full mb-3"
+          name="recurrences"
+        >
+          <option {% if recurrences == 3 %}selected{% endif%} value="daily">Daily</option>
+          <option {% if recurrences == 2 %}selected{% endif%} value="weekly">Weekly</option>
+          <option {% if recurrences == 1 %}selected{% endif%} value="monthly">Monthly</option>
+          <option {% if recurrences == 0 %}selected{% endif%} value="yearly">Yearly</option>
+          <option {% if recurrences == 'none' %}selected{% endif%} value="never">Never</option>
+        </select>
+      </div>
+
+      <div class="divider my-1"></div>
+      <p>Each occurance</p>
+      <div class="flex">
+        <div class="w-full">
+      
+      <p>Starts at</p>
+      <input
+        type="time"
+        name="start_time"
+        class="input input-bordered w-full mb-3"
+        value="{{ opportunity.start_time|date:'H:i' }}"
+      />
+      </div>
+
+      <div class="divider divider-horizontal"></div>
+
+      <div class="w-full">
+      <p>Ends at</p>
+      <input
+        type="time"
+        name="end_time"
+        class="input input-bordered w-full mb-3"
+        value="{{ opportunity.end_time|date:'H:i' }}"
+      />
+      </div>
+      </div>
+
+      <div class="divider my-1"></div>
+
+      <div class="flex">
+        <div class="flex-1">
+          <p class="text-xl">Individual Dates</p>
+          <p>Add exceptions or individual dates here</p>
+        </div>
+      <button
+        class="btn btn-primary"
+        hx-get="/org_admin/add_date/{{ opportunity.id }}"
+        hx-on:htmx:after-request="my_modal_2.showModal();"
+        hx-target="#modalDiv"
+        hx-swap="innerHTML"
+      >
+        Add Date
+      </button>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for date in individual_dates %}
+          <tr>
+            <td>{{date|date:"d/m/Y"}}</td>
+            <td>
+              <button
+                class="btn btn-danger"
+                hx-get="/org_admin/delete_date/{{ opportunity.id }}/{{forloop.counter0}}"
+              >
+                Remove
+              </button>
+            </td>
+          </tr>
+          {%endfor%}
+        </tbody>
+      </table>
+
+
+
+      <div class="divider"></div>
+      <button
+        class="btn btn-primary"
+        hx-post="/org_admin/opportunities/{{ opportunity.id }}/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+      >
+        Save
+      </button>
+    </form>
+  </div>
+
+
+  <div class=="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Benefits</p>
+      <button
+        class="btn btn-primary"
+        hx-get="/org_admin/add_benefit/{{ opportunity.id }}"
+        hx-on:htmx:after-request="my_modal_2.showModal();"
+        hx-target="#modalDiv"
+        hx-swap="innerHTML"
+      >
+
+        Add a Benefit
+
+      </button>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table">
+      <tr>
+        <th>Benefit</th>
+        <th>Actions</th>
+      </tr>
+      {% for benefit in benefits %}
+      <tr>
+        <td>{{ benefit.benefit }}</td>
+        <td>
+          <button
+            class="btn btn-primary"
+            hx-get="/org_admin/edit_benefit/{{ benefit.id }}"
+            hx-on:htmx:after-request="my_modal_2.showModal();"
+            hx-target="#modalDiv"
+            hx-swap="innerHTML"
+          >
+            Edit
+          </button>
+          <a
+            href="/org_admin/delete_benefit/{{ benefit.id }}"
+            class="btn btn-danger"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Supplemental Info requirements</p>
+      <button
+        class="btn btn-primary"
+        hx-get="/org_admin/add_supplemental_info/{{ opportunity.id }}"
+        hx-on:htmx:after-request="my_modal_2.showModal();"
+        hx-target="#modalDiv"
+        hx-swap="innerHTML"
+      >
+      Add a information requirement
+      </button>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table">
+      <tr>
+        <th>Requirement</th>
+        <th>Actions</th>
+      </tr>
+      {% for info in supplemental_info %}
+      <tr>
+        <td>{{ info.requirement }}</td>
+        <td>
+          <button
+            class="btn btn-primary"
+            hx-get="/org_admin/edit_supplemental_info/{{ info.id }}"
+            hx-on:htmx:after-request="my_modal_2.showModal();"
+            hx-target="#modalDiv"
+            hx-swap="innerHTML"
+          >
+            Edit
+          </button>
+          <a
+            href="/org_admin/delete_supplemental_info/{{ info.id }}"
+            class="btn btn-danger"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  
+    
+
+
+  <div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Media</p>
+      <p class="text-gray-500">Hover over media to delete.<br>Please note you need more than 1 image to be able to delete.<br>Only JPEG and MP4 files are supported.</p>
+      <button
+        class="btn btn-primary"
+        hx-get="/org_admin/upload_media/opportunity_image/{{ opportunity.id }}"
+        hx-on:htmx:after-request="my_modal_2.showModal();"
+        hx-target="#modalDiv"
+        hx-swap="innerHTML"
+      >
+        Upload
+      </button>
+    </div>
+    <div class="divider"></div>
+    <div class='flex w-full overflow-auto flex-wrap justify-center mb-3'>
+      {% for image in opp_images%} 
+      <div class="mr-3 mb-3 relative w-48 h-40 ">
+        {% if opp_images|length > 1 %}
+        <div class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0">
+          <button class="btn btn-danger" hx-get="/org_admin/delete_media/opportunity_image/{{image.id}}/image/">Delete</button>
+        </div>
+        {% endif %}
+        <div>
+          <img src="{{image.image.url}}" alt="" class="absolute w-full h-full z-0 object-cover rounded-xl" />
+        </div>
+      </div>
+      {%endfor%}
+    </div>
+  </div>
+
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Locations</p>
+    <button
+      class="btn btn-primary"
+      hx-get="/org_admin/add_location"
+      hx-on:htmx:after-request="my_modal_2.showModal();"
+      hx-target="#modalDiv"
+      hx-swap="innerHTML"
+    >
+      Add a Location
+    </button>
+  </div>
+  <div class="divider"></div>
+  {% if locations|length == 0 %}
+  <p>No locations have been added yet</p>
+  {% else %}
+  <table class="table">
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>Postcode</th>
+      <th>Actions</th>
+    </tr>
+    {% for location in locations %}
+    <tr>
+      <td>{{ location.name }}</td>
+      <td>{{ location.description }}</td>
+      <td>{{ location.first_line }}</td>
+      <td>{{ location.city }}</td>
+      <td>{{ location.postcode }}</td>
+      <td>
+        <button
+          class="btn btn-primary"
+          hx-get="/org_admin/edit_location/{{ location.id }}"
+          hx-on:htmx:after-request="my_modal_2.showModal();"
+          hx-target="#modalDiv"
+          hx-swap="innerHTML"
+        >
+          Edit
+        </button>
+        <a
+          href="/org_admin/delete_location/{{ location.id }}"
+          class="btn btn-danger"
+          >Delete</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+
+  <dialog id="my_modal_2" class="modal">
+    <div id="modalDiv" class="modal-box">
+      <h3 class="font-bold text-lg">Hello!</h3>
+      <p class="py-4">Press ESC key or click outside to close</p>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+{% endblock %}

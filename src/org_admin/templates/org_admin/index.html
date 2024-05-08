@@ -11,21 +11,26 @@
   <div class="stat place-items-center">
     <div class="stat-title">Volunteers</div>
     <div class="stat-value">{{ total_volunteers }}</div>
+    {% if superuser %}
+    <div class="stat-desc">Registered in the system</div>
+    {% else %}
     <div class="stat-desc">Signed up for opportunities</div>
+    {% endif %}
   </div>
   
   <div class="stat place-items-center">
-    <div class="stat-title">Views</div>
+    <div class="stat-title">Opportunity Views</div>
     <div class="stat-value">{{ total_views }}</div>
     <div class="stat-desc">Past 24 Hours</div>
   </div>
   
+  {% if not superuser%}
   <div class="stat place-items-center">
-    <div class="stat-title">Registrations</div>
+    <div class="stat-title">Unread Messages</div>
     <div class="stat-value">{{messages}}</div>
-    <div class="stat-desc">↘︎ 90 (14%)</div>
+
   </div>
-  
+  {% endif %}
 </div>
 
 <div class="flex w-full h-56 mt-3">
@@ -43,6 +48,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      //try to make ctx if exisits reuse
+      try{
+        ctx1.destroy();
+        ctx2.destroy();
+        ctx3.destroy();
+      }
+      catch(err){
+        console.log(err);
+      }
+        
+      
         const ctx1 = document.getElementById('myChart');
         const ctx2 = document.getElementById('myChart2');
         const ctx3 = document.getElementById('myChart3');

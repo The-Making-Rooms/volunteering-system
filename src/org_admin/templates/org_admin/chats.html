@@ -1,0 +1,20 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<p class="text-2xl text-slate-200">Communication</p>
+
+<div class="flex p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+        {% for chat in chat %}
+            <a href="/org_admin/communication/{{chat.id}}" class="btn btn-primary" hx-target="#chat_div">{{chat.name}}</a>
+        {% endfor %}
+    <div>
+
+    <div>
+        <div id="chat_div">
+            <p>Click on a chat to view messages</p>
+        </div>
+    </div>
+
+</div>

@@ -26,16 +26,12 @@ js_info_dict = {
     'packages': ('recurrence', ),
 }
 
-
-
-
-
-
 urlpatterns = [
     path("organisations/", include("organisations.urls")),
     path("opportunities/", include("opportunities.urls")),
     path("volunteer/", include("volunteer.urls")),
     path("explore/", include("explore.urls")),
+    path("forms/", include("forms.urls")),
     path("", include("commonui.urls")),
     path('admin/', admin.site.urls),
     path('djrichtextfield/', include('djrichtextfield.urls')),

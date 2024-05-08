@@ -1,9 +1,22 @@
 <div>
-    <p class="font-bold text-2xl">Add a Date</p>
-    <div class="divider"></div>
-    <form>
-        {% csrf_token %}
-        <input type="date" name="date" class="form-control input input-bordered" required>
-        <button class="btn btn-primary" type="submit" hx-post="/org_admin/add_date/{{opportunity_id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Date</button>
-    </form>
+  <p class="font-bold text-2xl">Add a Date</p>
+  <div class="divider"></div>
+  <form>
+    {% csrf_token %}
+    <input
+      type="date"
+      name="date"
+      class="form-control input input-bordered"
+      required
+    />
+    <button
+      class="btn btn-primary"
+      type="submit"
+      hx-post="/org_admin/add_date/{{opportunity_id}}/"
+      hx-target=".htmx-navigator"
+      hx-swap="outerHTML"
+    >
+      Add Date
+    </button>
+  </form>
 </div>

@@ -16,6 +16,9 @@ class Opportunity(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name_plural = "Opportunities"
 
 class OpportunityView(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
@@ -28,16 +31,16 @@ class Benefit(models.Model):
 class Location(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=500)
-    first_line = models.CharField(max_length=200)
-    second_line = models.CharField(max_length=200, blank=True, null=True)
-    postcode = models.CharField(max_length=200)
-    city = models.CharField(max_length=200)
-    longitude = models.FloatField(blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
+    address = RichTextField(null=True, blank=True)
+    place_id = models.CharField(blank=True, null=True,max_length=200)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
 
 class RegistrationStatus(models.Model):
     status = models.CharField(max_length=200)
+    
+    class Meta:
+        verbose_name_plural = "Registration Statuses"
     
 class VolunteerRegistrationStatus(models.Model):
     registration = models.ForeignKey('Registration', on_delete=models.CASCADE)
@@ -53,6 +56,9 @@ class VolunteerRegistrationStatus(models.Model):
     def get_organisation(self):
         return self.registration.opportunity.organisation.name
     
+    class Meta:
+        verbose_name_plural = "Volunteer Registration Statuses"
+    
 class Registration(models.Model):
     volunteer = models.ForeignKey('volunteer.Volunteer', on_delete=models.CASCADE)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
@@ -67,18 +73,20 @@ class RegistrationAbsence(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
+    thumbnail_image = models.ImageField(upload_to='images/', null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
 
 class Video(models.Model):
     video = models.FileField(upload_to='videos/')
+    video_thumbnail = models.ImageField(upload_to='videos/', null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
 
 class LinkedTags(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
-    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
+    tag = models.OneToOneField('Tag', on_delete=models.CASCADE)
 
 class Tag(models.Model):
-    tag = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100, unique=True)
 
 class SupplimentaryInfoRequirement(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)

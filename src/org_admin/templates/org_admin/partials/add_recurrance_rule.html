@@ -1,0 +1,53 @@
+<p>Add a repeating rule</p>
+<div class="divider"></div>
+<form>
+  {% csrf_token %}
+  <div>
+    <label for="repeat_type">Repeat Type</label>
+    <select
+      name="repeat_type"
+      class="form-control input input-bordered"
+      required
+    >
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+  </div>
+
+  <!-- Start and end date -->
+  <div class="flex w-full">
+    <div class="w-full">
+      <p>Start Date</p>
+      <input
+        type="date"
+        name="start_date"
+        class="input input-bordered w-full mb-3"
+        value="{{start_date | date:'Y-m-d'}}"
+      />
+    </div>
+
+    <div class="divider divider-horizontal"></div>
+
+    <div class="w-full">
+      <p>End Date</p>
+      <input
+        type="date"
+        name="end_date"
+        class="input input-bordered w-full mb-3"
+        value="{{end_date | date:'Y-m-d'}}"
+      />
+    </div>
+  </div>
+
+  <button
+    class="btn btn-primary"
+    type="submit"
+    hx-post="/org_admin/opportunities/manage_recurrance_rule/{{opportunity.id}}/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+  >
+    Add Recurrance Rule
+  </button>
+</form>

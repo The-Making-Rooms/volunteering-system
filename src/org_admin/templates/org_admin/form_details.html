@@ -1,0 +1,67 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+
+<div class="p-3 my-3 bg-secondary rounded-xl">
+    <form>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label><br>
+            <input class="input input-bordered w-full" type="text" class="form-control" id="name" name="name" value="{{ form.name }}">
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control input input-bordered w-full h-24" id="description" name="description">{{ form.description }}</textarea>
+        </div>
+        <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/{{form.id}}/update" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
+    </form>
+</div>
+<button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{form.id}}/add_question/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Question</button>
+<button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{form.id}}/add_boolean/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Yes/No</button>
+<button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{form.id}}/add_multi_choice/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Add Multi Choice</button>
+
+
+{% for question in questions %}
+
+<div class="p-3 my-3 bg-secondary rounded-xl">
+    <div class="badge badge-accent">{{question.question.question_type}}</div>
+    <form>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="question" class="form-label">Question</label><br>
+            <input class="input input-bordered w-full" type="text" class="form-control" id="question" name="question" value="{{ question.question.question }}">
+        </div>
+
+        <div class="mb-3 w-24">
+            <label class="label cursor-pointer">Required</label>
+            <input type="checkbox" class="checkbox" name="required" {% if question.question.required %}checked{%endif%}>
+        </div>
+
+        
+        <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/{{question.question.id}}/save/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
+        <button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{question.question.id}}/delete/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+    </form>
+
+    {% if question.question.question_type == "multi_choice" %}
+        <div class="divider"></div>
+        <p>Options</p>
+        <p>Click on an option to delete it</p>
+        <div class="flex flex-wrap">
+            {% for option in question.options %}
+            <a href="/org_admin/forms/{{question.question.id}}/delete_option/{{option.id}}/"><div class="badge badge-primary mx-1">{{ option.option }}</div></a>
+            {% endfor %}
+        </div>
+        <form>
+            {% csrf_token %}
+            <input name="option" type="text" placeholder="Type to add an option" class="input input-bordered w-full max-w-xs" />
+            <button class="btn bg-green-600" hx-target=".htmx-navigator" hx-post="/org_admin/forms/{{question.question.id}}/add_option/" hx-swap="outerHTML" >Add</button>
+        </form>
+        <div class="divider"></div>
+        {% endif %}
+
+   
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -1,103 +1,164 @@
 {% extends 'org_admin/navigation_template.html' %} {% block page_content %}
 
 <p class="text-2xl font-bol mb-5">About your Organisation</p>
-{% if error %}
-{{ error }}
-{% endif %}
+{% if error %} {{ error }} {% endif %}
 
-<div class="p-5 rounded-lg bg-gray-700 mb-3">
+<div class="p-5 rounded-lg bg-base-200 mb-3">
   <div class="flex justify-between items-center">
     <p class="text-xl">Details</p>
-    <button
-      class="btn btn-primary"
-      hx-get="/org_admin/add_location"
-      hx-on:htmx:after-request="my_modal_2.showModal();"
-      hx-target="#modalDiv"
-      hx-swap="innerHTML"
-    >
-      Save
-    </button>
   </div>
   <div class="divider"></div>
-  <form>
+
+<div class="flex">
+
+  <div class="mr-3 mb-3 relative w-48 h-48 rounded-xl border">
+    <div
+      class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0"
+    >
+    <button
+    class="btn btn-primary"
+    {% if superuser %} hx-get="/org_admin/upload_organisation_logo/{{organisation.id}}/"{% else %} hx-get="/org_admin/upload_organisation_logo/"{% endif %} 
+    hx-on:htmx:after-request="my_modal_2.showModal();"
+    hx-target="#modalDiv"
+    hx-swap="innerHTML"
+  >
+    Upload
+  </button>
+    </div>
+    
+    <div>
+      <p class="absolute w-full h-full p-3 text-center">Organisation Logo <br>Hover to upload a image</p>
+      {% if organisation.logo %}
+      <img
+        src="{{organisation.logo.url}}"
+        alt=""
+        class="absolute w-full h-full z-0 object-contain rounded-xl"
+      />{% endif %}
+    </div>
+  </div>
+
+
+  <form class="flex-grow">
+    {% csrf_token %}
+
+    <label for="name">Organisation Name</label>
+
     <input
       type="text"
       class="input input-bordered w-full mb-3"
       placeholder="Organisation Name"
+      name="name"
       value="{{ organisation.name }}"
     />
     <br />
+
+    <label for="description">Organisation Description</label>
     <textarea
+      name="description"
       class="textarea textarea-bordered w-full text-wrap"
       placeholder="Organisation Description"
     >
-{{ organisation.description }}</textarea
-    >
+{{ organisation.description }}</textarea>
+
+    <p class="text-secondary">Hover over the logo to upload a new image</p>
+
+    <div class="flex w-full justify-end">
+      <button class="btn btn-primary self-end" {% if superuser %} hx-post="/org_admin/organisations/{{organisation.id}}/" {% else %} hx-post="/org_admin/details/"{%endif%}hx-target=".htmx-navigator" hx-swap="outerHTML">
+        Save
+      </button>
+    </div>
   </form>
 </div>
 
-<div class="p-5 rounded-lg bg-gray-700 mb-3">
-  <div class="flex justify-between items-center">
-    <p class="text-xl">Locations</p>
-    <button
-      class="btn btn-primary"
-      hx-get="/org_admin/add_location"
-      hx-on:htmx:after-request="my_modal_2.showModal();"
-      hx-target="#modalDiv"
-      hx-swap="innerHTML"
-    >
-      Add a Location
-    </button>
-  </div>
-  <div class="divider"></div>
-  {% if locations|length == 0 %}
-  <p>No locations have been added yet</p>
-  {% else %}
-  <table class="table">
-    <tr>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Address</th>
-      <th>City</th>
-      <th>Postcode</th>
-      <th>Actions</th>
-    </tr>
-    {% for location in locations %}
-    <tr>
-      <td>{{ location.name }}</td>
-      <td>{{ location.description }}</td>
-      <td>{{ location.first_line }}</td>
-      <td>{{ location.city }}</td>
-      <td>{{ location.postcode }}</td>
-      <td>
-        <button
-          class="btn btn-primary"
-          hx-get="/org_admin/edit_location/{{ location.id }}"
-          hx-on:htmx:after-request="my_modal_2.showModal();"
-          hx-target="#modalDiv"
-          hx-swap="innerHTML"
-        >
-          Edit
-        </button>
-        <a
-          href="/org_admin/delete_location/{{ location.id }}"
-          class="btn btn-danger"
-          >Delete</a
-        >
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
 </div>
 
-<div class="p-5 rounded-lg bg-gray-700">
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Locations</p>
+  </div>
+
+  <div class="divider"></div>
+
+  {% include "org_admin/partials/map_finder.html" %}
+
+  <div class="divider"></div>
+
+  {% if locations|length == 0 %}
+    <p>No locations have been added yet</p>
+    {% else %}
+    <table class="table rounded-xl ">
+      <tr class="border-b border-gray-600">
+        <th>Name</th>
+        <th>Address</th>
+        <th>Actions</th>
+      </tr>
+      {% for location in locations %}
+      <tr>
+        <td>{{ location.name }}</td>
+        <td>{{ location.address }}</td>
+        <td>
+          <a
+            hx-get="/org_admin/delete_location/{{ location.id }}/"
+            class="btn bg-red-600"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Social Media Links</p>
+  </div>
+<div class="divider"></div>
+<form>
+  {% csrf_token %}
+<table class="table w-full">
+  <thead>
+    <tr>
+      <th>Platform</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for type in link_types %}
+    <tr>
+      <td>{{ type.type.name }}</td>
+      <td><input name="type_{{type.type.id}}" class="input input-bordered w-full" placeholder="URL (including https://)" {%if type.link %}value={{type.link}}{%endif%}></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="divider"></div>
+<div class="flex w-full justify-end">
+  <button class="btn btn-primary self-end" {% if superuser %} hx-post="/org_admin/links/{{organisation.id}}/" {% else %}hx-post="/org_admin/links/"{%endif%}hx-target=".htmx-navigator" hx-swap="outerHTML">
+    Save
+  </button>
+</div>
+</form>
+</div>
+
+<div class="p-5 rounded-lg bg-base-200">
   <div class="flex justify-between items-center">
     <p class="text-xl">Media</p>
-    <p class="text-gray-500">Hover over media to delete.<br>Please note you need more than 1 image to be able to delete.</p>
+    <p class="text-gray-500">
+      Hover over media to delete.<br />Please note you need more than 1 image to
+      be able to delete.
+    </p>
     <button
       class="btn btn-primary"
+      {% if superuser %}
+      hx-get="/org_admin/upload_media/organisation_image/{{organisation.id}}/"
+      {% else %}
       hx-get="/org_admin/upload_media/organisation_image/"
+      {% endif %}
       hx-on:htmx:after-request="my_modal_2.showModal();"
       hx-target="#modalDiv"
       hx-swap="innerHTML"
@@ -106,17 +167,52 @@
     </button>
   </div>
   <div class="divider"></div>
-  <div class='flex w-full overflow-auto flex-wrap justify-center'>
-    {% for image in org_images%} 
-    
-    <div class="mr-3 mb-3 relative w-48 h-40 ">
+  <div class="flex w-full overflow-auto flex-wrap justify-start">
+    {% for image in org_images%}
+
+    <div class="mr-3 mb-3 relative w-48 h-40">
       {% if org_images|length > 1 %}
-      <div class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0">
-        <button class="btn btn-danger" hx-get="/org_admin/delete_media/organisation_image/{{image.id}}/image/">Delete</button>
+      <div
+        class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0"
+      >
+        <button
+          class="btn btn-danger"
+          hx-get="/org_admin/delete_media/organisation_image/{{image.id}}/image/"
+        >
+          Delete
+        </button>
       </div>
       {% endif %}
       <div>
-        <img src="{{image.image.url}}" alt="" class="absolute w-full h-full z-0 object-cover rounded-xl" />
+        <img
+          src="{{image.thumbnail_image.url}}"
+          alt=""
+          class="absolute w-full h-full z-0 object-cover rounded-xl"
+        />
+      </div>
+    </div>
+    {%endfor%}
+    {% for video in org_videos%}
+
+    <div class="mr-3 mb-3 relative w-48 h-40">
+      {% if org_images|length > 1 or org_videos|length > 1%}
+      <div
+        class="flex flex-col p-2 items-center justify-center bg-slate-300 absolute w-full h-full hover:opacity-100 z-10 rounded-xl opacity-0"
+      >
+        <button
+          class="btn btn-danger"
+          hx-get="/org_admin/delete_media/organisation_image/{{video.id}}/video/"
+        >
+          Delete
+        </button>
+      </div>
+      {% endif %}
+      <div>
+        <img
+          src="{{video.video_thumbnail.url}}"
+          alt=""
+          class="absolute w-full h-full z-0 object-cover rounded-xl"
+        />
       </div>
     </div>
     {%endfor%}

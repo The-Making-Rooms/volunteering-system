@@ -1,0 +1,113 @@
+{% extends 'org_admin/navigation_template.html' %} {% block page_content %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-2xl font-bol mb-5">Volunteer Details</p>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>First Name</th>
+        <td>{{volunteer.user.first_name}}</td>
+      </tr>
+      <tr>
+        <th>Last Name</th>
+        <td>{{volunteer.user.last_name}}</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>{{volunteer.user.email}}</td>
+      </tr>
+      <tr>
+        <th>Phone</th>
+        <td>{{volunteer.phone}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Conditions</p>
+  <div class="divider my-2"></div>
+  {% if conditions|length == 0 %}
+  <p>No conditions disclosed</p>
+  {% else %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Condition</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for condition in conditions %}
+      <tr>
+        <td>{{ condition.disclosures }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Supplemental Information</p>
+  <div class="divider my-2"></div>
+  {% if vol_supp_info|length == 0%}
+  <p>No supplemental information</p>
+  {% else %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for data in vol_supp_info %}
+      <tr>
+        <td>{{ data.info.title }}</td>
+        <td>{{ data.info.description }}</td>
+        <td>{{ data.data }}</td>
+        <td>{{ data.last_updated }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Volunteer Registrations</p>
+  <div class="divider my-2"></div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Opportunity</th>
+        <th>Registered</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for registration in registrations %}
+      <tr>
+        <td>{{ registration.opportunity.name }}</td>
+        <td>{{ registration.date_created }}</td>
+        <td>
+          <a
+            href="/org_admin/opportunities/{{registration.opportunity.id}}"
+            class="btn btn-primary"
+            >View</a
+          >
+          <a href="" class="btn bg-red-600">Mark as complete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+ 
+</div>
+{% endblock %}

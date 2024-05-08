@@ -16,6 +16,11 @@
   <section id="image-carousel" class="splide" aria-label="Beautiful Images">
     <div class="splide__track">
       <ul class="splide__list">
+        {% for video in videos %}
+          <li class="splide__slide" data-splide-html-video="{{video.video.url}}">
+            <img src="{{video.video_thumbnail.url}}">
+          </li>
+        {% endfor %}
         {% for image in images %}
         <li class="splide__slide">
           <img src="{{image.image.url}}" alt="" />
@@ -37,7 +42,7 @@
 
       new Splide("#image-carousel", {
         heightRatio: 0.5,
-      }).mount();
+      }).mount(window.splide.Extensions);
       isLoaded = true;
     }
     
@@ -82,7 +87,9 @@
     <div class="divider"></div>
     <div class="card-actions justify-center">
       {% for link in links %}
-      <a href="{{ link.url }}" target="_blank" class="btn btn-primary">{{ link.name }}</a>
+      <a href="{{ link.url }}" target="_blank" class="btn btn-primary">
+        {% if link.link_type.icon %}<img src="{{link.link_type.icon.url}}" alt="{{link.link_type.name}}" class="w-10 h-10" />{% endif %}
+      </a>
       {% endfor %}
     </div>
   </div>
@@ -90,7 +97,28 @@
 {% endif %} {% if locations %}
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
-    <h2 class="card-title">Location</h2>
+    <h2 class="card-title">Locations</h2>
+    <div class="divider"></div>
+
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for site in locations %}
+        <tr>
+          <td>{{ site.name }}</td>
+          <td>{{ site.address}}</td>
+          <td>
+            <a href="https://www.google.com/maps/dir/?api=1&origin=&destination=b&destination_place_id={{site.place_id}}&travelmode=walking" target="_blank"><button class="btn btn-primary">Check directions</button></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     <div class="divider"></div>
 
     <script type="module">
@@ -117,17 +145,14 @@
       initMap();
     </script>
     <div id="map" class="w-full h-96"></div>
-    <div class="divider"></div>
-    <div class="card-actions justify-center">
-      <button class="btn btn-primary">Check directions</button>
-    </div>
+
   </div>
 </div>
 {% endif %} {% if opportunities %}
 
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">
-    <h2 class="card-title">Oppertunities from this organisation</h2>
+    <h2 class="card-title">Opportunities from this organisation</h2>
     <div class="divider"></div>
 
     <div class="carousel carousel-center w-full h-64 p-4 space-x-4 rounded-box">

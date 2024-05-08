@@ -1,0 +1,12 @@
+<div class="form-control">
+    <p class="text-2xl">{{question.question}}</p>
+    <div class="divider"></div>
+    <div class="flex flex-wrap">
+        {% for option in question.options %}
+        <div class="flex items-center">
+            <input class="radio mr-2" type="radio" id="{{option.id}}" name="option" value="{{option.id}}">
+            <label for="{{option.id}}">{{option.option}}</label>
+        </div>
+        {% endfor %}
+    </div>
+</div>

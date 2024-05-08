@@ -13,7 +13,7 @@
 <div>
   <div class="w-full">
     <div class="card shadow-lg p-3">
-      <h1 class="text-2xl font-bold mb-3">Your Opportuinities</h1>
+      <h1 class="text-2xl font-bold mb-3">Your Opportunities</h1>
 
       {% if data %} {% for loop in data %}
 
@@ -23,23 +23,21 @@
             <div class="flex flex-1 items-center">
               {% if loop.registration.opportunity.organisation.logo %}<img class="w-16 h-16 rounded-md mr-3" src="{{ loop.registration.opportunity.organisation.logo.url }}" alt="Logo of {{ loop.registration.opportunity.organisation.name }}" />{% endif %}
               <div class="flex flex-col">
-                <p class="text-2xl font-bold">
-                  {{ loop.registration.opportunity.name }}
-                </p>
+                <a
+              class="btn btn-md bg-gray-700 p-1 rounded-full"
+              href="/opportunities/{{ loop.registration.opportunity.id }}"
+              >{{ loop.registration.opportunity.name }} ></a>
                 <div class="badge badge-accent my-1">{{loop.registration.opportunity.organisation.name}}</div>
+                
               </div>
             </div>
 
-            <a
-              class="btn btn-primary"
-              href="/opportunities/{{ loop.registration.opportunity.id }}"
-              >View Opportunity Details</a
-            >
+            
           </div>
           <div class="divider my-2"></div>
 
           <div class="overflow-x-auto">
-            <p>Volunteer since: {{ loop.registration.date_created }}</p>
+            <p>Volunteer since: {{ loop.registration.date_created|date:"d/m/Y" }}</p>
             <p>
               Volunteer status: 
               {% if loop.status.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to Approve 
@@ -47,17 +45,18 @@
               {{ loop.status.registration_status.status }} 
               {% endif %}
             </p>
-            <p>Next Upcoming Event: {{ loop.next_occurance|date:"d/m/Y" }} - {{loop.registration.opportunity.start_time}}</p>
+            <p>Next Upcoming Event: {% if loop.next_occurance == None %} To be confirmed {% else %} {{ loop.next_occurance|date:"d/m/Y" }} - {{loop.registration.opportunity.start_time}} {% endif %}</p>
           </div>
           {% if loop.status.0.registration_status.status != 'awaiting_approval' %}
           <div class="divider my-2"></div>
 
           <div>
+
+            {% if loop.next_occurance != None %}
             <button class="btn btn-primary justify-end mr-3" hx-get="/volunteer/register_absence/{{loop.registration.id}}" {% if loop.absent %} disabled {%endif%}>
               {% if loop.absent %}You have notified of a absence{% else%}I can't make it{%endif%}
             </button>
-            
-            <button class="btn btn-primary justify-end mr-3" >Pause</button>
+            {% endif %}
             <button
                     class="btn btn-primary"
                     hx-get="/volunteer/stop_volunteering/{{ loop.registration.id }}"
@@ -79,6 +78,9 @@
 
 {% else %}
 
-<p>You have not signed up for any opportunities yet. Why not <a class="text-blue-400 underline" href="/explore">Explore</a></p>
+
+<p>You have not signed up for any opportunities yet.</p>
+
+<button class="btn btn-primary max-w-24 mt-3" hx-get="/explore" hx-target=".htmx-navigator" hx-swap="outerHTML">Explore</button>
 
 {% endif %} {% include "navbar.html" %} {% endblock %}

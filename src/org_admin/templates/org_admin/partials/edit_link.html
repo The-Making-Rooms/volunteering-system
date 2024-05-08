@@ -1,0 +1,37 @@
+<div>
+    <form>
+        {% csrf_token %}
+
+        <p class="text-xl">Edit Link</p>
+
+        <div class="divider"></div>
+
+        <input type="hidden" name="link_id" value="{{ link.id }}" />
+
+        <div class="form-control mb-3">
+            <label for="link_type">Link Type</label>
+            <select name="type" class="select select-bordered" required>
+                {% for link_type in link_types %}
+                <option value="{{ link_type.id }}"  {% if link_type.id == link.link_type.id %}selected{%endif%}>{{ link_type.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-control mb-3">
+            <label for="description">Description (Optional)</label>
+            <input value="{{link.name}}" type="description" name="name" class="form-control input input-bordered" required />
+        </div>
+        <div class="form-control mb-3">
+            <label for="link">URL</label>
+            <input value="{{link.url}}" type="text" name="url" class="form-control input input-bordered" required />
+        </div>
+
+
+
+
+
+
+
+        <button class="btn btn-primary" type="submit" hx-post="/org_admin/add_link/"
+            hx-target=".htmx-navigator" hx-swap="outerHTML">{% if link %}Save{% else %}Add Link{%endif%}</button>
+</div>

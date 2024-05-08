@@ -1,17 +1,116 @@
-<div>
-    <p class="font-bold text-2xl">Add a Location</p>
+<div class="w-full">
+  <p class="font-bold text-2xl">Add a Location</p>
+  <div class="divider"></div>
+  <form class="w-full">
+    {% csrf_token %}
+
+    <input
+      value="{{ opportunity_id }}"
+      class="input input-bordered"
+      type="hidden"
+      name="opportunity"
+      placeholder="opportunity"
+    />
+    <input
+      value="{{ location.id }}"
+      class="input input-bordered"
+      type="hidden"
+      name="locationID"
+      placeholder="Organisation"
+    />
+    <input
+      value="{{ org_id }}"
+      class="input input-bordered w-full"
+      type="hidden"
+      name="organisation"
+      placeholder="Organisation"
+    />
+
+    <label for="name">
+      <span class="label-text">Location Name</span>
+    </label>
+    <input
+      value="{{ location.name }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="name"
+      placeholder="Main Offices"
+    />
+
+    <label for="description">
+      <span class="label-text">Location Description</span>
+    </label>
+    <input
+      value="{{ location.description }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="description"
+      placeholder="Home of ABC C.I.C"
+    />
+
+    <label for="first_line">
+      <span class="label-text">Address Line 1</span>
+    </label>
+    <input
+      value="{{ location.first_line }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="first_line"
+      placeholder="First Line"
+    />
+
+    <label for="second_line">
+      <span class="label-text">Address Line 2</span>
+    </label>
+    <input
+      value="{{ location.second_line }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="second_line"
+      placeholder="Second Line"
+    />
+
+    <label for="postcode">
+      <span class="label-text">Postcode</span>
+    </label>
+    <input
+      value="{{ location.postcode }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="postcode"
+      placeholder="Postcode"
+    />
+
+    <label for="city">
+      <span class="label-text">City</span>
+    </label>
+    <input
+      value="{{ location.city }}"
+      class="form-control input input-bordered w-full mb-3"
+      type="text"
+      name="city"
+      placeholder="City"
+    />
     <div class="divider"></div>
-    <form>
-        {% csrf_token %}
-        <input value="{{ location.id }}" class="input input-bordered" type="hidden" name="locationID" placeholder="Organisation">
-        <input value="{{ org_id }}" class="input input-bordered" type="hidden" name="organisation" placeholder="Organisation">
-        <input value="{{ location.name }}" class="input input-bordered" type="text" name="name" placeholder="Main Offices">
-        <input value="{{ location.description }}" class="input input-bordered" type="text" name="description" placeholder="Home of ABC C.I.C">
-        <input value="{{ location.first_line }}" class="input input-bordered" type="text" name="first_line" placeholder="First Line">
-        <input value="{{ location.second_line }}" class="input input-bordered" type="text" name="second_line" placeholder="Second Line">
-        <input value="{{ location.postcode }}" class="input input-bordered" type="text" name="postcode" placeholder="Postcode">
-        <input value="{{ location.city }}" class="input input-bordered" type="text" name="city" placeholder="City">
-        <div class="divider"></div>
-        <button class="btn btn-primary" type="submit" hx-post="/org_admin/add_location/" hx-target=".htmx-navigator" hx-swap="outerHTML">{% if location.id %}Save{%else%}Add Location{%endif%}</button>
-    </form>
+    <button
+      class="btn btn-primary"
+      type="submit"
+      {%
+      if
+      opportunity_id
+      %}
+      hx-post="/org_admin/opportunities/manage_location/{{opportunity_id}}/"
+      {%
+      else
+      %}
+      hx-post="/org_admin/add_location/"
+      {%
+      endif
+      %}
+      hx-target=".htmx-navigator"
+      hx-swap="outerHTML"
+    >
+      {% if location.id %}Save{%else%}Add Location{%endif%}
+    </button>
+  </form>
 </div>

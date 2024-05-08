@@ -1,0 +1,95 @@
+<div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Details</p>
+  </div>
+  <div class="divider"></div>
+  <form class="post-form">
+    {% csrf_token %}
+    <label for="name">
+      <span class="label-text">Opportunity Name</span>
+    </label>
+    <input
+      id="name"
+      type="text"
+      class="input input-bordered w-full mb-3"
+      placeholder="Opportunity Name"
+      name="name"
+      value="{{ opportunity.name }}"
+    />
+    <br />
+
+    <label for="description">
+      <span class="label-text">Opportunity Description</span>
+    </label>
+
+    <textarea
+      id="description"
+      class="textarea textarea-bordered w-full text-wrap"
+      name="description"
+      placeholder="Opportunity Description"
+    >
+{{ opportunity.description }}</textarea
+    >
+
+    <div class="divider"></div>
+
+    <div class="flex items-center mb-2">
+      <input
+        type="checkbox"
+        name="active"
+        class="checkbox mx-2"
+        {% if opportunity.active %}checked{% endif %}
+      />
+      <label for="active">Active</label>
+    </div>
+
+    <div class="flex items-center mb-2">
+      <input
+        type="checkbox"
+        name="featured"
+        class="checkbox mx-2"
+        {%if not superuser %}disabled{%endif%}
+        {% if opportunity.featured %}checked{%  endif %}
+      />
+      <label for="featured">Featured</label>
+    </div>
+
+    <div class="divider"></div>
+
+
+    <div>
+      <p>Tags</p>
+      <p>Click on a tag to delete it</p>
+      <div class="flex">
+        <form>
+          {% csrf_token %}
+          <input name="tag" type="text" placeholder="Type to add a tag" class="input input-bordered w-full max-w-xs" />
+          <button class="btn bg-green-600" hx-target=".htmx-navigator" hx-post="/org_admin/opportunities/manage_tag/{{opportunity.id}}/" hx-swap="outerHTML" >Add</button>
+        </form>
+      </div>
+
+      <div class="flex flex-wrap">
+        {% for tag in tags %}
+        <a href="/org_admin/opportunities/manage_tag/delete/{{opportunity.id}}/{{tag.id}}/"><div class="badge badge-primary mx-1">{{ tag.tag.tag }}</div></a>
+        {% endfor %}
+    </div>
+
+    <div class="divider"></div>
+
+    <button
+      class="btn bg-green-600"
+      hx-post="/org_admin/opportunities/details/{{opportunity.id}}/"
+      hx-target=".htmx-navigator"
+      hx-swap="outerHTML"
+    >
+      Save
+    </button>
+    <a
+      href="/org_admin/opportunities/delete/{{ opportunity.id }}"
+      class="btn bg-red-600"
+      >Delete</a
+    >
+
+    {% with active_link="details" %} {% include "org_admin/partials/tabs.html"%} {% endwith %}
+  </form>
+</div>

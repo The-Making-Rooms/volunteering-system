@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import OrgnaisationAdmin
+from .models import OrganisationAdmin
 # Register your models here.
 
-@admin.register(OrgnaisationAdmin)
-class OrgnaisationAdminAdmin(admin.ModelAdmin):
+@admin.register(OrganisationAdmin)
+class OrganisationAdminAdmin(admin.ModelAdmin):
     list_display = ('user', 'organisation')
     search_fields = ('user', 'organisation')
     pass
