@@ -1,0 +1,37 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<p class="text-2xl font-bold mt-5">Responses for form {{form.name}}</p>
+
+<div class="rounded-xl bg-secondary">
+    <table class="table w-full mt-5">
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for response in answers %}
+            <tr>
+                <td>{{ response.answer.question }}</td>
+
+
+                {% if response.option %}
+                <td>
+                    {% for ans in response.option %}
+                        {{ans}},
+                    {% endfor %}
+                </td>
+
+                {% else %}
+                <td>{{ response.answer.answer }}</td>
+                
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+</div>
+
+{% endblock %}

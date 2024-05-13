@@ -23,11 +23,7 @@ module.exports = {
           "base-content": "#ffffff",
         },
       },
-      "dark",
-      "cupcake",
       "retro",
-      "synthwave",
-      "halloween",
     ],
   },
 }

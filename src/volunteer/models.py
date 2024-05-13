@@ -45,6 +45,7 @@ class VolunteerInterest(models.Model):
 class SupplementaryInfo(models.Model):
     title = models.CharField(max_length=200)
     description =  models.CharField(max_length=200)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE, null=True)
 
 class SupplementaryInfoGrantee(models.Model):
     org = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)

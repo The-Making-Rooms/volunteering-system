@@ -1,7 +1,7 @@
-<div id="navbar" class="btm-nav z-40 rounded-t-xl bg-base-200" hx-swap-oob="true">
+<div id="navbar" class="btm-nav z-40 rounded-t-xl bg-base-300" hx-swap-oob="true">
 
   <div class="flex flex-col">
-    <button class="p-3 rounded-xl {% if link_active == 'index' %} bg-primary {% else %} bg-[#4b4b4b] {% endif %}" hx-get="/" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
+    <button class="p-3 rounded-xl {% if link_active == 'index' %} bg-primary {% else %} bg-secondary {% endif %}" hx-get="/" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
       <svg xmlns="http://www.w3.org/2000/svg" width="2rem" class="h-5 w-5" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
         <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5"/>
       </svg>
@@ -10,7 +10,7 @@
 
 
   <div class="flex flex-col">
-    <button class="p-3 rounded-xl {% if link_active == 'explore' %} bg-primary {% else %} bg-[#4b4b4b]  {% endif %}" hx-get="/explore" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
+    <button class="p-3 rounded-xl {% if link_active == 'explore' %} bg-primary {% else %} bg-secondary  {% endif %}" hx-get="/explore" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
       <svg xmlns="http://www.w3.org/2000/svg" width="2rem" class="h-5 w-5" fill="currentColor" class="bi bi-compass-fill" viewBox="0 0 16 16">
         <path d="M15.5 8.516a7.5 7.5 0 1 1-9.462-7.24A1 1 0 0 1 7 0h2a1 1 0 0 1 .962 1.276 7.503 7.503 0 0 1 5.538 7.24m-3.61-3.905L6.94 7.439 4.11 12.39l4.95-2.828 2.828-4.95z"/>
       </svg>
@@ -20,7 +20,7 @@
 
   {% if user.is_authenticated %}
   <div class="flex flex-col">
-    <button class="p-3 rounded-xl {% if link_active == 'your-opportunities' %} bg-primary {% else %} bg-[#4b4b4b]  {% endif %}" hx-get="/volunteer/your-opportunities" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
+    <button class="p-3 rounded-xl {% if link_active == 'your-opportunities' %} bg-primary {% else %} bg-secondary  {% endif %}" hx-get="/volunteer/your-opportunities" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-check" viewBox="0 0 16 16">
         <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
@@ -29,7 +29,7 @@
   </div>
 
   <div class="flex flex-col">
-    <button class="p-3 rounded-xl {% if link_active == 'communications' %} bg-primary {% else %} bg-[#4b4b4b]  {% endif %}" hx-get="/communications" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
+    <button class="p-3 rounded-xl {% if link_active == 'communications' %} bg-primary {% else %} bg-secondary  {% endif %}" hx-get="/communications" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-text-fill" viewBox="0 0 16 16">
         <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z"/>
       </svg>
@@ -45,7 +45,7 @@
   </button>
 -->
   <div class="flex flex-col">
-    <button class="p-3 rounded-xl {% if link_active == 'volunteer' %} bg-primary {% else %} bg-[#4b4b4b]  {% endif %}" hx-get="/volunteer" hx-target=".htmx-navigator" hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
+    <button class="p-3 rounded-xl {% if link_active == 'volunteer' %} bg-primary {% else %} bg-secondary  {% endif %}" hx-get="/volunteer" hx-target=".htmx-navigator" hx-push-url="true" hx-swap="outerHTML scroll:top" hx-indicator=".loader">
       <svg xmlns="http://www.w3.org/2000/svg" width="2rem" class="h-5 w-5" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
         <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
         <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>

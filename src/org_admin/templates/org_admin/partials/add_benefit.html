@@ -1,20 +1,18 @@
-<div class="w-full">
+<div id="add_benefit" class="w-full">
   <p>Add a Benefit</p>
   <p class="text-gray-500">
     Click outside of this popup to dismiss without saving.
   </p>
   <div class="divider"></div>
+
+
+
   <form>
     {% csrf_token %}
-    <input
-      type="text"
-      name="description"
-      class="form-control input input-bordered mb-3 w-full"
-      placeholder="Benefit Description"
-      {% if benefit %}value="{{benefit.description}}"
-      {% endif %}
-      required
-    />
+    {% include "org_admin/partials/select_opportunity_icon.html" %}
+
+    <div class="divider"></div>
+    <textarea class="textarea textarea-bordered w-full mb-3 h-24" placeholder="Description" name="description">{% if benefit %}{{benefit.description}}{%endif%}</textarea>
     <button
       class="btn btn-primary"
       type="submit"

@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-from os import path
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-rd6@o^$_u7tniw&^#dg-0vr88$*r^b^4%3fkyr6c@r_i5^g!s8'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -33,8 +33,11 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'uzair.patel@makingrooms.org'
 EMAIL_HOST_PASSWORD = 'kjic dgye sriy nsvv'
-
+DATA_UPLOAD_MAX_NUMBER_FILES = 10
 # Application definition
+
+NOUN_PROJECT_API_KEY = "a5f9c58009584357b678c737e8cb871f"
+NOUN_PROJECT_SECRET_KEY = "7c76f3fa935445669bf4f2b8ac906d90"
 
 INSTALLED_APPS = [
     "django.contrib.admin",  # required

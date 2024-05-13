@@ -46,4 +46,5 @@
 		npx tailwindcss -i ./static/src/input.css -o ./static/src/output.css --watch
 		python manage.py runserver
 		python manage.py runserver_plus --cert-file example.crt --key-file example.key
+		
 

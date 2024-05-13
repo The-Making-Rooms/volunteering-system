@@ -1,0 +1,30 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Volunteer Name</th>
+            <th>Volunteer Email</th>
+            <th>Signed Up</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for volunteer in volunteers %}
+        <tr>
+            <td><input type="checkbox" name="volunteer" value="{{volunteer.id}}"></td>
+            <td>{{ volunteer.user.first_name }} {{ volunteer.user.last_name }}</td>
+            <td>{{ volunteer.user.email }}</td>
+            <td>{{ volunteer.created_at }}</td>
+            <td>
+                {% if overide_links %}
+                {% for link in overide_links%}
+                    <button class="btn btn-primary btn-sm" hx-get="{{link.url}}{{volunteer.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">{{link.text}}</button>
+                {% endfor %}
+                {% else %}
+                    <button class="btn btn-primary btn-sm" hx-push-url="true" hx-get="/org_admin/volunteers/{{volunteer.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Details</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

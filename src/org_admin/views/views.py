@@ -1,14 +1,19 @@
 from django.shortcuts import render
+from django.http import HttpResponse 
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
 from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation
 from communications.models import Message, Chat
-from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement
-from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo
+from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon
+from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo
 from .common import check_ownership
-
+from datetime import datetime, timedelta, date
+import requests
+from requests_oauthlib import OAuth1
+from django.conf import settings
+import json
 
 # Create your views here.
 def volunteer_admin(request):
@@ -123,6 +128,8 @@ def details(request, error=None, success=None, organisation_id=None):
         
         link_types = LinkType.objects.all()
         
+        supp_info = SupplementaryInfo.objects.filter(organisation=organisation)
+        
         link_obj = []
         
         for link in link_types:
@@ -137,6 +144,7 @@ def details(request, error=None, success=None, organisation_id=None):
             "org_videos": org_videos,
             "org_images": org_images,
             "link_types": link_obj,
+            "supp_info": supp_info,
             "locations": Location.objects.filter(organisation=organisation),
             "error": error,
             "success": success,
@@ -145,6 +153,31 @@ def details(request, error=None, success=None, organisation_id=None):
 
         return render(request, "org_admin/organisation_details_admin.html", context)
 
+def supplementary_info(request, org_id=None):        
+    if request.method == "POST":
+        data = request.POST
+        if org_id and request.user.is_superuser:
+            org = Organisation.objects.get(id=org_id)
+        else:
+            org = OrganisationAdmin.objects.get(user=request.user).organisation
+        supp_info = SupplementaryInfo.objects.create(
+            organisation=org,
+            title=data["name"],
+            description=data["description"],
+        )
+        request.method="GET"
+        return details(request, organisation_id=org_id, success="Supplementary info added")
+
+def delete_supplementary_info(request, id):
+    supp_info = SupplementaryInfo.objects.get(id=id)
+    if check_ownership(request, supp_info):
+        supp_info.delete()
+    else:
+        return details(request, error="You do not have permission to delete this supplementary info")
+    return details(request, organisation_id=supp_info.organisation.id, success="Supplementary info deleted")
+
+
+
 def volunteer_details_admin(request, id):
     volunteer = Volunteer.objects.get(id=id)
 
@@ -152,6 +185,9 @@ def volunteer_details_admin(request, id):
         volunteer_part_of_org = Registration.objects.filter(volunteer=volunteer, opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exists()
         if not volunteer_part_of_org:
             return volunteer_admin(request, error="You do not have permission to view this volunteer")
+    
+    
+    
     
     if request.user.is_superuser:
         print("superuser")
@@ -162,10 +198,51 @@ def volunteer_details_admin(request, id):
         org_supp_info = SupplimentaryInfoRequirement.objects.filter(opportunity__in=registrations.values_list('opportunity', flat=True))
         vol_supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer, info__id__in=org_supp_info.values_list('info', flat=True))
     
+    for registration in registrations:
+        opportunity = registration.opportunity
+        stopped_status = RegistrationStatus.objects.get(status="stopped")
+        started_status = RegistrationStatus.objects.get(status="active")
+        
+        if VolunteerRegistrationStatus.objects.filter(registration=registration, registration_status=started_status).exists():
+        
+            volunteer_start = VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=started_status).date
+            
+            
+            dateTimeA = datetime.combine(date.today(), opportunity.start_time)
+            dateTimeB = datetime.combine(date.today(), opportunity.end_time)
+            # Get the difference between datetimes (as timedelta)
+            dateTimeDifference = dateTimeB - dateTimeA
+            print(dateTimeDifference)
+            
+            
+            start_date_0_0 = datetime(volunteer_start.date().year, volunteer_start.date().month, volunteer_start.date().day, 0, 0)
+            
+            if VolunteerRegistrationStatus.objects.filter(registration=registration, registration_status=stopped_status).exists():
+                print("stopped as of: ", VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=stopped_status).date.date())
+                is_stopped = VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=stopped_status)
+                is_stopped_23_59 = datetime(is_stopped.date.date().year, is_stopped.date.date().month, is_stopped.date.date().day, 23, 59)
+            else:
+                now= datetime.now()
+                is_stopped_23_59 = datetime(now.year, now.month, now.day, 23, 59)
+            
+            recurrences = len(opportunity.recurrences.between(
+                start_date_0_0,
+                is_stopped_23_59,
+                inc=True
+            ))
+            
+            absences = RegistrationAbsence.objects.filter(registration=registration).count()
+            hours = dateTimeDifference.total_seconds() / 3600 * recurrences - absences
+        else:
+            print("not been approved")
+            hours = 0
+            
+            
+        latest_status = VolunteerRegistrationStatus.objects.filter(registration=registration).last()
+        
+        
+    
     conditions = VolunteerConditions.objects.filter(volunteer=volunteer)
-    
-    
-    
     
     context = {
         "hx": check_if_hx(request),
@@ -245,4 +322,47 @@ def manage_link(request, link_id=None, delete=False):
         )
         request.method = "GET"
         return details(request)
-    
+
+def upload_icons(request):
+    if request.method == "POST":
+        files = request.FILES.getlist('file')
+        
+        for file in files:
+            print(file)
+            icons = Icon.objects.filter(name=file.name).exists()
+            if not icons:
+                icon = Icon(
+                    icon = file,
+                    name = file.name.split('.')[0]
+                )
+            icon.save()
+            print("Icon Name: {} File: {}".format(file.name.split('.')[0], file))
+        return HttpResponse('Icons Uploaded')
+
+    else:
+        return render(request, 'org_admin/partials/file_upload.html', context={
+            "hx": check_if_hx(request),
+            "upload_url": "/org_admin/upload_icons/"
+        })
+        
+def icons(request):
+        auth = OAuth1(settings.NOUN_PROJECT_API_KEY, settings.NOUN_PROJECT_SECRET_KEY)
+        endpoint = "https://api.thenounproject.com/v2/icon/"
+        params = {
+            "limit": 10,
+            "query": request.POST["search"]
+        }
+        
+        response = requests.get(endpoint, auth=auth, params=params)
+        resp = json.loads(response.text)
+
+        if len(json.loads(response.text)["icons"]) == 0:
+            return HttpResponse("No icons found")
+        
+        icons = [json.loads(response.text)["icons"][i] for i in range(10)]
+
+        context = {
+            "results" : icons,
+        }
+        return render(request, "org_admin/partials/icon_results.html", context=context)
+        

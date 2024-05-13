@@ -2,6 +2,20 @@
 
 {% block page_content %}
 
+<p class="text-2xl font-bold mt-5">Form Details</p>
+{% if error %}
+<div role="alert" class="alert alert-error my-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if success %}
+<div role="alert" class="alert alert-success my-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{success}}</span>
+</div>
+{% endif %}
 
 <div class="p-3 my-3 bg-secondary rounded-xl">
     <form>
@@ -12,9 +26,27 @@
         </div>
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea class="form-control input input-bordered w-full h-24" id="description" name="description">{{ form.description }}</textarea>
+            <textarea class="form-control textarea textarea-bordered w-full h-24" id="description" name="description">{{ form.description }}</textarea>
         </div>
-        <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/{{form.id}}/update" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
+
+        <div class="flex mb-3 w-full  flex-col">
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="allow_multiple" {% if form.allow_multiple %}checked{%endif%}>
+                <label class="label cursor-pointer">Allow multiple submissions</label>
+            </div>
+            {% if superuser %}
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="filled_by_organisations" {% if form.filled_by_organisation %}checked{%endif%}>
+                <label class="label cursor-pointer">Filled by organisations</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="visible_to_all" {% if form.visible_to_all %}checked{%endif%}>
+                <label class="label cursor-pointer">Assignable by organisations</label>
+            </div>
+            {% endif %}
+        </div>
+
+        <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/{{form.id}}/update/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
     </form>
 </div>
 <button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{form.id}}/add_question/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Question</button>
@@ -25,39 +57,57 @@
 {% for question in questions %}
 
 <div class="p-3 my-3 bg-secondary rounded-xl">
-    <div class="badge badge-accent">{{question.question.question_type}}</div>
+    <div class="flex justify-between">
+        <div class="badge badge-accent">{{question.question.question_type}}</div>
+        <div class="flex">
+            <button class="btn bg-gray-700 btn-sm mr-3" hx-get="/org_admin/forms/{{question.question.id}}/move_down/" hx-target=".htmx-navigator" hx-swap="outerHTML">Move Up</button>
+            <button class="btn bg-gray-700 btn-sm" hx-get="/org_admin/forms/{{question.question.id}}/move_up/" hx-target=".htmx-navigator" hx-swap="outerHTML">Move Down</button>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <p class="text-xl font-bold">Question Details</p>
     <form>
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="question" class="form-label">Question</label><br>
-            <input class="input input-bordered w-full" type="text" class="form-control" id="question" name="question" value="{{ question.question.question }}">
-        </div>
-
-        <div class="mb-3 w-24">
-            <label class="label cursor-pointer">Required</label>
-            <input type="checkbox" class="checkbox" name="required" {% if question.question.required %}checked{%endif%}>
-        </div>
-
         
-        <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/{{question.question.id}}/save/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
-        <button class="btn btn-primary btn-md" hx-get="/org_admin/forms/{{question.question.id}}/delete/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+            <div class="flex w-full items-center">
+
+                <div class="flex-grow mr-3">
+                    <label for="question" class="form-label">Question</label><br>
+                    <input class="input input-bordered w-full" type="text" class="form-control" id="question" name="question" value="{{ question.question.question }}">
+                </div>
+                <div class="w-24">
+                    <label class="label cursor-pointer">Required</label>
+                    <input type="checkbox" class="checkbox" name="required" {% if question.question.required %}checked{%endif%}>
+                </div>
+
+                {% if question.question.question_type == "multi_choice"%}
+                <div class="w-24">
+                    <label class="label cursor-pointer">Multiple</label>
+                    <input type="checkbox" class="checkbox" name="allow_multiple" {% if question.question.allow_multiple %}checked{%endif%}>
+                </div>
+                {% endif %}
+
+                <div class="self-end">
+                    <button class="btn btn-primary btn-md mr-3" hx-post="/org_admin/forms/{{question.question.id}}/save/" hx-target=".htmx-navigator" hx-swap="outerHTML">Save</button>
+                    <button class="btn bg-red-600 btn-md" hx-get="/org_admin/forms/{{question.question.id}}/delete/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                </div>
+            </div>
     </form>
 
     {% if question.question.question_type == "multi_choice" %}
         <div class="divider"></div>
-        <p>Options</p>
+        <p class="text-xl font-bold">Options</p>
         <p>Click on an option to delete it</p>
-        <div class="flex flex-wrap">
-            {% for option in question.options %}
-            <a href="/org_admin/forms/{{question.question.id}}/delete_option/{{option.id}}/"><div class="badge badge-primary mx-1">{{ option.option }}</div></a>
-            {% endfor %}
-        </div>
         <form>
             {% csrf_token %}
-            <input name="option" type="text" placeholder="Type to add an option" class="input input-bordered w-full max-w-xs" />
+            <input name="option" type="text" placeholder="Type to add an option" class="input input-bordered w-full max-w-xs mb-3" />
             <button class="btn bg-green-600" hx-target=".htmx-navigator" hx-post="/org_admin/forms/{{question.question.id}}/add_option/" hx-swap="outerHTML" >Add</button>
         </form>
-        <div class="divider"></div>
+        <div class="flex flex-wrap">
+            {% for option in question.options %}
+            <a href="/org_admin/forms/{{option.id}}/delete_option/"><div class="badge badge-primary mx-1">{{ option.option }}</div></a>
+            {% endfor %}
+        </div>
         {% endif %}
 
    

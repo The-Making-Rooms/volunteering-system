@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
@@ -43,8 +43,11 @@ def detail(request, opportunity_id):
             
     
 
-    opp_images = Image.objects.filter(opportunity=opportunity)
+    opp_images = Image.objects.filter(opportunity=opportunity) if len(Image.objects.filter(opportunity=opportunity)) > 0 else OrgImage.objects.filter(organisation=opportunity.organisation)
     opp_videos = Video.objects.filter(opportunity=opportunity)
+    
+    tags = LinkedTags.objects.filter(opportunity=opportunity)
+    
     
     if len(opp_images) == 0:
         opp_images = OrgImage.objects.filter(organisation=opportunity.organisation)
@@ -57,9 +60,16 @@ def detail(request, opportunity_id):
     current_user = request.user
     if current_user.is_authenticated:
         try:
-            exists = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
-            if exists:
-                active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
+            check_1 = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
+            latest_registration = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).order_by('-date_created').first()
+            if latest_registration:
+                check_2 = VolunteerRegistrationStatus.objects.filter(registration=latest_registration).order_by('-date').first().registration_status.status == 'stopped'
+            else:
+                check_2 = False
+            if check_1:
+                if not check_2:
+                    print(check_1, check_2)
+                    active = True
         except Volunteer.DoesNotExist:
             active = False
     context = {
@@ -71,6 +81,7 @@ def detail(request, opportunity_id):
         "opp_videos": opp_videos,
         "hx" : check_if_hx(request),
         "exists": active,
+        "linked_tags": tags
     }
 
     return HttpResponse(template.render(context, request))
@@ -88,16 +99,22 @@ def register(request, opportunity_id):
 
     if request.user.is_authenticated:
         current_user = request.user
-        
+        #check opportunity supplementary Inforequirements
+        opportunity = Opportunity.objects.get(id=opportunity_id)
         try:
-            active = VolunteerRegistrationStatus.objects.filter(registration__volunteer=Volunteer.objects.get(user=request.user), registration__opportunity=opportunity).order_by('-date').first().registration_status == "stopped"
+            check_1 = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
+            latest_registration = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).order_by('-date_created').first()
+            if latest_registration:
+                check_2 = VolunteerRegistrationStatus.objects.filter(registration=latest_registration).order_by('-date').first().registration_status.status == 'stopped'
+            else:
+                check_2 = False
+            if check_1:
+                if not check_2:
+                    print(check_1, check_2)
+                    return HttpResponse('You are already registered for this opportunity') 
         except Volunteer.DoesNotExist:
             return HTTPResponseHXRedirect('/volunteer')
         
-        
-        ##
-        #check opportunity supplementary Inforequirements
-        opportunity = Opportunity.objects.get(id=opportunity_id)
         supp_info_reqs = SupplimentaryInfoRequirement.objects.filter(opportunity=opportunity)
         #add the initial data to the form, if the user has already submitted the information
         SuppInfoFormSet = formset_factory(SuppInfoForm, extra=0)
@@ -205,3 +222,9 @@ def register(request, opportunity_id):
             return render(request, 'opportunities/register.html', context=context)
     else:
         return HttpResponseRedirect('/volunteer')
+
+
+
+    
+            
+            

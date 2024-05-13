@@ -1,0 +1,8 @@
+<div>
+    <input class="input input-bordered w-full mb-3" placeholder="Search for an icon" hx-trigger="input changed delay:500ms, search" hx-target="#search-results" hx-post="/org_admin/icons/" name="search">
+</div>
+
+<div>
+    <div id="search-results" class="flex flex-col justify-center" hx-get="/org_admin/icons/" hx-trigger="load">
+    </div>
+</div>

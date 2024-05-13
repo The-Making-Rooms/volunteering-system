@@ -45,7 +45,7 @@ def detail(request, organisation_id):
     template = loader.get_template("organisations/organisation_details.html")
 
     org = Organisation.objects.get(id=organisation_id)
-    opps = Opportunity.objects.filter(organisation=org)
+    opps = Opportunity.objects.filter(organisation=org, active=True)
     location = Location.objects.filter(organisation=org)
 
     opp_objects = []

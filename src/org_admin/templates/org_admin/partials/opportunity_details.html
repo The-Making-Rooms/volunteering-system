@@ -54,8 +54,75 @@
       <label for="featured">Featured</label>
     </div>
 
-    <div class="divider"></div>
+    <button
+    class="btn bg-green-600"
+    hx-post="/org_admin/opportunities/details/{{opportunity.id}}/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+  >
+    Save
+  </button>
+  <a
+    href="/org_admin/opportunities/delete/{{ opportunity.id }}"
+    class="btn bg-red-600"
+    >Delete</a
+  >
 
+
+  {% with active_link="details" %} {% include "org_admin/partials/tabs.html"%} {% endwith %}
+</form>
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
+
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Supplementary Information</p>
+      <p>Add any additional information you would like to ask volunteers. Note that these need to be assigned to opportunities</p>
+    </div>
+  <div class="divider"></div>
+  <table class="table w-full">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for info in supp_infos %}
+      <tr>
+        <td>{{ info.info.title }}</td>
+        <td>{{info.info.description}}</td>
+        <td>
+          <a
+            hx-get="/org_admin/supplementary_info/delete/{{ info.id }}/"
+            class="btn bg-red-600 btn-xs"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+            >Delete</a
+          >
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <div class="divider"></div>
+  
+    <form class="flex w-full">
+      {% csrf_token %}
+      
+      <select class="select select-bordered flex-grow" name="supp_id">
+        {% for info in avail_supp_infos %}
+        <option value="{{ info.id }}">{{ info.title }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary self-end" hx-post="/org_admin/opportunities/supp_info/{{opportunity.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">
+        Add
+      </button>
+    </form>
+
+  </div>
+  <div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
 
     <div>
       <p>Tags</p>
@@ -70,26 +137,9 @@
 
       <div class="flex flex-wrap">
         {% for tag in tags %}
-        <a href="/org_admin/opportunities/manage_tag/delete/{{opportunity.id}}/{{tag.id}}/"><div class="badge badge-primary mx-1">{{ tag.tag.tag }}</div></a>
+        <a hx-swap="outerHTML" hx-target=".htmx-navigator" hx-get="/org_admin/opportunities/manage_tag/delete/{{opportunity.id}}/{{tag.id}}/"><div class="badge badge-primary mx-1 cursor-pointer">{{ tag.tag.tag }}</div></a>
         {% endfor %}
     </div>
 
-    <div class="divider"></div>
 
-    <button
-      class="btn bg-green-600"
-      hx-post="/org_admin/opportunities/details/{{opportunity.id}}/"
-      hx-target=".htmx-navigator"
-      hx-swap="outerHTML"
-    >
-      Save
-    </button>
-    <a
-      href="/org_admin/opportunities/delete/{{ opportunity.id }}"
-      class="btn bg-red-600"
-      >Delete</a
-    >
-
-    {% with active_link="details" %} {% include "org_admin/partials/tabs.html"%} {% endwith %}
-  </form>
 </div>

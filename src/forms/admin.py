@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Form, Question, Options, Answer, Response
+from .models import Form, Question, Options, Answer, Response, FormResponseRequirement
 # Register your models here.
 
 
@@ -28,4 +28,12 @@ class QuestionAdmin(admin.ModelAdmin):
     
 @admin.register(Options)
 class OptionsAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Response)
+class ResponseAdmin(admin.ModelAdmin):
+    inlines = [AnswerInline]
+
+@admin.register(FormResponseRequirement)
+class FormResponseRequirementAdmin(admin.ModelAdmin):
     pass

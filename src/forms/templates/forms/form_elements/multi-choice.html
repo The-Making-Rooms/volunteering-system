@@ -1,10 +1,17 @@
 <div class="form-control">
     <p class="text-2xl">{{question.question}}</p>
+    {% if question.question.required %}<p class="text-red-500">(Required)</p>{% endif %}
     <div class="divider"></div>
-    <div class="flex flex-wrap">
+    <div class="flex flex-col">
         {% for option in question.options %}
-        <div class="flex items-center">
-            <input class="radio mr-2" type="radio" id="{{option.id}}" name="option" value="{{option.id}}">
+        <div class="flex items-center mb-3">
+
+            {% if question.question.allow_multiple %}
+            <input class="checkbox mr-2" type="checkbox" name="{{question.question.id}}" value="{{option.id}}">
+            {% else %}
+            <input class="radio mr-2" type="radio" name="{{question.question.id}}" value="{{option.id}}">
+            {% endif %}
+            
             <label for="{{option.id}}">{{option.option}}</label>
         </div>
         {% endfor %}

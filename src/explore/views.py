@@ -3,6 +3,7 @@ from organisations.models import thematicCategory, organisationnThematicLink, Or
 from organisations.models import Image as OrgImage
 from opportunities.models import Opportunity, Location, Image, Video, LinkedTags, Tag
 from commonui.views import check_if_hx
+import random
 # Create your views here.
 
 def index(request):
@@ -40,6 +41,12 @@ def index(request):
         except:
             pass
         org_objects.append(org_object)
+        
+    #randomise order of organisations
+    random.shuffle(org_objects)
+    
+    #randomise order of opportunities
+    random.shuffle(opp_objects)
 
     context = {
         "search" : True,

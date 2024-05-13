@@ -2,19 +2,41 @@
 
 {% block page_content %}
 
-<p class="text-2xl text-slate-200">Communication</p>
+<p class="text-2xl text-slate-200 mb-3">Communication</p>
 
-<div class="flex p-5 rounded-lg bg-base-200 mb-3">
-    <div class="flex justify-between items-center">
-        {% for chat in chat %}
-            <a href="/org_admin/communication/{{chat.id}}" class="btn btn-primary" hx-target="#chat_div">{{chat.name}}</a>
+<div class="flex p-5 rounded-lg bg-base-200 mb-3 h-[50rem]">
+    <div class="flex  mr-3">
+        <ul class="menu bg-base-300 w-56 rounded-box">
+            {% for chat in chats %}
+            <li>
+            <a hx-push-url="false" hx-boost="true" href="/org_admin/communication/{{chat.id}}" class="" hx-target="#chat_view" hx-swap="outerHTML">
+        
+                {% if chat.broadcast %}
+                Broadcast chat
+                {% elif not chat.participants%}
+                *Test Chat*
+                {% else %}
+
+                    {% for participant in chat.participants %}
+                        {{participant.first_name}} {{participant.last_name}}<br>
+                    {% endfor %}
+                {% endif %}
+            </a>
+        </li>
         {% endfor %}
-    <div>
-
-    <div>
-        <div id="chat_div">
-            <p>Click on a chat to view messages</p>
+          </ul>
         </div>
+
+        
+
+
+
+        <div id="chat_view" class="flex flex-grow border border-base-100 rounded-box justify-center items-center">
+            <p>Select a chat to get started</p>
+        </div>
+
     </div>
 
 </div>
+
+{% endblock %}

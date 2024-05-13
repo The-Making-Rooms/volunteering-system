@@ -1,0 +1,40 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+
+
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Forms</p>
+
+  </div>
+    
+    {% if error %}
+    <div role="alert" class="alert alert-error my-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div role="alert" class="alert alert-success my-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span>{{success}}</span>
+    </div>
+    {% endif %}
+
+    <div class="rounded-xl p-5 bg-secondary">
+        <form>
+            {% csrf_token %}
+            <select class="select select-bordered w-full max-w-xs" name="form_id">
+                {% for form in forms %}
+                <option value="{{form.id}}">{{form.name}}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/assign_form/" hx-target=".htmx-navigator" hx-swap="outerHTML">Assign Form</button>
+            {% include "org_admin/volunteer_finder.html"%}
+        </form>
+
+    </div>
+
+{% endblock %}

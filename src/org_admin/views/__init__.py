@@ -7,3 +7,4 @@ from .opportunity_gallery import *
 from .index import *
 from .organisation_links import *
 from .forms import *
+from .communications import *

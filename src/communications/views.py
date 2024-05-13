@@ -5,7 +5,7 @@ from .models import Chat, Message, MessageSeen
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import send_user_notification
 from django.conf import settings
-
+from better_profanity import profanity
 # Create your views here.
 
 
@@ -26,7 +26,7 @@ def mark_as_seen(request, message_id):
     return HttpResponse("ok")
 
 
-def get_chat_content(request, chat_id):
+def get_chat_content(request, chat_id, error=None):
     user = request.user
     chat = Chat.objects.get(id=chat_id)
 
@@ -46,6 +46,7 @@ def get_chat_content(request, chat_id):
             "messages": messages,
             "user": request.user,
             "link_active": "communications",
+            "error": error,
         },
     )
 
@@ -64,12 +65,17 @@ def send_message(request, chat_id):
         return HTTPResponseHXRedirect("/communications")
 
     message = request.POST["message"]
+    
+    if profanity.contains_profanity(message):
+        return get_chat_content(request, chat_id, error="Profanity is not allowed")
+    
     Message.objects.create(chat=chat, sender=user, content=message)
     org_name = chat.organisation.name
     payload = {
         "head": org_name,
         "body": message,
         "url": "/communications/" + str(chat_id) + "/",
+        "icon": settings.STATIC_URL + "images/icons/icon-512x512.png"
     }
 
     for user in chat.participants.all():

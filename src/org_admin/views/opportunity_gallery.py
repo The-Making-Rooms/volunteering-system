@@ -34,19 +34,17 @@ def opportunity_gallery(request, id):
 def delete_media(request, id, location, media_type):
     
     return_id = None
-    
-    if location == "opportunity_media":
-        media = OppImage.objects.get(id=id)
-        return_id = media.opportunity.id
-    
+
     if media_type == "image" and location == "org_media":
         media = OrgImage.objects.get(id=id)
     elif media_type == "video" and location == "org_media":
         media = OrgVideo.objects.get(id=id)
     elif media_type == "image" and location == "opportunity_media":
         media = OppImage.objects.get(id=id)
+        return_id = media.opportunity.id
     elif media_type == "video" and location == "opportunity_media":
         media = OppVideo.objects.get(id=id)
+        return_id = media.opportunity.id
     else:
         return details(request, error="Media type not found")
     
@@ -82,91 +80,99 @@ def upload_media(request, location, id=None, organisation_id=None):
 
     elif request.method == "POST":
         data = request.POST
-        file = request.FILES["file"]
-        file_type = file.content_type.split("/")[1]
-        print(file_type)
+        files = request.FILES.getlist("file")
+        print(len(files))
+        
         #generate_thumbnails_optimise()
 
         # emergency_contact = emergency_contact_form.save(commit=False)
         # emergency_contact.volunteer = volunteer
-        try:
-            if file_type in ["jpeg", "png", "jpg"]:
-                print("image")
-                if location == "org_media":
-                    
-                    if request.user.is_superuser and organisation_id:
-                        organisation = Organisation.objects.get(id=organisation_id)
-                    elif request.user.is_superuser:
-                        return details(request, error="Organisation not found")
-                    else:
-                        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-                    
-                    image_instance = OrgImage.objects.create(
-                        image=file,
-                        organisation=organisation,
-                    )
-                    
-                    pil_photo = PImage.open(image_instance.image.path)
-                    pil_photo.thumbnail((300, 300))
-                    file = BytesIO()
-                    pil_photo.save(file, file_type.upper())
-                    image_instance.thumbnail_image.save(image_instance.image.name,  ContentFile(file.getvalue()), save=False)
-                    image_instance.save()
-                    
-                elif location == "opportunity_media":
-                    image_instance = OppImage.objects.create(
-                        image=file,
-                        opportunity=Opportunity.objects.get(id=id),
-                    )
-                    print
-                    pil_photo = PImage.open(image_instance.image.path)
-                    pil_photo.thumbnail((300, 300))
-                    file = BytesIO()
-                    pil_photo.save(file, file_type.upper())
-                    image_instance.thumbnail_image.save(image_instance.image.name,  ContentFile(file.getvalue()), save=False)
-                    image_instance.save()
-                    
-            elif file_type == "mp4":
-                if location == "org_media":
-                    if request.user.is_superuser and organisation_id:
-                        organisation = Organisation.objects.get(id=organisation_id)
-                    elif request.user.is_superuser:
-                        return details(request, error="Organisation not found")
-                    else:
-                        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-                      
-                      
+        for file in files:
+            print(file)
+            file_type = file.content_type.split("/")[1]
+            print(file_type)
+        
+            try:
+                if file_type in ["jpeg", "png", "jpg"]:
+                    print("image")
+                    if location == "org_media":
                         
-                    video = OrgVideo.objects.create(
-                    video=file,
-                    organisation=organisation,
+                        if request.user.is_superuser and organisation_id:
+                            organisation = Organisation.objects.get(id=organisation_id)
+                        elif request.user.is_superuser:
+                            return details(request, error="Organisation not found")
+                        else:
+                            organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+                        
+                        image_instance = OrgImage.objects.create(
+                            image=file,
+                            organisation=organisation,
                         )
-                    video.save()
-                    save_video_thumbnail(video)
-                
-                elif location == "opportunity_media":
-                    video = OppVideo.objects.create(
+                        
+                        pil_photo = PImage.open(image_instance.image.path)
+                        pil_photo.thumbnail((300, 300))
+                        file = BytesIO()
+                        pil_photo.save(file, file_type.upper())
+                        image_instance.thumbnail_image.save(image_instance.image.name,  ContentFile(file.getvalue()), save=False)
+                        image_instance.save()
+                        
+                    elif location == "opportunity_media":
+                        image_instance = OppImage.objects.create(
+                            image=file,
+                            opportunity=Opportunity.objects.get(id=id),
+                        )
+                        print
+                        pil_photo = PImage.open(image_instance.image.path)
+                        pil_photo.thumbnail((300, 300))
+                        file = BytesIO()
+                        pil_photo.save(file, file_type.upper())
+                        image_instance.thumbnail_image.save(image_instance.image.name,  ContentFile(file.getvalue()), save=False)
+                        image_instance.save()
+                        
+                elif file_type == "mp4":
+                    if location == "org_media":
+                        if request.user.is_superuser and organisation_id:
+                            organisation = Organisation.objects.get(id=organisation_id)
+                        elif request.user.is_superuser:
+                            return details(request, error="Organisation not found")
+                        else:
+                            organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+                        
+                        
+                            
+                        video = OrgVideo.objects.create(
                         video=file,
-                        opportunity=Opportunity.objects.get(id=id),
-                    )
-                    save_video_thumbnail(video)
+                        organisation=organisation,
+                            )
+                        video.save()
+                        save_video_thumbnail(video)
+                    
+                    elif location == "opportunity_media":
+                        video = OppVideo.objects.create(
+                            video=file,
+                            opportunity=Opportunity.objects.get(id=id),
+                        )
+                        save_video_thumbnail(video)
 
-            if location == "org_media" and organisation_id:
-                return HTTPResponseHXRedirect('/org_admin/organisations/{}/'.format(organisation_id))
-            elif location == "org_media":
-                return HTTPResponseHXRedirect('/org_admin/details/')
-            elif location == "opportunity_media":
-                return HTTPResponseHXRedirect(
-                    '/org_admin/opportunities/{}/gallery/'.format(id)
-                )
-        except Exception as e:
-            print("Something went wrong: ",e)
-            if location == "org_media":
-                return HTTPResponseHXRedirect('/org_admin/details/')
-            elif location == "opportunity_media":
-                return HTTPResponseHXRedirect(
-                    '/org_admin/opportunities/{}/gallery/'.format(id)
-                )
+
+            except Exception as e:
+                print("Something went wrong: ",e)
+                if location == "org_media":
+                    return HTTPResponseHXRedirect('/org_admin/details/')
+                elif location == "opportunity_media":
+                    return HTTPResponseHXRedirect(
+                        '/org_admin/opportunities/{}/gallery/'.format(id)
+                    )
+                    
+            
+        if location == "org_media" and organisation_id:
+            return HTTPResponseHXRedirect('/org_admin/organisations/{}/'.format(organisation_id))
+        elif location == "org_media":
+            return HTTPResponseHXRedirect('/org_admin/details/')
+        elif location == "opportunity_media":
+            return HTTPResponseHXRedirect(
+                '/org_admin/opportunities/{}/gallery/'.format(id)
+            )
                 
 def generate_thumbnails_optimise():
     images = OrgImage.objects.all()

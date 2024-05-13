@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login
 from webpush import send_user_notification
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
-
+import random
 
 # create uswer
 from django.contrib.auth.models import User
@@ -71,7 +71,7 @@ def index(request):
             "name": opp.name,
             "description": opp.description,
             "organisation": opp.organisation,
-            "images": OpportunityImage.objects.filter(opportunity=opp),
+            "images": OpportunityImage.objects.filter(opportunity=opp) if len(OpportunityImage.objects.filter(opportunity=opp)) > 0 else Image.objects.filter(organisation=opp.organisation),
         }
         try:
             print(opp_object["images"][0].image.url)
@@ -92,6 +92,13 @@ def index(request):
         except:
             pass
         org_objects.append(org_object)
+        
+    #randomise order of organisations
+    random.shuffle(org_objects)
+    
+    #randomise order of opportunities
+    random.shuffle(opp_objects)
+    
 
     context = {
         "organisations": org_objects,

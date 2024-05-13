@@ -6,6 +6,7 @@ from volunteer.models import (
     VolunteerAddress,
     EmergencyContacts,
     VolunteerConditions,
+    VolunteerSupplementaryInfo
 )
 from opportunities.models import Registration, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus
 from django.core.exceptions import ObjectDoesNotExist
@@ -21,6 +22,8 @@ from .forms import (
     EmergencyContactsForm,
     VolunteerConditionsForm,
 )
+
+from forms.models import FormResponseRequirement
 
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
@@ -39,14 +42,18 @@ def check_valid_origin(func, expected_url_end, redirect_path):
                 else:
                     return HttpResponseRedirect(redirect_path)
         return inner()
-
-
+    
 def index(request):
     if request.user.is_authenticated:
         current_user = request.user
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
+            
+            incomplete_forms = FormResponseRequirement.objects.filter(user=current_user, completed=False)
+            print(incomplete_forms)
+            
+            supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer_profile)
 
             context = {
                 "hx": check_if_hx(request),
@@ -61,7 +68,9 @@ def index(request):
                 "conditions": VolunteerConditions.objects.filter(
                     volunteer=volunteer_profile
                 ),
+                "forms": incomplete_forms,
                 "link_active": "volunteer",
+                "supp_info": supp_info,
             }
 
             return render(request, "volunteer/index.html", context=context)
@@ -88,8 +97,7 @@ def notify_absence(request, id):
             absence = RegistrationAbsence(registration=registration)
             absence.save()
             return HTTPResponseHXRedirect("/volunteer/your-opportunities")
-            
-                
+
 def stop_volunteering(request, id):
     if request.user.is_authenticated:
         if request.method == "POST":
@@ -314,7 +322,6 @@ def emergency_contact_form(request, contact_id=None, delete=False):
                 context=context,
             )
 
-
 def volunteer_address_form(request, address_id=None, delete=False):
     if request.method == "GET":
         if address_id:
@@ -382,7 +389,6 @@ def volunteer_address_form(request, address_id=None, delete=False):
                 "volunteer/partials/volunteer_address_form.html",
                 context=context,
             )
-
 
 def volunteer_conditions_form(request, condition_id=None, delete=False):
     if request.method == "GET":
@@ -452,6 +458,24 @@ def volunteer_conditions_form(request, condition_id=None, delete=False):
                 context=context,
             )
 
+def volunteer_supp_info_form(request, supp_info_id):
+    info = VolunteerSupplementaryInfo.objects.get(id=supp_info_id)
+    if info.volunteer == Volunteer.objects.get(user=request.user):
+        if request.method == "GET":
+            context = {
+                "hx": check_if_hx(request),
+                "volunteer": get_volunteer_if_exists(request.user),
+                "supp_info": info,
+            }
+            return render(
+                request, "volunteer/partials/volunteer_supp_info_form.html", context=context
+            )
+        elif request.method == "POST":
+            data = request.POST
+            if len(data["supp_info"]) > 0:
+                info.data = data["supp_info"]
+                info.save()
+            return HTTPResponseHXRedirect("/volunteer/")
 
 def sign_up(request):
     if request.method == "GET":
@@ -465,7 +489,7 @@ def sign_up(request):
         # create volunteer -> redirect to onboarding
         return HTTPResponseHXRedirect("/volunteer")
 
-
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect("/volunteer")
+

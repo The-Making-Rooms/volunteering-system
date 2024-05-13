@@ -1,9 +1,13 @@
 <p class="text-2xl">{{question.question}}</p>
+{% if question.question.required %}<p class="text-red-500">(Required)</p>{% endif %}
 <div class="divider"></div>
-<div class="flex items-center">
-    <input class="radio mr-2" type="radio" id="yes" name="option" value="yes">
-    <label for="yes">Yes</label>
-
-    <input class="radio mr-2" type="radio" id="no" name="option" value="no">
-    <label for="no">No</label>
+<div class="flex justify-center flex-col">
+    <div class="flex items-center mb-3">
+        <input class="radio mr-2" type="radio" id="yes" name="{{question.question.id}}" value="yes">
+        <label for="yes">Yes</label>
+    </div>
+    <div class="flex items-center mb-3">
+        <input class="radio mr-2" type="radio" id="no" name="{{question.question.id}}" value="no">
+        <label for="no">No</label>
+    </div>
 </div>

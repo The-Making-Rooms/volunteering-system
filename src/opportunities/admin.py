@@ -1,5 +1,5 @@
 from django.contrib import admin
-from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration, RegistrationStatus, VolunteerRegistrationStatus, LinkedTags
+from opportunities.models import Benefit, Location, Opportunity, Image, Video, SupplimentaryInfoRequirement, Registration, RegistrationStatus, VolunteerRegistrationStatus, LinkedTags, Tag, Icon
 
 # Register your models here.
 class BenefitInline(admin.TabularInline):
@@ -43,4 +43,12 @@ class SupplimentaryInfoRequirementAdmin(admin.ModelAdmin):
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ('volunteer', 'opportunity', 'get_registration_status')
+    pass
+
+@admin.register(Tag)
+class TagsAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Icon)
+class IconAdmin(admin.ModelAdmin):
     pass

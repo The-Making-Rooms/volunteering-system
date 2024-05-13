@@ -1,0 +1,8 @@
+{% for result in results %}
+<div class="flex items-center">
+    <input type="radio" name="icon" value="{{result.id}}" class="radio mr-2">
+    <img src="{{result.thumbnail_url}}" class="h-16 w-16 p-2 invert">
+    <div class="flex flex-wrap">{% for tag in result.tags %}<div class="badge mr-1 mb-1">{{tag}}</div>{% endfor %}</div>
+</div>
+
+{%endfor%}

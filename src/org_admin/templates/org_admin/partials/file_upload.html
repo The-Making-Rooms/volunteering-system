@@ -1,18 +1,21 @@
 <form
   class="w-full"
-  id="uploader"
+  id="form"
   hx-encoding="multipart/form-data"
   hx-post="{{ upload_url }}"
+  hx-on:htmx:xhr:progress="document.getElementById('progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100);"
 >
   {% csrf_token %}
   <input
     type="file"
     class="file-input file-input-bordered file-input-primary w-full"
     name="file"
-    accept="image/png, image/jpeg"
+    accept="image/png, image/jpeg, video/mp4"
+    multiple
   />
   <div class="divider"></div>
-  <button class="btn btn-primary">Upload</button>
+  <!--btn-disabled-->
+  <button hx-on:click="this.classList.add('btn-disabled'); document.getElementById('spinner').classList.remove('hidden');" class="btn btn-primary" id="btn-upload"><span id="spinner" class="loading loading-spinner hidden"></span>Upload</button>
   <progress
     id="progress"
     class="progress progress-primary w-full"
@@ -21,10 +24,9 @@
   ></progress>
 </form>
 <script>
-  htmx.on("#uploader", "htmx:xhr:progress", function (evt) {
-    console.log("file upload begin");
-    htmx
-      .find("#progress")
-      .setAttribute("value", (evt.detail.loaded / evt.detail.total) * 100);
+  htmx.on('#form', 'htmx:xhr:progress', function(evt) {
+    htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
   });
+
+
 </script>

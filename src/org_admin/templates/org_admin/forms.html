@@ -2,7 +2,19 @@
 
 {% block page_content %}
 
-<p class="text-2xl font-bold mt-5">Forms</p>
+
+
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Forms</p>
+    <div>
+        <a href="/org_admin/forms/create/" class="btn btn-primary mb-3"
+        >New Form</a>
+
+        <a href="/org_admin/forms/assign_form/" class="btn btn-primary mb-3"
+        >Assign Form</a>
+    </div>
+
+  </div>
     
     {% if error %}
     <div role="alert" class="alert alert-error my-3">
@@ -19,16 +31,33 @@
     {% endif %}
 
     <div class="rounded-xl p-5 bg-secondary">
-            <button class="btn btn-primary" hx-get="/org_admin/forms/create/" hx-target=".htmx-navigator" hx-swap="outerHTML">Create Form</button>
-
-            {% for form in forms %}
-                <div>
-                    <p class="text-xl">{{ form.name }}</p>
-                    <p>{{ form.description }}</p>
-                    <button class="btn btn-primary" hx-get="/org_admin/forms/{{ form.id }}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Edit</button>
-                    <button class="btn btn-primary" hx-get="/org_admin/forms/delete/{{ form.id }}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
-                </div>
-            {% endfor %}
+            <table class="table w-full mt-5">
+                <thead>
+                    <tr>
+                        <th>Form Name</th>
+                        <th>Form Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in forms %}
+                    <tr>
+                        <td>{{ form.name }}</td>
+                        <td>{{ form.description }}</td>
+                        <td>
+                            {% if form.visible_to_all and not superuser %}
+                            <p>This form can be assigned</p>
+                            {% else %}
+                            <button class="btn btn-primary btn-sm" hx-push-url="true" hx-get="/org_admin/forms/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Details</button>
+                            <button class="btn btn-primary btn-sm" hx-push-url="true" hx-get="/org_admin/forms/responses/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Responses</button>
+                            <a class="btn btn-primary btn-sm" href="/org_admin/forms/download/{{form.id}}/">Download CSV</a>
+                            <button class="btn bg-red-600 btn-sm" hx-get="/org_admin/forms/delete/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                            {%endif%}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
     </div>
 
 

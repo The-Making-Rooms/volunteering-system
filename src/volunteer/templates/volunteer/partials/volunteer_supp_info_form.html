@@ -1,0 +1,7 @@
+<form class="flex flex-col">
+    {% csrf_token %}
+    <p class="text-xl font-bold">{{supp_info.info.title}}</p>
+    <p class="mb-3">{{supp_info.info.description}}</p>
+    <textarea name="supp_info" class="textarea textarea-bordered mb-3" placeholder="Answer Here...">{{supp_info.data}}</textarea>
+    <button hx-post="/volunteer/volunteer_supplementary_info_form/{{supp_info.id}}/" class="btn btn-primary">Submit</button>
+</form>

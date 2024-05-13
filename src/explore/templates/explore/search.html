@@ -1,7 +1,7 @@
 
 {% if results|length > 0 %}
 <p>Found {{ results|length }} {% if results|length == 1 %} result {% else %} results {% endif %}</p>
-<div class="grid grid-cols-2 md-grid-cols-6 gap-3">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3 justify-between">
     {% for res in results %}
         {% if res.type == "opportunity" %}
             {% include "opp-card.html" with opp=res%}

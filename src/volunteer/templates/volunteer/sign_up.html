@@ -16,7 +16,7 @@
     {% csrf_token %}
     <input id="InputEmail1" name="email" type="email" placeholder="Email" class="input input-bordered w-full mb-3" />
     <input id="InputPassword1" name="password" type="password" placeholder="Password" class="input input-bordered w-full" />
-    <input id="InputPassword2" name="password" type="password" placeholder="Password" class="input input-bordered w-full" />
+    <input id="InputPassword2" name="password" type="password" placeholder="Password" class="input input-bordered w-full mb-3" />
     <button hx-post="/sign-up" class="btn btn-primary"  hx-target=".htmx-navigator" hx-swap="outerHTML">Submit</button>
   </div>
 </div>

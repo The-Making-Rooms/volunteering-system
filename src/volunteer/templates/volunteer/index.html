@@ -35,12 +35,59 @@
               <th>Email</th>
               <td>{{ user.email }}</td>
             </tr>
+            <!-- row 4 -->
+            <tr>
+              <th>Phone Number</th>
+              <td>{{volunteer.phone_number}}</td>
+            </tr>
+            <!-- row 5 -->
+            <tr>
+              <th>Bio</th>
+              <td>{{volunteer.bio}}</td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
+  {% if forms %}
+  <div class="card w-full bg-base-200 mb-3">
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">Forms</p>
+      </div>
+      <div class="divider my-2"></div>
+
+      <div class="overflow-x-auto">
+
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr>
+              <th>Form Name</th>
+              <th>Form Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- row 1 -->
+            {% for form in forms %}
+            <tr>
+              <td>{{ form.form.name }}</td>
+              <td>{{ form.form.description }}</td>
+              <td>
+                <a class="btn btn-primary" href="/forms/{{form.form.id}}/">Complete Form</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+  </div>
+{% endif %}
   <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">
       <div class="card-actions items-center">
@@ -91,7 +138,7 @@
                     Edit
                   </button>
                 </td>
-                <td><a class="btn btn-danger" hx-get="/volunteer/emergency_contact_form/{{ contact.id }}/delete">Delete</a></td>
+                <td><a class="btn bg-red-600" hx-get="/volunteer/emergency_contact_form/{{ contact.id }}/delete">Delete</a></td>
               </tr>
               {% endfor %}
             </tbody>
@@ -155,11 +202,13 @@
                     Edit
                   </button>
                 </td>
-                <td><a class="btn btn-danger" hx-get="/volunteer/volunteer_address_form/{{ address.id }}/delete">Delete</a></td>
+                <td><a class="btn bg-red-600" hx-get="/volunteer/volunteer_address_form/{{ address.id }}/delete">Delete</a></td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
+          {% else %}
+          <p>No addresses added</p>
           {% endif %}
         </div>
       </div>
@@ -208,7 +257,7 @@
                     Edit
                   </button>
                 </td>
-                <td><a class="btn btn-danger" hx-get="/volunteer/volunteer_conditions_form/{{ condition.id }}/delete">Delete</a></td>
+                <td><a class="btn bg-red-600" hx-get="/volunteer/volunteer_conditions_form/{{ condition.id }}/delete">Delete</a></td>
               </tr>
               {% endfor %}
             </tbody>
@@ -217,6 +266,60 @@
           <p>No conditions disclosed</p>
           {% endif %}
         </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+    <div class="card-body p-5">
+      <div class="card-actions items-center">
+        <p class="text-2xl font-bold">Supplementary Information</p>
+      </div>
+
+      <div class="divider my-2"></div>
+
+      <div class="overflow-x-auto">
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Organisation</th>
+              <th>Data</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- row 1 -->
+            {% for info in supp_info %}
+            <tr>
+              <td>{{info.info.title}}</td>
+              <td>{{info.info.description}}</td>
+              <td>
+                {% if info.info.organisation %}
+                {{info.info.organisation.name}}
+                {% else %}
+                Chip in System
+                {% endif %}
+              </td>
+              <td>{{ info.data }}</td>
+              <td>
+                <button
+                  class="btn btn-primary"
+                  hx-get="/volunteer/volunteer_supplementary_info_form/{{ info.id }}"
+                  hx-on:htmx:after-request="my_modal_2.showModal();"
+                  hx-target="#modalDiv"
+                  hx-swap="innerHTML"
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -233,6 +336,8 @@
   <button onclick="registerSw()" class="btn btn-primary justify-end">
     Enable Push Notifications
   </button>
+
+
 </div>
 
 <!-- Open the modal using ID.showModal() method -->

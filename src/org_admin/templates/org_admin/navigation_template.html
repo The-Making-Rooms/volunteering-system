@@ -7,7 +7,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Volunteering System - Orgnaisation Admin</title>
-
+    <!--Favicon /static/images/icons/icon-512x512.png-->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'images/icons/icon-72x72.png' %}"
+    />
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}" />
     {% endcompress %}
@@ -51,10 +57,11 @@
             <ul class="menu menu-horizontal" hx-boost="true" hx-target=".htmx-navigator" hx-swap="outerHTML">
               <!-- Navbar menu content here -->
               <li><a href="/org_admin/">Dashboard</a></li>
-              <li><a href="/org_admin/details">Organisation Details</a></li>
-              <li><a href="/org_admin/opportunities">Opportunities</a></li>
-              <li><a href="/org_admin/volunteers">Volunteers</a></li>
-              <li><a href="/org_admin/communication">Communication</a></li>
+              <li><a href="/org_admin/details/">Organisation Details</a></li>
+              <li><a href="/org_admin/opportunities/">Opportunities</a></li>
+              <li><a href="/org_admin/volunteers/">Volunteers</a></li>
+              <li><a href="/org_admin/forms/">Forms</a></li>
+              <li><a href="/org_admin/communication/">Communication</a></li>
             </ul>
           </div>
         </div>
@@ -66,7 +73,7 @@
 
         {% if not hx or hx == False %}
       </div>
-      <div class="drawer-side">
+      <div class="drawer-side z-40">
         <label
           for="my-drawer-3"
           aria-label="close sidebar"
@@ -88,6 +95,7 @@
           <li><a href="/org_admin/details">Organisation Details</a></li>
           <li><a href="/org_admin/opportunities">Opportunities</a></li>
           <li><a href="/org_admin/volunteers">Volunteers</a></li>
+          <li><a href="/org_admin/forms">Forms</a></li>
           <li><a href="/org_admin/communication">Communication</a></li>
         </ul>
       </div>
