@@ -1,5 +1,4 @@
 from django.db import models
-from djrichtextfield.models import RichTextField
 from recurrence.fields import RecurrenceField
 from django.conf import settings
 import random
@@ -35,7 +34,7 @@ def generate_darker_gradient_hex(colour):
 
 def get_default_icon():
     if Icon.objects.filter(name="Default").exists():
-        return Icon.objects.get(name="Default")
+        return Icon.objects.get(name="Default").id
     else:
         url = "https://static.thenounproject.com/png/2030120-200.png"
 
@@ -46,7 +45,7 @@ def get_default_icon():
         icon.icon.save("default_icon.png", ContentFile(bytes_io.getvalue()))
         icon.save()
         
-        return icon
+        return icon.id
    
         
         
@@ -85,7 +84,7 @@ class Benefit(models.Model):
 class Location(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    address = RichTextField(null=True, blank=True)
+    address = models.CharField(max_length=200, blank=True, null=True)
     place_id = models.CharField(blank=True, null=True,max_length=200)
     longitude = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
