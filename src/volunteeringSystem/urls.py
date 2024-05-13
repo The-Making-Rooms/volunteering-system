@@ -34,7 +34,6 @@ urlpatterns = [
     path("forms/", include("forms.urls")),
     path("", include("commonui.urls")),
     path('admin/', admin.site.urls),
-    path('djrichtextfield/', include('djrichtextfield.urls')),
     re_path(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
     path('api-auth/', include('rest_framework.urls')),
     path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
