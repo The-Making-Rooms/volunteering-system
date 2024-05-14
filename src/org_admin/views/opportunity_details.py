@@ -29,6 +29,11 @@ def opportunity_supplementary_info(request, opp_id):
         
         try:
             supp_id = request.POST["supp_id"]
+            
+            if supp_id == "":
+                request.method = "GET"
+                return opportunity_details(request, opp_id, error="Supplementary Info cannot be empty. Use organisation details to add new information.", tab_name="details")
+            
             supp_info = SupplementaryInfo.objects.get(id=supp_id)
             info_req = SupplimentaryInfoRequirement(
                 opportunity=opportunity,
@@ -49,7 +54,8 @@ def opportunity_supplementary_info(request, opp_id):
             "opportunity": opportunity,
         }
         
-        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="supp_info")
+        request.method = "GET"
+        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="details")
     
 def delete_info_req(request, supp_id):
     supp = SupplimentaryInfoRequirement.objects.get(id=supp_id)
@@ -100,13 +106,18 @@ def opportunity_details(request, id, error=None, success=None, index=False, tab_
         tags = LinkedTags.objects.filter(opportunity=Opportunity.objects.get(id=id))
         supp_infos = SupplimentaryInfoRequirement.objects.filter(opportunity=Opportunity.objects.get(id=id))
         unavail_ids = [supp_info.info.id for supp_info in supp_infos]
-        avail_supp_infos = SupplementaryInfo.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exclude(id__in=unavail_ids)
         
-    
         try:
             opp = Opportunity.objects.get(id=id)
         except Opportunity.DoesNotExist:
             return opportunity_admin_list(request, error="Opportunity does not exist")
+        
+        if not request.user.is_superuser:
+            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exclude(id__in=unavail_ids)
+        else:
+            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=opp.organisation).exclude(id__in=unavail_ids)
+    
+        
         
         context = {
             "hx": check_if_hx(request),
