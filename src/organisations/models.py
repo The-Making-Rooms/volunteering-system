@@ -1,5 +1,4 @@
 from django.db import models
-from djrichtextfield.models import RichTextField
 from org_admin.models import OrganisationAdmin
 from PIL import Image as PImage
 import uuid
@@ -9,7 +8,7 @@ import os
 class Organisation(models.Model):
     name = models.CharField(max_length=200)
     logo = models.ImageField(upload_to='logos/', null=True, blank=True)
-    description = RichTextField()
+    description = models.TextField()
     featured = models.BooleanField(default=False)
 
     def get_orgnanisation_admin_users(self):
@@ -20,7 +19,7 @@ class Organisation(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
-    address = RichTextField(null=True, blank=True)
+    address = models.CharField(max_length=200, blank=True, null=True)
     place_id = models.CharField(blank=True, null=True,max_length=200)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
     longitude = models.FloatField(null=True, blank=True)
