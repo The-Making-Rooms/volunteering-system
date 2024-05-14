@@ -15,6 +15,7 @@ urlpatterns = [
     path("upload_icons/", views.upload_icons, name="upload_icons"),
     path("icons/", views.icons, name="icons"),
     
+    path("export/", views.export_all_orgs_zip, name="export"),
     
     path("location/", views.add_location_by_id, name="locations"),
     path("delete_location/<int:location_id>/", views.delete_org_location, name="delete_location"),

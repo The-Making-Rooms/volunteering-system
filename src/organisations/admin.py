@@ -45,3 +45,7 @@ class ThematicAdmin(admin.ModelAdmin):
 @admin.register(LinkType)
 class LinkTypeAdmin(admin.ModelAdmin):
     list_display = ['name']
+    
+@admin.register(Link)
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ['url', 'organisation']

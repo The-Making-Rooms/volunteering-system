@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponse 
+from django.http import HttpResponse
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
 from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation
 from communications.models import Message, Chat
-from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon
+from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
 from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo
 from .common import check_ownership
 from datetime import datetime, timedelta, date
@@ -14,6 +14,11 @@ import requests
 from requests_oauthlib import OAuth1
 from django.conf import settings
 import json
+import os
+import csv
+from django.core.files import File
+
+
 
 # Create your views here.
 def volunteer_admin(request):
@@ -42,6 +47,7 @@ def opportunity_admin(request):
     
     if request.user.is_superuser:
         opportunities = Opportunity.objects.all()
+
     else:
         opportunities = Opportunity.objects.filter(
             organisation=OrganisationAdmin.objects.get(user=request.user).organisation
@@ -60,7 +66,6 @@ def opportunity_admin(request):
         {"hx": check_if_hx(request),
          "opportunities": opportunities,
          "superuser": request.user.is_superuser,
-         
          },
     )
 
@@ -366,3 +371,272 @@ def icons(request):
         }
         return render(request, "org_admin/partials/icon_results.html", context=context)
         
+        
+        
+##system transfer
+
+def export_all_orgs_zip(request):
+    #create a zip file, with folder for each org
+    #each folder will have the media ascociated with it and a csv of the data
+    
+    if not request.user.is_superuser:
+        return HttpResponse("You do not have permission to export data")
+    
+    orgs = Organisation.objects.all()
+
+
+    export_path = "/home/fab/export/"#
+    
+        
+    
+    os.system("rm -r /home/fab/export/*")
+    
+    icons = Icon.objects.all()
+    icons_list = []
+    for icon in icons:
+        icon_l = {
+            "name": icon.name,
+            "url": icon.icon.url.split("/")[-1],
+        }
+        os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + icon.icon.url, export_path))
+        
+        icons_list.append(icon_l)
+    
+    with open(export_path + "icons.csv", "w") as f:
+        writer = csv.writer(f)
+        for icon in icons_list:
+            for key, value in icon.items():
+                writer.writerow([key, value])
+        f.close()
+        
+    link_types = LinkType.objects.all()
+    link_types_list = []
+    os.mkdir(export_path + 'links')
+    
+    for link_type in link_types:
+        link_type_l = {
+            "name": link_type.name,
+            "icon": link_type.icon.url.split("/")[-1],
+        }
+        os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + link_type.icon.url, export_path + "links"))
+        
+        link_types_list.append(link_type_l)
+    
+    with open(export_path + "link_types.csv", "w") as f:
+        writer = csv.writer(f)
+        header = link_types_list[0].keys()
+        writer.writerow(header)
+        for link_type in link_types_list:
+            writer.writerow(link_type.values())
+    
+    for org in orgs:
+        
+        os.mkdir(export_path + org.name)
+        os.mkdir(export_path + org.name + "/media")
+        os.mkdir(export_path + org.name + "/media_thumbnail")
+        
+        print("Exporting {}".format(org.name))
+        
+        org_images = OrgImage.objects.filter(organisation=org)
+        org_videos = OrgVideo.objects.filter(organisation=org)
+        org_locations = Location.objects.filter(organisation=org)
+        org_links = Link.objects.filter(organisation=org)
+        
+        org_opportunities = Opportunity.objects.filter(organisation=org)
+        #print('oppotunities', opportunities)
+        opp_locations = OppLocation.objects.filter(opportunity__in=org_opportunities)
+        
+        print("Data count: \n Org: {} \n Org Images: {} \n Org Videos: {} \n Org Locations: {} \n Opportunities: {} \n Opp Locations: {}".format(
+            org, 
+            len(org_images), 
+            len(org_videos), 
+            len(org_locations), 
+            len(org_opportunities), 
+            len(opp_locations)))
+        
+        print("packaging data")
+        
+        org_data = {
+            "name": org.name,
+            "description": org.description,
+            "logo": org.logo.url.split("/")[-1] if org.logo else None,
+            "featured": org.featured,
+        }
+        
+        org_links_list = []
+        
+        for link in org_links:
+            if link.link_type == None:
+                continue
+            org_links_list.append({
+                "url": link.url,
+                "type": link.link_type.name,
+            })
+        
+        org_locations_l = []
+        
+        for location in org_locations:
+            org_locations_l.append({
+                "name": location.name,
+                "address": location.address,
+                "place_id": location.place_id,
+                "longitude": location.longitude,
+                "latitude": location.latitude,
+            })
+            
+        opp_locations_l = []
+        
+        for location in opp_locations:
+            opp_locations_l.append({
+                "name": location.name,
+                "address": location.address,
+                "place_id": location.place_id,
+                "longitude": location.longitude,
+                "latitude": location.latitude,
+            })
+            
+        org_media = []
+        
+        for image in org_images:
+            org_media.append({
+                "type": "image",
+                "url": image.image.url.split("/")[-1],
+                "thumbnail": image.thumbnail_image.url.split("/")[-1] if image.thumbnail_image else ""
+            })
+            
+        for video in org_videos:
+            org_media.append({
+                "type": "video",
+                "url": video.video.url.split("/")[-1],
+                "thumbnail": video.video_thumbnail.url.split("/")[-1] if video.video_thumbnail else ""
+            })
+            
+            
+        opp_media = []
+        
+        for image in OppImage.objects.filter(opportunity__in=org_opportunities):
+            opp_media.append({
+                "type": "image",
+                "url": image.image.url.split("/")[-1],
+                "thumbnail": image.thumbnail_image.url.split("/")[-1] if image.thumbnail_image else ""
+            })
+            
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + image.image.url, export_path + org.name + "/media")) if image.image else None
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + image.thumbnail_image.url, export_path + org.name + "/media_thumbnail")) if image.thumbnail_image else None
+        for video in OppVideo.objects.filter(opportunity__in=org_opportunities):
+            opp_media.append({
+                "type": "video",
+                "url": video.video.url.split("/")[-1],
+                "thumbnail": video.video_thumbnail.url.split("/")[-1] if video.video_thumbnail else ""
+            })
+            
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + video.video.url, export_path + org.name + "/media")) if video.video else None
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + video.video_thumbnail.url, export_path + org.name + "/media_thumbnail")) if video.video_thumbnail else None
+        opportunities = []
+        
+        for opportunity in org_opportunities:
+            opportunities.append({
+                "name": opportunity.name,
+                "description": opportunity.description,
+                "start_time": opportunity.start_time,
+                "end_time": opportunity.end_time,
+                "recurrences": opportunity.recurrences,
+                "featured": opportunity.featured,
+                "benefits": [benefit.description for benefit in Benefit.objects.filter(opportunity=opportunity)],
+                "benefit_icons": [benefit.icon.icon.url.split("/")[-1] for benefit in Benefit.objects.filter(opportunity=opportunity)],
+                "tags":[tag.tag.tag for tag in LinkedTags.objects.filter(opportunity=opportunity)]
+            })
+            
+        print("Saving Data")
+        #create a folder for the org
+        
+        #create a seperate csv for each type
+        
+
+        with open(export_path + org.name + "/organisation.csv".format(org.name), "w") as f:
+            writer = csv.writer(f)
+            header = org_data.keys()
+            writer.writerow(header)
+            writer.writerow(org_data.values())
+            f.close()
+            
+        os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + org.logo.url, export_path + org.name)) if org.logo else None
+            
+        if len(org_locations_l) > 0:
+            with open(export_path + org.name + "/locations.csv", "w") as f:
+                writer = csv.writer(f)
+                header = org_locations_l[0].keys()
+                writer.writerow(header)
+                for location in org_locations_l:
+                    writer.writerow(location.values())
+                f.close()
+        else:
+            print ("no locations", org.name)
+                
+        if len(opp_locations_l) > 0:
+            with open(export_path + org.name + "/opportunity_locations.csv", "w") as f:
+                writer = csv.writer(f)
+                header = opp_locations_l[0].keys()
+                writer.writerow(header)
+                for location in opp_locations_l:
+                    writer.writerow(location.values())
+                f.close()
+        else:
+            print ("no opp locations", org.name)
+        
+        if len(org_media) > 0:
+            with open(export_path + org.name + "/media.csv", "w") as f:
+                writer = csv.writer(f)
+                header = org_media[0].keys()
+                writer.writerow(header)
+                for media in org_media:
+                    writer.writerow(media.values())
+                f.close()
+                
+        if len(opportunities) > 0:
+            with open(export_path + org.name + "/opportunities.csv", "w") as f:
+                writer = csv.writer(f)
+                header = opportunities[0].keys()
+                writer.writerow(header)
+                for opportunity in opportunities:
+                    writer.writerow(opportunity.values())
+                    
+                f.close()
+                
+        if len(opp_media) > 0:
+            with open(export_path + org.name + "/opportunity_media.csv", "w") as f:
+                writer = csv.writer(f)
+                header = opp_media[0].keys()
+                writer.writerow(header)
+                for media in opp_media:
+                    writer.writerow(media.values())
+                f.close()
+                
+        if len(org_links_list) > 0:
+            with open(export_path + org.name + "/links.csv", "w") as f:
+                writer = csv.writer(f)
+                header = org_links_list[0].keys()
+                writer.writerow(header)
+                for link in org_links_list:
+                    writer.writerow(link.values())
+                f.close()
+
+        #add the media to the folder
+
+        for image in org_images:
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + image.image.url, export_path + org.name + "/media"))
+            if image.thumbnail_image:
+                os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + image.thumbnail_image.url, export_path + org.name + "/media_thumbnail"))
+        
+        for video in org_videos:
+            os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + video.video.url, export_path + org.name + "/media"))
+            if video.video_thumbnail:
+                os.system("cp \"{}\" \"{}\"".format("/home/fab/volunteering-system/src/" + video.video_thumbnail.url, export_path + org.name + "/media_thumbnail"))
+        
+
+    
+    os.system("zip -r /home/fab/export/export.zip /home/fab/export/")
+    
+    response = HttpResponse(open("/home/fab/export/export.zip", "rb"), content_type="application/zip")
+    response["Content-Disposition"] = "attachment; filename=export.zip"
+    return response

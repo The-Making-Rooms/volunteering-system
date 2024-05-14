@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk']
+ALLOWED_HOSTS = ['localhost', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -205,7 +205,7 @@ COMPRESS_ENABLED = True
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static' / 'js' / 'sw.js'
-CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.makingrooms.org']
+CSRF_TRUSTED_ORIGINS = ['http://volunteerapp.makingrooms.org', 'https://chipinbwd.co.uk']
 PWA_APP_NAME = 'Chip In'
 PWA_APP_DESCRIPTION = "Find Volunteering Opportunities in your area!"
 PWA_APP_THEME_COLOR = '#0A0302'
