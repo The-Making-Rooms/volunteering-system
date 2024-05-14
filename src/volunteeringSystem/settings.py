@@ -21,23 +21,62 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rd6@o^$_u7tniw&^#dg-0vr88$*r^b^4%3fkyr6c@r_i5^g!s8'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = ['localhost', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'uzair.patel@makingrooms.org'
-EMAIL_HOST_PASSWORD = 'kjic dgye sriy nsvv'
 DATA_UPLOAD_MAX_NUMBER_FILES = 10
 # Application definition
 
-NOUN_PROJECT_API_KEY = "a5f9c58009584357b678c737e8cb871f"
-NOUN_PROJECT_SECRET_KEY = "7c76f3fa935445669bf4f2b8ac906d90"
+if os.environ.get('DJANGO_ENV') == 'production':
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    NOUN_PROJECT_API_KEY = os.environ.get('NOUN_PROJECT_API_KEY')
+    NOUN_PROJECT_SECRET_KEY = os.environ.get('NOUN_PROJECT_SECRET_KEY')
+    WEBPUSH_SETTINGS = {
+        "VAPID_PUBLIC_KEY": os.environ.get('VAPID_PUBLIC_KEY'), #Update in nav_template
+        "VAPID_PRIVATE_KEY": os.environ.get('VAPID_PRIVATE_KEY'),
+        "VAPID_ADMIN_EMAIL": os.environ.get('VAPID_ADMIN_EMAIL')
+    }
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
+
+    
+    
+else:
+    SECRET_KEY = 'django-insecure-rd6@o^$_u7tniw&^#dg-0vr88$*r^b^4%3fkyr6c@r_i5^g!s8'
+    EMAIL_HOST_USER = 'uzair.patel@makingrooms.org'
+    EMAIL_HOST_PASSWORD = 'kjic dgye sriy nsvv'
+    NOUN_PROJECT_API_KEY = "a5f9c58009584357b678c737e8cb871f"
+    NOUN_PROJECT_SECRET_KEY = "7c76f3fa935445669bf4f2b8ac906d90"
+    WEBPUSH_SETTINGS = {
+        "VAPID_PUBLIC_KEY": "BNRVbyR3auCqhbrnRcQcBXiAdDoP_-wVe16VMCpSaXJ9TN1PqbtwRQXOnHoDmg013wiFotc5y8hHWl3Bn4YcwE0", #Update in nav_template
+        "VAPID_PRIVATE_KEY":"kO5i2K4COSjMISdogh4C7NQuf91NSi5Gpwnp4m8h7C4",
+        "VAPID_ADMIN_EMAIL": "info@makingrooms.org"
+    }
+
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",  # required
@@ -63,11 +102,6 @@ INSTALLED_APPS = [
      
 ]
 
-WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": "BNRVbyR3auCqhbrnRcQcBXiAdDoP_-wVe16VMCpSaXJ9TN1PqbtwRQXOnHoDmg013wiFotc5y8hHWl3Bn4YcwE0", #Update in nav_template
-    "VAPID_PRIVATE_KEY":"kO5i2K4COSjMISdogh4C7NQuf91NSi5Gpwnp4m8h7C4",
-    "VAPID_ADMIN_EMAIL": "info@makingrooms.org"
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -118,12 +152,6 @@ WSGI_APPLICATION = 'volunteeringSystem.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
@@ -161,7 +189,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = BASE_DIR / 'static/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'

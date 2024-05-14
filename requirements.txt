@@ -6,3 +6,6 @@ django-pwa
 django-webpush
 Pillow
 googlemaps
+requests_oauthlib
+opencv-python
+better_profanity
