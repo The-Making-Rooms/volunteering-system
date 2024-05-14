@@ -1,5 +1,4 @@
 django-recurrence
-djrichtextfield
 django_compressor
 django_extensions
 django-pwa
