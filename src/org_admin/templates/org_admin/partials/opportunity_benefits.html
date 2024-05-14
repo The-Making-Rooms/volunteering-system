@@ -21,7 +21,7 @@
     <div class="flex justify-between items-center bg-secondary-200 my-2">
       <img class="invert h-16 w-16 p-2" src="{{benefit.icon.icon.url}}"></img>
       <p class="text flex-grow ml-5">{{ benefit.description }}</p>
-      <div>
+      <div class="min-w-44">
       <button
         class="btn btn-primary"
         hx-get="/org_admin/opportunities/manage_benefit/edit/{{ benefit.id }}/"

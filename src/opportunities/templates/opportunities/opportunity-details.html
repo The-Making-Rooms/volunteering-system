@@ -70,10 +70,22 @@
         <div class="flex flex-col justify-between">
           <h2 class="card-title">{{ opportunity.name }}</h2>
           <button class="btn btn-sm rounded-full" hx-get="/organisations/{{ opportunity.organisation.id }}" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML">{{ opportunity.organisation.name}}</button>
+          
         </div>
+
+
       </div>
 
       
+      <div class="divider my-1"></div> 
+      <div class="flex w-full justify-center">
+      <button class="btn btn-primary rounded-xl max-w-48" id="shareButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+          <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+        </svg>
+        Share
+      </button>
+    </div>
       <div class="divider my-1"></div> 
       <p>{{ opportunity.description }}</p>
       <div class="divider my-1"></div> 
@@ -151,6 +163,7 @@
     </div>
   </div>
 
+  {% if benefits|length > 0 %}
   <div class="card w-full bg-base-300 shadow-xl mb-5">
     <div class="card-body">
       <h2 class="card-title">What will I get from this opportunity?</h2>
@@ -168,6 +181,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
   {% if locations %}
 <div class="card w-full bg-base-300 shadow-xl mb-5">
@@ -218,8 +232,7 @@
       
       }
   
-      initMap();
-  
+      initMap();  
       </script>
       <div id="map" class="w-full h-96"></div>
     <div class="divider"></div> 
@@ -229,4 +242,25 @@
   </div>
 </div>
 {% endif %}
+
+<script>
+  var shareButton = document.getElementById('shareButton');
+
+  shareButton.addEventListener('click', event => {
+    if (navigator.share) {
+      navigator.share({
+        title: '{{opportunity.name}}',
+        url: 'https://volunteerapp.makingrooms.org/opportunities/{{ opportunity.id }}/'
+      }).then(() => {
+        console.log('Thanks for sharing!');
+      })
+      .catch(console.error);
+    } else {
+      //copy to clipboard and change button text
+      navigator.clipboard.writeText('https://volunteerapp.makingrooms.org/opportunities/{{ opportunity.id }}/');
+      shareButton.innerHTML = 'Link Copied';
+    }
+  });
+</script>
+
 {% endblock %}

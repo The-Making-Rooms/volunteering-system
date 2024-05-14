@@ -1,0 +1,21 @@
+<a class="flex-grow mb-2 mx-2" href="/opportunities/{{opp.id}}" hx-boost="true" hx-target=".htmx-navigator"  hx-push-url="true" hx-swap="outerHTML" hx-indicator=".loader">
+    <div class="w-full h-32 mb-3  carousel-item md:h-60 border border-gray-600 rounded-xl flex justify-center items-center ">
+      <div class="rounded-xl relative z-0 w-full h-full">
+        <img class="rounded-xl object-cover h-full w-full " src="{% if opp.images.0.thumbnail_image.url %} {{opp.images.0.thumbnail_image.url}} {% else %} # {% endif %}" alt="Image of {{ opp.organisation.description|truncatewords:10}}" />
+        <div class="p-5 absolute inset-0 rounded-xl  flex flex-col justify-end h-full w-full z-10 bg-gradient-to-b from-[#ffffff00] to-[#000000]">
+          {% if opp.organisation.logo %}<img class="w-16 h-16 rounded-md mb-2" src="{{ opp.organisation.logo.url }}" alt="Logo of {{ opp.organisation.name }}" />{% endif %}
+          <h2 class="text-white text-2xl">{{ opp.name }}</h2>
+          {% if opp.type == "opportunity" %}<div class="badge badge-accent my-1">Opportunity</div>{% endif %}
+          {% if opp.tag %}
+          <div class="flex flex-wrap">
+            {% for tag in opp.tag %}
+            <div class="badge badge-primary my-1">{{ tag }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          
+          <p class="text-gray-400">{{ opp.organisation.name }}</p>
+        </div>
+      </div> 
+    </div>
+    </a>
