@@ -53,8 +53,6 @@ INSTALLED_APPS = [
     'explore',
     'opportunities',
     'commonui',
-    'rest_framework',
-    'rest_framework.authtoken',  # <-- Here
     'volunteeringSystem',
     'compressor',
      "django_extensions",

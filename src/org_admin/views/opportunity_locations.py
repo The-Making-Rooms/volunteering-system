@@ -27,7 +27,7 @@ def add_location_by_id(request, opportunity_id=None, organisation_id=None):
     if request.method == "POST":
         data = request.POST
         if opportunity_id:
-            if OppLocation.objects.filter(place_id=data["location_id"]).exists():
+            if OppLocation.objects.filter(place_id=data["location_id"], opportunity=Opportunity.objects.get(id=opportunity_id)).exists():
                 request.method = "GET"
                 return opportunity_details(request, opportunity_id, error="Location already exists", tab_name="locations")
             OppLocation.objects.create(

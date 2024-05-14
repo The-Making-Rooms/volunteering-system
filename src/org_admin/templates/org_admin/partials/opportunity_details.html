@@ -80,7 +80,9 @@
       <p>Add any additional information you would like to ask volunteers. Note that these need to be assigned to opportunities</p>
     </div>
   <div class="divider"></div>
+  {% if supp_infos %}
   <table class="table w-full">
+    
     <thead>
       <tr>
         <th>Name</th>
@@ -105,6 +107,9 @@
       {% endfor %}
     </tbody>
   </table>
+  {% else%}
+  No Supplemental Information questions added yet
+  {%endif%}
   
   <div class="divider"></div>
   
