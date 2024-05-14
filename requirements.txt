@@ -1,2 +1,8 @@
 django-recurrence
 djrichtextfield
+django_compressor
+django_extensions
+django-pwa
+django-webpush
+Pillow
+googlemaps

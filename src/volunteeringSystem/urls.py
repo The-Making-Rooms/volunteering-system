@@ -35,7 +35,6 @@ urlpatterns = [
     path("", include("commonui.urls")),
     path('admin/', admin.site.urls),
     re_path(r'^jsi18n/$', JavaScriptCatalog.as_view(), js_info_dict),
-    path('api-auth/', include('rest_framework.urls')),
     path('', include('pwa.urls')),  # You MUST use an empty string as the URL prefix
     path('org_admin/', include('org_admin.urls')),
     path('webpush/', include('webpush.urls')),
