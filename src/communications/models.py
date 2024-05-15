@@ -12,6 +12,7 @@ class Chat(models.Model):
         "organisations.Organisation", on_delete=models.CASCADE, related_name="chats"
     )
     broadcast = models.BooleanField(default=False)
+    
 
     def is_participant(self, user):
         return user in self.participants.all()
@@ -19,12 +20,12 @@ class Chat(models.Model):
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
-    sender = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="sent_messages"
-    )
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
 
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    automated = models.BooleanField(default=False)
 
     def clean(self):
         if not self.chat.is_participant(self.sender):
@@ -38,6 +39,12 @@ class Message(models.Model):
             )
 
 
+class AutomatedMessage(models.Model):
+    organisation = models.OneToOneField(Organisation, on_delete=models.CASCADE)
+    content = models.TextField()
+    
+    
+    
 class MessageSeen(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -24,6 +24,14 @@ urlpatterns = [
     path("supplementary_info/<int:org_id>/", views.supplementary_info, name="supplementary_info"),
     path("supplementary_info/delete/<int:id>/", views.delete_supplementary_info, name="delete_supplementary_info"),
     
+    path("automated_message/", views.automated_messages, name="automated_messages"),
+    path("automated_message/<int:id>/", views.automated_messages, name="automated_messages"),
+    
+    path("manage_badge/", views.manage_badge, name="manage_badge"),
+    path("manage_badge/<int:badge_id>/", views.manage_badge, name="manage_badge"),
+    path("manage_badge/delete/<int:badge_id>/", views.manage_badge, name="manage_badge", kwargs={'delete': True}),
+    path("manage_badge/add/<int:organisation_id>/", views.manage_badge, name="manage_badge"),
+    
     path("forms/", views.forms, name="forms"),
     path("forms/create/", views.create_form, name="create_form"),
     path("forms/<int:form_id>/", views.form_detail, name="form_detail"),

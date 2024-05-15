@@ -1,16 +1,8 @@
-{{ errors }}
+<div id="redirect_div"></div>
 <form class="grid grid-cols-2 gap-2 p-2">
   {% csrf_token %}
+    
 
-<!--
-  class Volunteer(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='avatars/', blank=True)
-    date_of_birth = models.DateField()
-    phone_number = models.CharField(max_length=11)
-    bio = models.TextField()
-    CV = models.FileField(upload_to='CV/', blank=True)
-    -->
     <label class="form-control w-full max-w-xs">
       <div class="label">
         <span class="label-text">First Name</span>
@@ -58,8 +50,8 @@
     href="#"
     class="btn btn-primary col-span-2"
     hx-post="/volunteer/volunteer_form/"
-    hx-swap="innerHTML transition:true"
-    hx-target="closest div"
+    hx-swap="outerHTML transition:true"
+    hx-target="#redirect_div"
     >Save</a
   >
 </form>

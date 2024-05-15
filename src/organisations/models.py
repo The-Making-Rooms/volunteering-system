@@ -44,6 +44,26 @@ class Image(models.Model):
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
     thumbnail_image = models.ImageField(upload_to='images/', null=True, blank=True)
     
+class Badge(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    image = models.ImageField(upload_to='badges/')
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE, null=True, blank=True)
+    
+class BadgeOpporunity(models.Model):
+    opportunity = models.ForeignKey('opportunities.Opportunity', on_delete=models.CASCADE)
+    badge = models.ForeignKey('Badge', on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('opportunity', 'badge')
+        
+class VolunteerBadge(models.Model):
+    badge = models.ForeignKey('Badge', on_delete=models.CASCADE)
+    volunteer = models.ForeignKey('volunteer.Volunteer', on_delete=models.CASCADE)
+    date_awarded = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('badge', 'volunteer')
 
 
 class Video(models.Model):

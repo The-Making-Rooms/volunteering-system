@@ -1,0 +1,20 @@
+<div>
+    <h3 class="text-2xl">Absences for this month:</h3>
+    <div class="divider my-2"></div>
+    {% if occourances|length > 0%}
+    <form class="flex flex-col">
+        {% csrf_token %}
+        
+        {% for event in occourances %}
+        <div class="flex">
+            <input class="checkbox mb-3 mr-3" type="checkbox" name="event" value="event_{{event.date|date:"d/m/y"}}" id="event_{{ event.id }}" {% if event.absent_exists %}checked{%endif%} >
+            <label for="event_{{ event.id }}">{{ event.date|date:"F j, Y" }} - {{ event.start_time|time:"g:i A" }}</label>
+        </div>
+        {% endfor %}
+        
+        <button class="btn btn-primary" type="submit" hx-post="/volunteer/register_absence/{{registration_id}}">Submit</button>
+    </form>
+    {% else %}
+        <p>No events this month</p>
+    {% endif %}
+</div>

@@ -53,8 +53,14 @@
           <div>
 
             {% if loop.next_occurance != None %}
-            <button class="btn btn-primary justify-end mr-3" hx-get="/volunteer/register_absence/{{loop.registration.id}}" {% if loop.absent %} disabled {%endif%}>
-              {% if loop.absent %}You have notified of a absence{% else%}I can't make it{%endif%}
+            <button 
+            <button
+            class="btn btn-primary"
+            hx-get="/volunteer/register_absence/{{loop.registration.id}}"
+            hx-on:htmx:after-request="my_modal_2.showModal();"
+            hx-target="#modalDiv"
+            hx-swap="innerHTML">
+             I can't make it
             </button>
             {% endif %}
             <button

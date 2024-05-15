@@ -139,8 +139,42 @@
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-video@0.8.0/dist/js/splide-extension-video.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/loading-states.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js"></script>
     <script src="{% static '/js/registerSw.js' %}"></script>
+    <script>
+
+      setPageTheme();
+
+      function setPageTheme() {
+        console.log('Setting page theme');
+        const currentTheme = localStorage.getItem('theme');
+        console.log(currentTheme);
+        if (currentTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'chipin');
+        } else {
+          console.log('Setting bumblebee');
+          document.documentElement.setAttribute('data-theme', 'bumblebee');
+        }
+      }
+
+      function toggleTheme() {
+
+        if (!localStorage.theme){
+          localStorage.theme = 'dark';
+        }
+
+        const currentTheme = localStorage.getItem('theme');
+
+
+        if (currentTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'bumblebee');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'chipin');
+          localStorage.setItem('theme', 'dark');
+        }
+      }
+    
+    </script>
   </body>
 </html>
 {% endif %}

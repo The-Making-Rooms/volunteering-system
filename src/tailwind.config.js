@@ -22,8 +22,16 @@ module.exports = {
           "base-300": "#494949",
           "base-content": "#ffffff",
         },
+        bumblebee: {
+          ...require("daisyui/src/theming/themes")["bumblebee"],
+          "primary": "#FF7C02",
+          "secondary": "#e8e8e8",
+
+        },
+
       },
-      "retro",
+
+
     ],
   },
 }

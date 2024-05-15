@@ -13,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
-from datetime import datetime
+from datetime import datetime, date
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from .forms import (
@@ -22,6 +22,8 @@ from .forms import (
     EmergencyContactsForm,
     VolunteerConditionsForm,
 )
+
+
 
 from forms.models import FormResponseRequirement
 
@@ -228,10 +230,18 @@ def volunteer_form(request):
             volunteer_form = VolunteerForm(data, instance=volunteer)
 
             if volunteer_form.is_valid():
+                
                 volunteer = volunteer_form.save(commit=False)
+                min_age = 16
+                
+                if volunteer.date_of_birth:
+                    age = datetime.now().year - volunteer.date_of_birth.year
+                    if age < min_age:
+                        return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["You must be between 16 and 30 years old to volunteer."]})
+                
                 volunteer.user = user
                 volunteer.save()
-                return HTTPResponseHXRedirect("/volunteer/")
+                return render(request, "volunteer/partials/redirect.html")
             else:
                 context = {
                     "hx": check_if_hx(request),
@@ -239,7 +249,7 @@ def volunteer_form(request):
                     "errors": volunteer_form.errors,
                 }
                 return render(
-                    request, "volunteer/partials/volunteer_form.html", context=context
+                    request, "volunteer/partials/error.html", context=context
                 )
         except Exception as e:
             context = {
@@ -249,7 +259,7 @@ def volunteer_form(request):
                 }
             
             return render(
-                request, "volunteer/partials/volunteer_form.html", context=context
+                request, "volunteer/partials/error.html", context=context
             )
 
 def emergency_contact_form(request, contact_id=None, delete=False):
@@ -488,6 +498,57 @@ def sign_up(request):
         user.save()
         # create volunteer -> redirect to onboarding
         return HTTPResponseHXRedirect("/volunteer")
+
+def volunteer_absence(request, registration_id):
+    if request.method == "POST":
+        data = request.POST
+        print("POST")
+        print(data)
+        registration = Registration.objects.get(id=registration_id)
+        #checkboxes benin with event_<01/05/24>
+        print(data)
+        #delete all absences
+        RegistrationAbsence.objects.filter(registration=registration).delete()
+        dates = request.POST.getlist("event")
+        print(dates)
+        for date in dates:
+            #each date is in the format event_<01/05/24>
+            print(date)
+            date = date.split("_")[1]
+            
+            date = datetime.strptime(date, "%d/%m/%y")
+            absence = RegistrationAbsence(registration=registration, date=date)
+            absence.save()
+            
+        return HTTPResponseHXRedirect("/volunteer/your-opportunities")
+    volunteer = Volunteer.objects.get(user=request.user)
+    opportunity = Registration.objects.get(id=registration_id).opportunity
+    
+    #get all recurrences between now and end of month
+    occourances = opportunity.recurrences.between(
+        datetime.now(),
+        datetime(datetime.now().year, datetime.now().month, 1).replace(day=1, month=datetime.now().month+1),
+        inc=True
+    )
+    
+    template_occourances = []
+    dates = [absence.date for absence in RegistrationAbsence.objects.filter(registration=registration_id)]
+    print(dates)
+    print(dates)
+    for occourance in occourances:
+        print(type(occourance.date()))
+        
+        occour = {
+            "start_time": opportunity.start_time,
+            "end_time": opportunity.end_time,
+            "disabled": True if occourance < datetime.now() else False,
+            "date": occourance.date(),
+            "absent_exists": True if occourance.date() in dates else False,
+        }
+        
+        template_occourances.append(occour)
+        
+    return render(request, "volunteer/partials/volunteer_absence.html", {"hx": check_if_hx(request), "volunteer": volunteer, "occourances": template_occourances, "registration_id": registration_id})
 
 def user_logout(request):
     logout(request)

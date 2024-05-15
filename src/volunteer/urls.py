@@ -6,7 +6,7 @@ urlpatterns = [
     path("", views.index, name="volunteer"),
     path("your-opportunities/", views.your_opportunities, name="your-opportunities"),
     path("volunteer_form/", views.volunteer_form, name="volunteer_form"),
-    path("register_absence/<int:id>", views.notify_absence, name="register_absence"),
+    path("register_absence/<int:registration_id>", views.volunteer_absence, name="register_absence"),
     path("stop_volunteering/<int:id>", views.stop_volunteering, name="stop_volunteering"),
     #Form Views
     path("emergency_contact_form/", views.emergency_contact_form, name="emergency_contacts_form"),

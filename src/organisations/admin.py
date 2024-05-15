@@ -1,6 +1,6 @@
 from typing import Any
 from django.contrib import admin
-from organisations.models import Link, Organisation, Image, Video, thematicCategory, organisationnThematicLink, Location, LinkType
+from organisations.models import Link, Organisation, Image, Video, thematicCategory, organisationnThematicLink, Location, LinkType, Badge, BadgeOpporunity, VolunteerBadge
 from org_admin.models import OrganisationAdmin
 # Register your models here.
 
@@ -53,3 +53,15 @@ class LinkAdmin(admin.ModelAdmin):
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = ['name', 'organisation']
+    
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'organisation']
+    
+@admin.register(BadgeOpporunity)
+class BadgeOpportunityAdmin(admin.ModelAdmin):
+    list_display = ['opportunity', 'badge']
+    
+@admin.register(VolunteerBadge)
+class VolunteerBadgeAdmin(admin.ModelAdmin):
+    list_display = ['badge', 'volunteer']

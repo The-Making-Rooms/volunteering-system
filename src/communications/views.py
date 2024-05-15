@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from .models import Chat, Message, MessageSeen
+from .models import Chat, Message, MessageSeen, AutomatedMessage
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import send_user_notification
 from django.conf import settings
@@ -69,7 +69,7 @@ def send_message(request, chat_id):
     if profanity.contains_profanity(message):
         return get_chat_content(request, chat_id, error="Profanity is not allowed")
     
-    Message.objects.create(chat=chat, sender=user, content=message)
+    sent_message = Message.objects.create(chat=chat, sender=user, content=message)
     org_name = chat.organisation.name
     payload = {
         "head": org_name,
@@ -81,5 +81,29 @@ def send_message(request, chat_id):
     for user in chat.participants.all():
         if user != request.user:
             send_user_notification(user=user, payload=payload, ttl=1000)
+            
+    
+    #Send an automated message
+    automated_message = AutomatedMessage.objects.get(organisation=chat.organisation) if AutomatedMessage.objects.filter(organisation=chat.organisation).exists() else None
+    
+    if not automated_message:
+        print("No automated message")
+        return get_chat_content(request, chat_id)
+    else:
+        #check if an automoted message exists in the chat on the day the mesage was sent
+        automated_chat_message = Message.objects.filter(chat=chat, timestamp__date=sent_message.timestamp.date(), content=automated_message.content).exists()
+        
+        if automated_chat_message:
+            print("Automated message already exists")
+            return get_chat_content(request, chat_id)
+        
+        message = automated_message.content
+        #get superuser:
+        try:
+            superuser = User.objects.filter(is_superuser=True)
+            Message.objects.create(chat=chat, sender=superuser[0], content=message, automated=True)
+            return get_chat_content(request, chat_id)
+        except Exception as e:
+            print(e)
 
     return get_chat_content(request, chat_id)
