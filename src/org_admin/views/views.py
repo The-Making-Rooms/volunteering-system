@@ -488,6 +488,7 @@ def export_all_orgs_zip(request):
         
         for location in opp_locations:
             opp_locations_l.append({
+                "opportunity": location.opportunity.name,
                 "name": location.name,
                 "address": location.address,
                 "place_id": location.place_id,
@@ -516,6 +517,7 @@ def export_all_orgs_zip(request):
         
         for image in OppImage.objects.filter(opportunity__in=org_opportunities):
             opp_media.append({
+                "opportunity": image.opportunity.name,
                 "type": "image",
                 "url": image.image.url.split("/")[-1],
                 "thumbnail": image.thumbnail_image.url.split("/")[-1] if image.thumbnail_image else ""
