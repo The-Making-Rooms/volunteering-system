@@ -107,35 +107,51 @@
 
 </div>
 
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
-  
   <div class="flex justify-between items-center">
-    <p class="text-xl">Locations</p>
+    <p class="text-xl">Badges</p>
+
+    <button
+      class="btn btn-primary"
+      {% if superuser %}
+      hx-get="/org_admin/manage_badge/add/{{organisation.id}}/"
+      {% else %}
+      hx-get="/org_admin/manage_badge/"
+      {% endif %}
+      hx-on:htmx:after-request="my_modal_2.showModal();"
+      hx-target="#modalDiv"
+      hx-swap="innerHTML"
+    >
+      Add
+    </button>
   </div>
-
   <div class="divider"></div>
-
-  {% include "org_admin/partials/map_finder.html" %}
-
-  <div class="divider"></div>
-
-  {% if locations|length == 0 %}
-    <p>No locations have been added yet</p>
-    {% else %}
-    <table class="table rounded-xl ">
-      <tr class="border-b border-gray-600">
+  <table class="table w-full">
+    <thead>
+      <tr>
+        <th>Icon</th>
         <th>Name</th>
-        <th>Address</th>
+        <th>Description</th>
         <th>Actions</th>
       </tr>
-      {% for location in locations %}
+    </thead>
+    <tbody>
+      {% for badge in badges %}
       <tr>
-        <td>{{ location.name }}</td>
-        <td>{{ location.address }}</td>
+        <td>
+          <img
+            src="{{badge.image.url}}"
+            alt=""
+            class="w-8 h-8 object-cover rounded-full"
+          />
+        </td>
+        <td>{{ badge.name }}</td>
+        <td>{{ badge.description }}</td>
         <td>
           <a
-            hx-get="/org_admin/delete_location/{{ location.id }}/"
-            class="btn bg-red-600"
+            hx-get="/org_admin/manage_badge/delete/{{ badge.id }}/"
+            class="btn bg-red-600 btn-xs"
             hx-target=".htmx-navigator"
             hx-swap="outerHTML"
             >Delete</a
@@ -143,8 +159,37 @@
         </td>
       </tr>
       {% endfor %}
-    </table>
-    {% endif %}
+    </tbody>
+  </table>
+
+    
+  </div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Automated Message Reply</p>
+    <p>Set up an automated message to be sent to volunteers when they send you a message</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <form>
+    {% csrf_token %}
+    <label for="message">Message</label>
+    <textarea
+      name="message"
+      class="textarea textarea-bordered w-full text-wrap"
+      placeholder="Message">{% if automated_message %}{{ automated_message.content }}{%endif%}</textarea>
+  
+      <div class="flex w-full justify-end">
+        <button class="btn btn-primary self-end" {% if superuser %} hx-post="/org_admin/automated_message/{{organisation.id}}/" {% else %}hx-post="/org_admin/automated_message/"{%endif%}hx-target=".htmx-navigator" hx-swap="outerHTML">
+          Save
+        </button>
+      </div>
+    </form>
+
+ 
 </div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">

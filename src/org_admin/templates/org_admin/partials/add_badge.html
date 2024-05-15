@@ -1,0 +1,41 @@
+<div id="add_badge" class="w-full">
+    <p>Add a Badge</p>
+    <p class="text-gray-500">
+      Click outside of this popup to dismiss without saving.
+    </p>
+    <div class="divider"></div>
+  
+  
+  
+    <form>
+      {% csrf_token %}
+      {% include "org_admin/partials/select_opportunity_icon.html" %}
+  
+      <div class="divider"></div>
+        <input type="text" class="input input-bordered w-full mb-3" placeholder="Badge Name" name="name" value="{% if badge %}{{badge.name}}{%endif%}">
+        <textarea class="textarea textarea-bordered w-full mb-3 h-24" placeholder="Description" name="description">
+            {% if badge %}{{badge.description}}{%endif%}
+        </textarea>
+
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+        {% if benefit %}
+        hx-post="/org_admin/opportunities/manage_badge/edit/{{badge.id}}/"
+        {%else%}
+            {% if superuser %}
+            hx-post="/org_admin/manage_badge/add/{{organisation.id}}/"
+            {%else%}
+            hx-post="/org_admin/manage_badge/"
+            {%endif%}
+        {%endif%}
+
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+      >
+        Add Badge
+      </button>
+    </form>
+  </div>
+  

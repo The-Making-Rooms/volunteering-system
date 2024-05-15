@@ -39,9 +39,33 @@ class Command(BaseCommand):
                             #skip header
                             if row[0] == 'name':
                                 continue
+                            #name,address,place_id,longitude,latitude
+                            if OrganisationLocation.objects.filter(place_id=row[2]).exists():
+                                continue
                             location = OrganisationLocation()
                             location.organisation = organisation
                             location.name = row[0]
                             location.address = row[1]
-                            location.postcode = row[2]
+                            location.place_id = row[2]
+                            location.longitude = row[3]
+                            location.latitude = row[4]
+                if 'opportunity_locations.csv' in files:
+                    with open(folder_path + 'opportunity_locations.csv') as file:
+                        reader = csv.reader(file)
+                        for row in reader:
+                            #skip header
+                            if row[0] == 'opportunity':
+                                continue
+                            #opportunity,name,address,place_id,longitude,latitude
+                            print(row[0])
+                            opportunity = Opportunity.objects.get(name=row[0])
+                            if OpportunityLocation.objects.filter(opportunity=opportunity, place_id=row[3]).exists():
+                                continue
+                            location = OpportunityLocation()
+                            location.opportunity = opportunity
+                            location.name = row[1]
+                            location.address = row[2]
+                            location.place_id = row[3]
+                            location.longitude = row[4]
+                            location.latitude = row[5]
                             location.save()

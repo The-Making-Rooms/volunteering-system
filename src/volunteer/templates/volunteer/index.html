@@ -215,7 +215,7 @@
     </div>
   </div>
 
-  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+  <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">
       <div class="card-actions items-center">
         <p class="text-2xl font-bold">Conditions</p>
@@ -271,7 +271,7 @@
   </div>
 
 
-  <div class="card w-full bg-base-200 text-neutral-conten mb-3">
+  <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">
       <div class="card-actions items-center">
         <p class="text-2xl font-bold">Supplementary Information</p>
@@ -324,18 +324,29 @@
     </div>
   </div>
 
-  <button
-    class="btn btn-primary justify-end"
-    hx-get="logout"
-    hx-target=".htmx-navigator"
-    hx-push-url="true"
-    hx-swap="outerHTML"
-  >
-    Sign Out
-  </button>
-  <button onclick="registerSw()" class="btn btn-primary justify-end">
-    Enable Push Notifications
-  </button>
+
+  <div class="card w-full bg-base-200 mb-3 p-3">
+    <button
+      class="btn btn-primary mb-3"
+      hx-get="logout"
+      hx-target=".htmx-navigator"
+      hx-push-url="true"
+      hx-swap="outerHTML"
+    >
+      Sign Out
+    </button>
+    <button onclick="registerSw()" class="btn btn-primary mb-3">
+      Enable Push Notifications
+    </button>
+
+    <button hx-on:click="toggleTheme()" class="btn btn-primary mb-3">
+      Toggle Dark/Light Mode
+    </button>
+</div>
+
+
+
+
 
 
 </div>
@@ -350,6 +361,8 @@
     <button>close</button>
   </form>
 </dialog>
+
+
 
 {% include "navbar.html" %}
 

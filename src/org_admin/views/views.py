@@ -3,9 +3,9 @@ from django.http import HttpResponse
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
-from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation
+from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation
-from communications.models import Message, Chat
+from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
 from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo
 from .common import check_ownership
@@ -17,7 +17,8 @@ import json
 import os
 import csv
 from django.core.files import File
-
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 
 # Create your views here.
@@ -130,9 +131,9 @@ def details(request, error=None, success=None, organisation_id=None):
 
         org_videos = OrgVideo.objects.filter(organisation=organisation)
         org_images = OrgImage.objects.filter(organisation=organisation)
-        
+        badges = Badge.objects.filter(organisation=organisation)
         link_types = LinkType.objects.all()
-        
+        automated_message = AutomatedMessage.objects.get(organisation=organisation) if AutomatedMessage.objects.filter(organisation=organisation).exists() else None
         supp_info = SupplementaryInfo.objects.filter(organisation=organisation)
         
         link_obj = []
@@ -148,8 +149,10 @@ def details(request, error=None, success=None, organisation_id=None):
             "organisation": organisation,
             "org_videos": org_videos,
             "org_images": org_images,
+            "badges": badges,
             "link_types": link_obj,
             "supp_info": supp_info,
+            "automated_message": automated_message,
             "locations": Location.objects.filter(organisation=organisation),
             "error": error,
             "success": success,
@@ -372,7 +375,150 @@ def icons(request):
         return render(request, "org_admin/partials/icon_results.html", context=context)
         
         
+def automated_messages(request, id=None):
+    if request.method == "POST":
+        data = request.POST
+        if request.user.is_superuser:
+            org = Organisation.objects.get(id=id)
+        else:
+            org = OrganisationAdmin.objects.get(user=request.user).organisation
+            
+        if AutomatedMessage.objects.filter(organisation=org).exists():
+            message = AutomatedMessage.objects.get(organisation=org)
+            message.content = data["message"]
+            message.save()
+            
+        else:
+            message = AutomatedMessage.objects.create(
+                organisation=org,
+                content=data["message"]
+            )
         
+        request.method = "GET"
+        return details(request, organisation_id=id, success="Automated message updated")
+    
+        
+def manage_badge(request, badge_id=None, organisation_id=None, delete=False):
+    if request.method == "POST":
+        try:
+            data = request.POST
+            if badge_id:
+                badge = Badge.objects.get(id=badge_id)
+                if not check_ownership(request, badge):
+                    return details(request, error="You do not have permission to edit this badge")
+                badge.name = data["name"]
+                badge.description = data["description"]
+                badge.save()
+                add_icon(badge, data["icon"])
+                request.method = "GET"
+                return details(request, organisation_id=badge.organisation.id, success="Badge updated")
+            else:
+                if request.user.is_superuser:
+                    org = Organisation.objects.get(id=organisation_id)
+                else:
+                    org = OrganisationAdmin.objects.get(user=request.user).organisation
+                    
+                if data["name"] == "" or data["description"] == "":
+                    request.method = "GET"
+                    return details(request, organisation_id=org.id, error="Please ensure all fields are filled")    
+                badge = Badge(
+                    name=data["name"],
+                    description=data["description"],
+                    organisation=org,
+                )
+                badge.save()
+                add_icon(badge, data["icon"])
+                
+                request.method = "GET"
+                return details(request, organisation_id=org.id, success="Badge created")
+        except Exception as e:
+            print(e)
+            request.method = "GET"
+            return details(request, error="An error occoured. Please ensure all fields are filled.")
+    if request.method == "GET":
+        if badge_id:
+            if delete:
+                badge = Badge.objects.get(id=badge_id)
+                if not check_ownership(request, badge):
+                    return details(request, error="You do not have permission to delete this badge")
+                badge.delete()
+                return details(request, organisation_id=badge.organisation.id, success="Badge deleted") 
+            
+            badge = Badge.objects.get(id=badge_id)
+            if check_ownership(request, badge):
+                return render(request, "org_admin/partials/add_badge.html", context={"hx": check_if_hx(request), "badge": badge, "superuser": request.user.is_superuser})
+            else:
+                return details(request, error="You do not have permission to edit this badge")
+        else:   
+            if request.user.is_superuser:
+                org = Organisation.objects.get(id=organisation_id) 
+                return render(request, "org_admin/partials/add_badge.html", context={"hx": check_if_hx(request), "badge": None, "organisation": org, "superuser": request.user.is_superuser})
+            else:    
+                return render(request, "org_admin/partials/add_badge.html", context={"hx": check_if_hx(request), "badge": None, "superuser": request.user.is_superuser})
+        
+        
+def add_icon(badge, icon_id):
+
+    auth = OAuth1(settings.NOUN_PROJECT_API_KEY, settings.NOUN_PROJECT_SECRET_KEY)
+    endpoint = "https://static.thenounproject.com/png/{}-200.png"
+    #download file into bytesIO
+    img_bytes = requests.get(endpoint.format(icon_id), auth=auth).content
+    bytes_io = BytesIO(img_bytes)
+    badge.image.save("{}.png".format(icon_id), ContentFile(bytes_io.getvalue()))
+    badge.save()
+
+
+def assign_badge_to_volunteer(request, volunteer_id, badge_id):
+    badge = Badge.objects.get(id=badge_id)
+    if not check_ownership(request, badge):
+        return volunteer_admin(request, error="You do not have permission to assign this badge")
+    volunteer = Volunteer.objects.get(id=volunteer_id)
+    #remove status where = stopped
+    
+    if not request.user.is_superuser:
+        non_acceptable_status = RegistrationStatus.objects.filter().exclude(status="active")
+        registrations = Registration.objects.filter(volunteer=volunteer)
+        volunteer_is_active = VolunteerRegistrationStatus.objects.filter(registration__in=registrations).exclude(registration_status__in=non_acceptable_status).exists()
+        if not volunteer_is_active:
+            return volunteer_admin(request, error="Volunteer is not active")
+    
+    else:
+        VolunteerBadge.objects.create(
+            badge=badge,
+            volunteer=volunteer,
+        )
+    return volunteer_admin(request, success="Badge assigned to volunteer")
+
+def remove_badge_from_volunteer(request, volunteer_id, badge_id):
+    badge = Badge.objects.get(id=badge_id)
+    if not check_ownership(request, badge):
+        return volunteer_admin(request, error="You do not have permission to remove this badge")
+    volunteer = Volunteer.objects.get(id=volunteer_id)
+    VolunteerBadge.objects.get(badge=badge, volunteer=volunteer).delete()
+    return volunteer_admin(request, success="Badge removed from volunteer")
+
+def manage_badge_opportunity(request, badge_id, opportunity_id, delete=False):
+    badge = Badge.objects.get(id=badge_id)
+    opportunity = Opportunity.objects.get(id=opportunity_id)
+    if not check_ownership(request, badge):
+        return opportunity_admin(request, error="You do not have permission to assign this badge")
+    if not check_ownership(request, opportunity):
+        return opportunity_admin(request, error="You do not have permission to assign this badge")
+    if delete:
+        BadgeOpporunity.objects.get(badge=badge, opportunity=opportunity).delete()
+        return opportunity_admin(request, success="Badge removed from opportunity")
+    if BadgeOpporunity.objects.filter(badge=badge, opportunity=opportunity).exists():
+        return opportunity_admin(request, error="Badge already assigned to opportunity")
+    BadgeOpporunity.objects.create(
+        badge=badge,
+        opportunity=opportunity,
+    )
+    return opportunity_admin(request, success="Badge assigned to opportunity")
+        
+    
+    
+    
+
 ##system transfer
 
 def export_all_orgs_zip(request):
@@ -488,6 +634,7 @@ def export_all_orgs_zip(request):
         
         for location in opp_locations:
             opp_locations_l.append({
+                "opportunity": location.opportunity.name,
                 "name": location.name,
                 "address": location.address,
                 "place_id": location.place_id,
@@ -516,6 +663,7 @@ def export_all_orgs_zip(request):
         
         for image in OppImage.objects.filter(opportunity__in=org_opportunities):
             opp_media.append({
+                "opportunity": image.opportunity.name,
                 "type": "image",
                 "url": image.image.url.split("/")[-1],
                 "thumbnail": image.thumbnail_image.url.split("/")[-1] if image.thumbnail_image else ""
