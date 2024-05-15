@@ -97,18 +97,22 @@ class Command(BaseCommand):
                         with open(folder_path + 'opportunity_media.csv') as file:
                             reader = csv.reader(file)
                             for row in reader:
-                                if row[0] == 'image':
+                                if row[0] == 'opportunity_name':
+                                    continue
+                                if row[1] == 'image':
                                     image = Image()
-                                    image.image = File(open(folder_path+ 'media/' + row[1], 'rb'), name=row[1])
-                                    image.thumbnail_image = File(open(folder_path+ 'media_thumbnail/' + row[2], 'rb'), name=row[2])
-                                    image.opportunity = opportunity
+                                    image.image = File(open(folder_path+ 'media/' + row[2], 'rb'), name=row[2])
+                                    image.thumbnail_image = File(open(folder_path+ 'media_thumbnail/' + row[3], 'rb'), name=row[3])
+                                    image.opportunity = Opportunity.objects.get(name=row[0])
                                     image.save()
-                                elif row[0] == 'video':
+                                elif row[1] == 'video':
                                     video = Video()
-                                    video.video = File(open(folder_path+ 'media/' + row[1], 'rb'), name=row[1])
-                                    video.video_thumbnail = File(open(folder_path+ 'media_thumbnail/' + row[2], 'rb'), name=row[2])
-                                    video.opportunity = opportunity
+                                    video.video = File(open(folder_path+ 'media/' + row[2], 'rb'), name=row[2])
+                                    video.video_thumbnail = File(open(folder_path+ 'media_thumbnail/' + row[3], 'rb'), name=row[3])
+                                    video.opportunity = Opportunity.objects.get(name=row[0])
                                     video.save()
-                
             else:
                 continue
+            
+            
+        

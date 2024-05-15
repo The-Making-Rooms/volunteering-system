@@ -49,3 +49,7 @@ class LinkTypeAdmin(admin.ModelAdmin):
 @admin.register(Link)
 class LinkAdmin(admin.ModelAdmin):
     list_display = ['url', 'organisation']
+    
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'organisation']
