@@ -8,7 +8,7 @@
     <div class="flex  mr-3">
         <ul class="menu bg-base-300 w-56 rounded-box">
             {% for chat in chats %}
-            <li>
+            <li class="border border-gray-800 rounded-xl mb-3">
             <a hx-push-url="false" hx-boost="true" href="/org_admin/communication/{{chat.id}}" class="" hx-target="#chat_view" hx-swap="outerHTML">
         
                 {% if chat.broadcast %}

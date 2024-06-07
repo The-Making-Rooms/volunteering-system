@@ -7,9 +7,14 @@ from better_profanity import profanity
 from datetime import datetime
 
 def get_org_chats(request):
-    org = OrganisationAdmin.objects.get(user=request.user).organisation
-    chat_admins = OrganisationAdmin.objects.filter(organisation=org).values_list("user", flat=True)
-    chats = Chat.objects.filter(organisation=org)
+    if not request.user.is_superuser:
+        org = OrganisationAdmin.objects.get(user=request.user).organisation
+        chat_admins = OrganisationAdmin.objects.filter(organisation=org).values_list("user", flat=True)
+        chats = Chat.objects.filter(organisation=org)
+    elif request.user.is_superuser:
+        chat_admins = []
+        chats = Chat.objects.all()
+        
     print(chats)
     chat_objs = []
     
