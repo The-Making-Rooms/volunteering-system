@@ -1,38 +1,75 @@
-{% extends org_admin/navigation_template.html %}
+{% extends "org_admin/navigation_template.html"%}
 
 
 {% block page_content %}
 
 <p class="text-2xl font-bol mb-5">Registrations for {{opportunity.name}}</p>
+
 {% if error %}
-{{ error }}
+<div role="alert" class="alert alert-error mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{error}}</span>
+ </div>
 {% endif %}
 
+{% if success %}
+<div role="alert" class="alert alert-success mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+    <span>{{success}}</span>
+ </div>
+{% endif %}
+
+
+<form>
+{% csrf_token %}
+
 <div class="p-5 rounded-lg bg-gray-700 mb-3">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Volunteering for</th>
-                <th>Number of sign ups</th>
-                <th>Total Views</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for opportunity in opportunities %}
-            <tr>
-                <td>{{ opportunity.name }}</td>
-                <td>{{ opportunity.description|truncatewords:10 }}</td>
-                <td>{{ opportunity.registrations }}</td>
-                <td>{{ opportunity.views }}</td>
-                <td>
-                    <a href="/org_admin/opportunities/{{opportunity.id}}" class="btn btn-primary mb-3">View</a>
-                    <a href="/org_admin/opportunities/{{opportunity.id}}" class="btn btn-primary">Registrations</a>
-                </td>
-            </tr>
+    <div class="flex items-center">
+    <input type="text" name="filter-by-name" placeholder="Search by Name" class="input input-bordered w-full max-w-xs" hx-trigger="input changed delay:500ms, search" hx-post="/org_admin/opportunities/registrations/get_registration_table/" hx-target="#reg-table"/>
+    <div class="divider divider-horizontal"></div>
+
+    <label class="text-white">Filter by Registration Status:</label>
+    <select class="select select-bordered w-full max-w-xs ml-3" name="filter-by-status" hx-post="/org_admin/opportunities/registrations/get_registration_table/" hx-target="#reg-table">
+        <option selected value="all">All</option>
+        {% for option in registration_types %}
+            <option value="{{option.id}}">{{option.status}}</option>
+        {% endfor %}
+      </select>
+      <div class="divider divider-horizontal"></div>
+
+    <!--Select-->
+    <label class="text-white">Filter by Opportunity</label>
+    <select class="select select-bordered w-full max-w-xs ml-3" name="filter-by-opportunity" hx-post="/org_admin/opportunities/registrations/get_registration_table/" hx-target="#reg-table">
+        <option {% if not opportunity %}selected{%endif%} value="all">All</option>
+        {% for opportunity_select in opportunities %}
+            <option {% if opportunity.id == opportunity_select.id %}selected{%endif%} value="{{opportunity_select.id}}">{{opportunity_select.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div>
+        <select class="select select-bordered w-full max-w-xs" name="set-selected-status">
+            <option disabled selected value="">Select Status</option>
+            {% for option in registration_types %}
+                {% if option.status != "awaiting_approval"%}
+                    <option value="{{option.id}}">{{option.status}}</option>
+                {% endif %}
             {% endfor %}
-        </tbody>
-    </table>
+          </select>
+          <button class="btn btn-primary ml-3"
+            hx-post="/org_admin/opportunities/registrations/set_status/" 
+            hx-push-url="false" 
+            hx-target=".htmx-navigator" 
+            hx-swap="outerHTML">Set Status
+        </button>
+    </div>
+
+
+</div>
+
+<div class="p-5 rounded-lg bg-gray-700 mb-3">
+    <div class=" w-full flex items-center align-middle" id="reg-table" hx-trigger="revealed" hx-swap="outerHTML" hx-post="/org_admin/opportunities/registrations/get_registration_table/"><span class="loading loading-spinner loading-lg"></span></div>
+</div>
+</form>
 
 {% endblock %}

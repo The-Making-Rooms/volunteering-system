@@ -8,3 +8,6 @@ from .index import *
 from .organisation_links import *
 from .forms import *
 from .communications import *
+from .opportunity_registrations import *
+from .mentor import *
+from .admin_assignment import *

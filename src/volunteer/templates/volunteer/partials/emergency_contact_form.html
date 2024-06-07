@@ -48,11 +48,14 @@
       class="btn btn-primary col-span-2"
       {% if edit %}
       hx-post="/volunteer/emergency_contact_form/{{contact.id}}/"
+
       {% else %}
       hx-post="/volunteer/emergency_contact_form/"
+     
       {% endif %}
-      hx-swap="innerHTML transition:true"
       hx-target="closest div"
+      hx-swap="innerHTML transition:true"
+      
       >Save</a>
 
   </form>

@@ -80,9 +80,20 @@ urlpatterns = [
     path("opportunities/manage_benefit/delete/<int:benefit_id>/", views.manage_benefit, name="manage_benefit", kwargs={'delete': True}),
     
     path("opportunities/locations/<int:id>/", views.opportunity_locations, name="opportunity_locations"),
-     path("opportunities/manage_location/delete/<int:location_id>/", views.delete_opportunity_location, name="manage_opportunity_location"),
+    path("opportunities/manage_location/delete/<int:location_id>/", views.delete_opportunity_location, name="manage_opportunity_location"),
     path("opportunities/manage_location/add/<int:opportunity_id>/", views.add_location_by_id, name="manage_opportunity_location"),
     
+    path("opportunities/registrations/<int:id>/", views.opportunity_registrations, name="opportunity_registrations"),
+    path("registrations/", views.opportunity_registrations, name="opportunity_registrations"),
+    path("opportunities/registrations/set_status/", views.set_selected_registration_status, name="set_selected_registration_status"),
+    path("opportunities/registrations/get_registration_table/", views.get_registration_table, name="get_registration_table"),
+    
+    #path("mentoring/", views.get_mentees, name="mentoring"),
+    #path("mentoring/<int:mentee_id>/", views.manage_mentee, name="mentee_manage"),
+    #path("mentoring/create/<int:volunteer_id>/", views.create_mentee, name="create_mentee"),
+    
+    path("admin_management/", views.get_admins, name="admin_management"),
+    path("admin_management/delete/<int:admin_id>/", views.delete_admin, name="delete_admin"),
     
     path("opportunities/schedule/<int:id>/", views.manage_schedule, name="opportunity_schedule"),
     path("delete_date/<int:opportunity_id>/<int:id>/", views.delete_date, name="delete_date"),

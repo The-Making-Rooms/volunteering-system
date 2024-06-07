@@ -1,0 +1,58 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div>
+        <p class="text-2xl">Mentee management:</p>
+        <p>Here you can manage mentee hours, as well as see volunteers eligible for mentorship</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Volunteer Name</th>
+                <th>Hours Completed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mentee in mentees %}
+            <tr>
+                <td>{{ mentee.volunteer.user.first_name }} {{ mentee.volunteer.user.first_name}}</td>
+                <td>{{ mentee.hours }}</td>
+                <td>
+                    {% if superuser %}
+                        <a href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
+                    {% else %}
+                        {% if mentee.organisation.id != org.organisation.id %}
+                        <p>Mentored by {{mentee.organisation}}</p>
+                        {% else %}
+                        <a href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% for mentee in available_to_mentor %}
+            <tr>
+            
+                <td>{{ mentee.user.first_name }} {{ mentee.user.last_name}}</td>
+                <td>-</td>
+                <td>
+                    <a href="/org_admin/mentoring/create/{{mentee.id}}">Create Mentoring Record</a>
+                </td>  
+            </tr>
+            {% endfor %}
+        </tbody>
+</div>
+
+
+
+
+
+{% endblock %}

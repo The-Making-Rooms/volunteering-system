@@ -1,0 +1,53 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between">
+        <p class="text-2xl">Mentor Sessions:</p>
+        <a class="button btn-primary" href="/org_admin/mentoring/log_hours/">Add Mentor Session</a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Session Date</th>
+                <th>Session Duration</th>
+                <th>Session Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in mentor_sessions %}
+            <tr>
+                <td>{{ session.date }}</td>
+                <td>{{ session.time }}</td>
+                <td>{{ session.session_notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <p class="text-2xl">Mentoring Notes</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Created By</th>
+                <th>Created On</th>
+                <th>Last Updated</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in mentor_notes %}
+            <tr>
+                <td>{{ note.created_by }}</td>
+                <td>{{ note.created_at }}</td>
+                <td>{{ note.last_updated }}</td>
+                <td>{{ note.note }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+</div>
+
+{% endblock %}
