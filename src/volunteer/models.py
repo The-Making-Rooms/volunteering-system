@@ -12,7 +12,25 @@ class Volunteer(models.Model):
 
     def __str__(self):
         return self.user.first_name + ' ' + self.user.last_name + ' (' + self.user.email + ')'
+    
+    
+class MentorRecord(models.Model):
+    volunteer = models.OneToOneField('Volunteer', on_delete=models.CASCADE)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
+    
+class MentorSession(models.Model):
+    date = models.DateField()
+    time = models.DurationField()
+    session_notes = models.TextField(blank=True)
+    MentorRecord = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
 
+class MentorNotes(models.Model):
+    note = models.TextField()
+    MentorRecord = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('org_admin.OrganisationAdmin', on_delete=models.SET_NULL, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    
 class VolunteerAddress(models.Model):
     first_line = models.CharField(max_length=200)
     second_line = models.CharField(max_length=200, blank=True, null=True)

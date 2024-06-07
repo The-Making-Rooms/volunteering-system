@@ -44,7 +44,7 @@ def volunteer_admin(request):
 
 
 
-def opportunity_admin(request):
+def opportunity_admin(request, error=None, success=None):
     
     if request.user.is_superuser:
         opportunities = Opportunity.objects.all()
@@ -67,6 +67,8 @@ def opportunity_admin(request):
         {"hx": check_if_hx(request),
          "opportunities": opportunities,
          "superuser": request.user.is_superuser,
+         "error": error,
+        "success": success,
          },
     )
 

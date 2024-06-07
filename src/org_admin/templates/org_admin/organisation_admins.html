@@ -1,0 +1,81 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+{% if error %}
+<div role="alert" class="alert alert-error mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{error}}</span>
+ </div>
+{% endif %}
+
+{% if success %}
+<div role="alert" class="alert alert-success mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+    <span>{{success}}</span>
+ </div>
+{% endif %}
+
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between">
+        <p class="text-2xl">Organisation Admins</p>
+        
+    </div>
+    <div class="divider"></div>
+
+    <div>
+        <form class="flex items-end">
+            {% csrf_token %}
+            <div class="form-control flex-grow">
+                <label class="label">
+                    <span class="label-text">Enter email to add new admin:</span>
+                </label>
+                <input name="email" type="email" placeholder="Email" class="input input-bordered">
+            </div>
+            {% if superuser %}
+                <div class="form-control ml-3">
+                    <label class="label">
+                        <span class="label-text">Organisation to add admin to:</span>
+                    </label>
+                    <select class="select select-bordered" name="organisation_id">
+                        <option value="" disabled selected>Select Organisation</option>
+                        {% for org in organisations %}
+                        <option value="{{ org.id }}">{{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            <button class="btn btn-primary ml-3" hx-post="/org_admin/admin_management/" hx-target=".htmx-navigator" hx-swap="outerHTML" hx-push-url="false">Add Admin</button>
+        </form>
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Last Login</th>
+                {% if superuser %}<th>Organisation</th>{% endif %}
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for org_admin in admins %}
+            <tr>
+                <td>{{ org_admin.user.first_name }} {{ org_admin.user.last_name }}</td>
+                <td>{{ org_admin.user.email }}</td>
+                <td>{{ org_admin.user.last_login }}</td>
+                {% if superuser %}<td>{{ org_admin.organisation.name }}</td>{% endif %}
+                <td>
+                    <a class="btn bg-red-600" hx-get="/org_admin/admin_management/delete/{{org_admin.id}}" hx-push-url="false" hx-target=".htmx-navigator" hx-swap="outerHTML" >Remove Admin</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
