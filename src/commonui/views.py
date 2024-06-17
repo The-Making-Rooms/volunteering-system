@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -8,6 +9,7 @@ from django.contrib.auth import authenticate, login
 from webpush import send_user_notification
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.password_validation import validate_password
 import random
 
 # create uswer
@@ -149,14 +151,30 @@ def authenticate_user(request):
 def create_account(request):
     if request.method == "POST":
 
-        print(request.POST)
+        data = request.POST
 
-        email = request.POST["email"]
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = User.objects.create_user(username, email, password)
+        if User.objects.filter(email=data["email"]).exists():
+            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Email already in use"})
+        
+        if data["password"] != data["password_confirm"]:
+            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
+        
+        #check password is secure enough
+        try:
+            validate_password(data["password"])
+        except ValidationError as e:
+            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": e})
+        
+        
+        #print(data)
+        username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
+        #ensure a user with that username does not exist
+        while User.objects.filter(username=username).exists():
+            username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
+        # create django user
+        user = User.objects.create_user(username, data["email"], data["password"])
         user.save()
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=username, password=data["password"])
         login(request, user)
 
         return HTTPResponseHXRedirect("/volunteer")

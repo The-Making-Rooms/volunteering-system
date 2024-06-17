@@ -22,7 +22,7 @@ from .forms import (
     EmergencyContactsForm,
     VolunteerConditionsForm,
 )
-
+import random
 
 
 from forms.models import FormResponseRequirement
@@ -223,6 +223,14 @@ def volunteer_form(request):
         user = User.objects.get(username=request.user)
         user.first_name = data["first_name"]
         user.last_name = data["last_name"]
+        
+        temp_username = data["first_name"] + data["last_name"] + "".join(random.choices("0123456789", k=5))
+        
+        while User.objects.filter(username=temp_username).exists():
+           temp_username = data["first_name"] + data["last_name"] + "".join(random.choices("0123456789", k=5))
+            
+        user.username = temp_username
+        
         user.save()
 
         try:
@@ -492,9 +500,19 @@ def sign_up(request):
         return render(request, "volunteer/sign_up.html", {"hx": check_if_hx(request)})
     elif request.method == "POST":
         data = request.POST
-        print(data)
+        
+        if User.objects.filter(email=data["email"]).exists():
+            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Email already in use"})
+        
+        if data["password"] != data["password_confirm"]:
+            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
+        #print(data)
+        username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
+        #ensure a user with that username does not exist
+        while User.objects.filter(username=username).exists():
+            username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
         # create django user
-        user = User.objects.create_user(data["email"], data["email"], data["password"])
+        user = User.objects.create_user(username, data["email"], data["password"])
         user.save()
         # create volunteer -> redirect to onboarding
         return HTTPResponseHXRedirect("/volunteer")

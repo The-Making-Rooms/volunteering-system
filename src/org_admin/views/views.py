@@ -26,6 +26,16 @@ def volunteer_admin(request):
     #List of volunteers without repeating
     if request.user.is_superuser:
         volunteers = Volunteer.objects.all()
+        
+        organisation_admins = OrganisationAdmin.objects.all()
+        
+        #remove organisation admins from the list
+        for org_admin in organisation_admins:
+            volunteers = volunteers.exclude(user__id=org_admin.user.id)
+            
+        #remove superusers from the list
+        volunteers = volunteers.exclude(user__is_superuser=True)
+        
         context = {
             "hx": check_if_hx(request),
             "unique_volunteers": volunteers,
@@ -34,6 +44,16 @@ def volunteer_admin(request):
     else:
         registrations = Registration.objects.filter(opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
         unique_volunteers = Volunteer.objects.filter(id__in=registrations.values_list('volunteer', flat=True)).distinct()
+        
+        organisation_admins = OrganisationAdmin.objects.all()
+        
+        #remove organisation admins from the list
+        for org_admin in organisation_admins:
+            unique_volunteers = unique_volunteers.exclude(user__id=org_admin.user.id)
+        
+        #remove superusers from the list
+        unique_volunteers = unique_volunteers.exclude(user__is_superuser=True)
+        
         print(unique_volunteers)
         context = {
             "hx": check_if_hx(request),
