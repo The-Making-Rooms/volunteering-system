@@ -12,6 +12,10 @@ urlpatterns = [
     path("communication/", views.get_org_chats, name="communication_admin"),
     path("communication/<int:chat_id>/", views.get_chat_content, name="communication_admin"),
     
+    path("profile/", views.profile, name="profile"),
+    path("change_password/", views.change_password, name="reset_password"),
+    path("logout/", views.logout_view, name="logout"),
+    
     path("upload_icons/", views.upload_icons, name="upload_icons"),
     path("icons/", views.icons, name="icons"),
     

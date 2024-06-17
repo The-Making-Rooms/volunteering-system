@@ -1,0 +1,75 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+{% if error %}
+{% include 'commonui/error_div.html' with error=error %}
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success">
+    {{ success }}
+</div>
+{% endif %}
+
+<p class="text-2xl mt-5">
+    Your Admin Profile
+</p>
+
+<div class="divider"></div>
+
+
+<form class="p-5 rounded-xl bg-secondary">
+    {% csrf_token %}
+
+    <div class="form-control mb-3">
+        <label for="first_name">First Name</label>
+        <input class="input input-bordered" type="text" name="first_name" id="first_name" value="{{ user.first_name }}">
+    </div>
+
+    <div class="form-control mb-3">
+        <label for="last_name">Last Name</label>
+        <input class="input input-bordered" type="text" name="last_name" id="last_name" value="{{ user.last_name }}">
+    </div>
+
+    <div class="form-control mb-3">
+        <label for="email">Email</label>
+        <input class="input input-bordered" type="email" name="email" id="email" value="{{ user.email }}" disabled>
+    </div>
+
+    <button class="btn btn-primary mt-3" hx-target=".htmx-navigator" hx-post="/org_admin/profile/" hx-swap="outerHTML">Update</button>
+</form>
+
+
+<div class="divider"></div>
+
+
+
+<form class="p-5 rounded-xl bg-secondary">
+
+    <p class="text-2xl mb-3">
+        Change Password
+    </p>
+    <p>You will be logged out after changing your password</p>
+
+    {% csrf_token %}
+    <div class="form-control mb-3">
+        <label for="password">Old Password</label>
+        <input class="input input-bordered" type="password" name="old_password" id="password">
+    </div>
+
+    <div class="form-control mb-3">
+        <label for="new_password">New Password</label>
+        <input class="input input-bordered" type="password" name="new_password" id="new_password">
+    </div>
+
+    <div class="form-control mb-3">
+        <label for="confirm_password">Confirm Password</label>
+        <input class="input input-bordered" type="password" name="confirm_password" id="confirm_password">
+    </div>
+
+    <button class="btn btn-primary mt-3" hx-target=".htmx-navigator" hx-post="/org_admin/change_password/" hx-swap="outerHTML">Reset Password</button>
+</form>
+
+
+{% endblock %}

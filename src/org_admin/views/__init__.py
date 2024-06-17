@@ -11,3 +11,4 @@ from .communications import *
 from .opportunity_registrations import *
 from .mentor import *
 from .admin_assignment import *
+from .admin_profile import *
