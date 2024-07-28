@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 ALLOWED_HOSTS = ['localhost', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -36,6 +36,7 @@ if os.environ.get('DJANGO_ENV') == 'production':
     SECRET_KEY = os.environ.get('SECRET_KEY')
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
     NOUN_PROJECT_API_KEY = os.environ.get('NOUN_PROJECT_API_KEY')
     NOUN_PROJECT_SECRET_KEY = os.environ.get('NOUN_PROJECT_SECRET_KEY')
     WEBPUSH_SETTINGS = {
@@ -43,6 +44,7 @@ if os.environ.get('DJANGO_ENV') == 'production':
         "VAPID_PRIVATE_KEY": os.environ.get('VAPID_PRIVATE_KEY'),
         "VAPID_ADMIN_EMAIL": os.environ.get('VAPID_ADMIN_EMAIL')
     }
+    DEBUG = False
     
     DATABASES = {
         'default': {
@@ -68,6 +70,7 @@ else:
         "VAPID_PRIVATE_KEY":"kO5i2K4COSjMISdogh4C7NQuf91NSi5Gpwnp4m8h7C4",
         "VAPID_ADMIN_EMAIL": "info@makingrooms.org"
     }
+    DEBUG = True
 
 
     DATABASES = {
