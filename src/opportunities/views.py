@@ -91,10 +91,10 @@ def register(request, opportunity_id):
     #The registration process is as follows:
     #1. Check if the user is logged in
     #2. Check if the user has a volunteer profile
-    #Query the opportunity if it requires any supplementary information
-    #Generat a form with the supplementary information
+    #Query the opportunity if it requires any Additional Information
+    #Generat a form with the Additional Information
     #If the form is valid, create a registration object
-    #Grant organisaton access to the supplementary information
+    #Grant organisaton access to the Additional Information
     #Return a success message
 
     if request.user.is_authenticated:
@@ -126,7 +126,7 @@ def register(request, opportunity_id):
                     initial_data.append({'info': vol_supp_info.info, 'data': vol_supp_info.data})
             except VolunteerSupplementaryInfo.DoesNotExist:
                 initial_data.append({'info': req.info, 'value': ''})
-        #crete a form for the supplementary information
+        #crete a form for the Additional Information
         formset = SuppInfoFormSet(initial=initial_data)
 
 

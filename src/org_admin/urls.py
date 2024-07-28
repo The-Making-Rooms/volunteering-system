@@ -1,5 +1,5 @@
 from django.urls import path
-
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
@@ -8,6 +8,16 @@ urlpatterns = [
     path("upload_organisation_logo/", views.upload_organisation_logo, name="upload_organisation_logo"),
     path("sign_in/", views.sign_in, name="sign_in"),
     #path("sign_out/", views.sign_out, name="sign_out"),
+    
+    path("password_reset_sent", views.password_reset_sent, name="password_reset_sent"),
+    path("password_reset/", views.ResetPasswordView.as_view(), name="reset_password"),
+    path('password-reset-confirm/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(template_name='org_admin/password_reset_confirm.html'),
+         name='password_reset_confirm'),
+    path('password-reset-complete/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='org_admin/password_reset_complete.html'),
+         name='password_reset_complete'),
+    
     path("links/", views.org_links, name="add_link"),
     path("communication/", views.get_org_chats, name="communication_admin"),
     path("communication/<int:chat_id>/", views.get_chat_content, name="communication_admin"),

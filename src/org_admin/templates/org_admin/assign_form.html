@@ -31,8 +31,15 @@
                 <option value="{{form.id}}">{{form.name}}</option>
                 {% endfor %}
             </select>
-            <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/assign_form/" hx-target=".htmx-navigator" hx-swap="outerHTML">Assign Form</button>
+            <div class="divider"></div>
+            
             {% include "org_admin/volunteer_finder.html"%}
+            <div class="divider"></div>
+            <div class="w-full flex justify-end">
+              
+              <button class="btn btn-primary btn-md" hx-post="/org_admin/forms/assign_form/" hx-target=".htmx-navigator" hx-swap="outerHTML">Assign Form</button>
+            </div>
+            
         </form>
 
     </div>

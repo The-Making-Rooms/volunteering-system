@@ -4,21 +4,49 @@ from .common import check_ownership
 from ..models import OrganisationAdmin
 from opportunities.models import Opportunity, Location, Image, Video, OpportunityView, Registration, Tag, LinkedTags, SupplimentaryInfoRequirement
 from volunteer.models import SupplementaryInfo
+from organisations.models import Organisation 
 import recurrence
 import datetime
 
 
+
+
 def create_new_opportunity(request):
-    new_opportunity = Opportunity.objects.create(
-        organisation=OrganisationAdmin.objects.get(user=request.user).organisation,
-        name="New Opportunity",
-        description="New Opportunity",
-        active=False,
-        recurrences=recurrence.Recurrence(),
-        end_time=datetime.datetime.now(),
-        start_time=datetime.datetime.now(),
-    )
-    return opportunity_details(request, new_opportunity.id, success="Opportunity created successfully", index=True)
+    if request.user.is_superuser:
+        if request.method == "POST":
+            try:
+                print(request.POST["organisation_id"])
+                organisation = Organisation.objects.get(id=request.POST["organisation_id"])
+            except OrganisationAdmin.DoesNotExist:
+                print("Organisation does not exist")
+                return render(request, "org_admin/opportunity_choose_organisation.html", context={"hx": check_if_hx(request), "error": "Organisation does not exist"})
+            
+            
+            new_opportunity = Opportunity.objects.create(
+                organisation=organisation,
+                name="New Opportunity",
+                description="New Opportunity",
+                active=False,
+                recurrences=recurrence.Recurrence(),
+                end_time=datetime.datetime.now(),
+                start_time=datetime.datetime.now(),
+            )
+            request.method = "GET"
+            return opportunity_details(request, new_opportunity.id, success="Opportunity created successfully", index=True)
+        else:
+            return render(request, "org_admin/opportunity_choose_organisation.html", context={"hx": check_if_hx(request), "organisations": Organisation.objects.all()})
+    
+    if not request.user.is_superuser:
+        new_opportunity = Opportunity.objects.create(
+            organisation=OrganisationAdmin.objects.get(user=request.user).organisation,
+            name="New Opportunity",
+            description="New Opportunity",
+            active=False,
+            recurrences=recurrence.Recurrence(),
+            end_time=datetime.datetime.now(),
+            start_time=datetime.datetime.now(),
+        )
+        return opportunity_details(request, new_opportunity.id, success="Opportunity created successfully", index=True)
 
 def opportunity_supplementary_info(request, opp_id):
     if request.method == "POST":

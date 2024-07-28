@@ -61,8 +61,13 @@ def manage_schedule(request, id):
         
         #Set start and end dates
         if data["recurrences"] != "never":
-            start_date = datetime.datetime.strptime(data["start_date"], "%Y-%m-%d")
-            end_date = datetime.datetime.strptime(data["end_date"], "%Y-%m-%d")
+            
+            try:
+                start_date = datetime.datetime.strptime(data["start_date"], "%Y-%m-%d")
+                end_date = datetime.datetime.strptime(data["end_date"], "%Y-%m-%d")
+            except ValueError:
+                request.method = "GET"
+                return opportunity_details(request, id, error="Please select a start and end date", tab_name="schedule")
             
             opportunity.recurrences.dtstart = start_date
             opportunity.recurrences.dtend = end_date
@@ -76,7 +81,12 @@ def manage_schedule(request, id):
             
         #Set recurrance frequency   
         if data["recurrences"] == "never":
-            opportunity.recurrences.rrules = []
+            if len(opportunity.recurrences.rdates) > 0:
+                opportunity.recurrences.rrules = []
+            else:
+                request.method = "GET"
+                return opportunity_details(request, id, error="Please add dates or select a recurrence frequency", tab_name="schedule")
+            
         elif data["recurrences"] == "daily":
             opportunity.recurrences.rrules = [recurrence.Rule(recurrence.DAILY)]
         elif data["recurrences"] == "weekly":

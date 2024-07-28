@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
@@ -19,7 +20,34 @@ import csv
 from django.core.files import File
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.password_validation import validate_password
 
+
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = "org_admin/password_reset.html"
+    email_template_name = "org_admin/password_reset_email.html"
+    subject_template_name = "org_admin/password_reset_subject.txt"
+    success_message = (
+        "We've emailed you instructions for setting your password, "
+        "if an account exists with the email you entered. You should receive them shortly."
+        " If you don't receive an email, "
+        "please make sure you've entered the address you registered with, and check your spam folder."
+    )
+    success_url = reverse_lazy("password_reset_sent")
+
+    # add hx context to the view
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hx"] = check_if_hx(self.request)
+        return context
+
+
+def password_reset_sent(request):
+    return render(
+        request, "org_admin/password_reset_sent.html", {"hx": check_if_hx(request)}
+    )
 
 # Create your views here.
 def volunteer_admin(request):

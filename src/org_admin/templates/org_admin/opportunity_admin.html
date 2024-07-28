@@ -12,6 +12,7 @@
   <table class="table table-auto border-spacing-2">
     <thead>
       <tr>
+        {% if superuser %}<th>Logo</th>{% endif%}
         <th>Name</th>
         <th>Description</th>
         {% if superuser %}<th>Organisation</th>{% endif %}
@@ -24,6 +25,9 @@
     <tbody>
       {% for opportunity in opportunities %}
       <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
+        {% if superuser %}
+          <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md h-12 w-12" /></td>
+        {% endif %}
         <td>{{ opportunity.name }}</td>
         <td>{{ opportunity.description|truncatewords:10 }}</td>
         {% if superuser %}<td>{{ opportunity.organisation.name }}</td>{% endif %}
@@ -32,7 +36,7 @@
         <td>
           <a
             href="/org_admin/opportunities/{{opportunity.id}}"
-            class="btn btn-primary mb-3"
+            class="btn bg-green-600 mb-3 "
             >View</a
           >
           <a

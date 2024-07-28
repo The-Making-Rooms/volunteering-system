@@ -3,6 +3,7 @@ from organisations.models import Organisation
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from commonui.views import check_if_hx
+from django.contrib.auth.forms import PasswordResetForm
 
 def get_admins(request, error=None, success=None):
     if request.method == "GET":
@@ -52,8 +53,32 @@ def get_admins(request, error=None, success=None):
                 request.method = "GET"
                 return get_admins(request, error="Admin already exists")
         except User.DoesNotExist:
+            
+            new_user = User.objects.create_user(email=email, username=email)
+            new_user.save()
+
+            """
+            form = PasswordResetForm({"email": email})
+            if form.is_valid():
+                form.save(
+                    request=request,
+                    use_https=request.is_secure(),
+                    email_template_name='registration/password_reset_email.html',
+                    subject_template_name='registration/password_reset_subject.txt',
+                    from_email=None,
+                    html_email_template_name=None,
+                    extra_email_context=None,
+                )
+            else:
+                print (form.errors)
+            """
+            
+            
+            #send password reset email
+            
+            
             request.method = "GET"
-            return get_admins(request, error="User does not exist")
+            return get_admins(request, success="User was cretaed. Reset password to login")
             
                 
                 

@@ -26,7 +26,7 @@ def forms(request, error=None, success=None):
         fill_forms = Form.objects.filter(filled_by_organisation=True)
         assignable_forms = Form.objects.filter(visible_to_all=True)
         
-        forms = forms | fill_forms | assignable_forms
+        forms = forms | assignable_forms
     
     for form in forms:
         responses = Response.objects.filter(form=form)
@@ -34,7 +34,7 @@ def forms(request, error=None, success=None):
     
     context = {
         "forms": forms,
-        "fill_forms": fill_forms,
+        "staff_forms": fill_forms,
         "assignable_forms": assignable_forms,
         "hx": check_if_hx(request),
         "superuser": request.user.is_superuser,
@@ -167,6 +167,9 @@ def delete_option(request, option_id):
 
 def get_responses(request, form_id):
     form = Form.objects.get(pk=form_id)
+    if not request.user.is_superuser:
+        if form.organisation != OrganisationAdmin.objects.get(user=request.user).organisation:
+            return forms(request, error="You do not have permission to view this form")
     responses = Response.objects.filter(form=form)
     
     context = {
