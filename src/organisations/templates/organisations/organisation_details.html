@@ -87,7 +87,7 @@
     <div class="divider m-1"></div>
     <div class="card-actions justify-center">
       {% for link in links %}
-      <a href="{{ link.url }}" target="_blank" class="invert">
+      <a href="{{ link.url }}" target="_blank" class="dark:invert">
         {% if link.link_type.icon %}<img src="{{link.link_type.icon.url}}" alt="{{link.link_type.name}}" class="w-10 h-10 " />{% endif %}
       </a>
       {% endfor %}

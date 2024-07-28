@@ -23,16 +23,16 @@
         <tbody>
             {% for mentee in mentees %}
             <tr>
-                <td>{{ mentee.volunteer.user.first_name }} {{ mentee.volunteer.user.first_name}}</td>
-                <td>{{ mentee.hours }}</td>
+                <td>{{ mentee.volunteer.user.first_name }} {{ mentee.volunteer.user.last_name}}</td>
+                <td>{{ mentee.get_hours }}</td>
                 <td>
                     {% if superuser %}
-                        <a href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
+                        <a class="btn btn-primary btn-sm" href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
                     {% else %}
                         {% if mentee.organisation.id != org.organisation.id %}
                         <p>Mentored by {{mentee.organisation}}</p>
                         {% else %}
-                        <a href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
+                        <a class="btn btn-sm btn-primary" href="/org_admin/mentoring/{{mentee.id}}">Manage mentoring</a>
                         {% endif %}
                     {% endif %}
                 </td>
@@ -44,7 +44,7 @@
                 <td>{{ mentee.user.first_name }} {{ mentee.user.last_name}}</td>
                 <td>-</td>
                 <td>
-                    <a href="/org_admin/mentoring/create/{{mentee.id}}">Create Mentoring Record</a>
+                    <a class="btn btn-sm btn-primary" href="/org_admin/mentoring/create/{{mentee.id}}">Create Mentoring Record</a>
                 </td>  
             </tr>
             {% endfor %}

@@ -2,33 +2,53 @@
 
 {% block page_content %}
 
+<p class="text-2xl mb-3">Mentee Record: {{mentee.user.first_name}} {{mentee.user.last_name}} </p>
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
     <div class="flex justify-between">
         <p class="text-2xl">Mentor Sessions:</p>
-        <a class="button btn-primary" href="/org_admin/mentoring/log_hours/">Add Mentor Session</a>
+        <a class="btn btn-primary" href="/org_admin/mentoring/log_hours/{{mentee_record.id}}">Add Mentor Session</a>
     </div>
+
+    <div class="divider"></div>
 
     <table class="table">
         <thead>
             <tr>
+                <th>Mentor</th>
                 <th>Session Date</th>
                 <th>Session Duration</th>
                 <th>Session Notes</th>
             </tr>
         </thead>
         <tbody>
+            {% if mentor_sessions|length == 0 %}
+            <tr>
+                <td colspan="3">No mentor sessions have been logged</td>
+            </tr>
+
+            {%else %}
             {% for session in mentor_sessions %}
             <tr>
+                <td>{{ session.mentor_user.first_name }} {{ session.mentor_user.last_name }}</td>
                 <td>{{ session.date }}</td>
                 <td>{{ session.time }}</td>
-                <td>{{ session.session_notes }}</td>
+                 <td>{% if session.session_notes|length > 0%}{{ session.session_notes }}{%else%}-{%endif%}</td>
             </tr>
             {% endfor %}
+            {% endif %}
         </tbody>
+    </table>
 </div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">
-    <p class="text-2xl">Mentoring Notes</p>
+    <div class="flex justify-between">
+        <p class="text-2xl">Mentor Notes:</p>
+        <a class="btn btn-primary" href="/org_admin/mentoring/add_note/{{mentee_record.id}}">Add Note</a>
+    </div>
+
+    <div class="divider"></div>
+
     <table class="table">
         <thead>
             <tr>
@@ -39,9 +59,14 @@
             </tr>
         </thead>
         <tbody>
+            {% if mentor_notes|length == 0 %}
+            <tr>
+                <td colspan="3">No mentor notes have been logged</td>
+            </tr>
+            {%endif%}
             {% for note in mentor_notes %}
             <tr>
-                <td>{{ note.created_by }}</td>
+                <td>{{ note.created_by.first_name }} {{ note.created_by.last_name }}</td>
                 <td>{{ note.created_at }}</td>
                 <td>{{ note.last_updated }}</td>
                 <td>{{ note.note }}</td>

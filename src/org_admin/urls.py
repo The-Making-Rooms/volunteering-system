@@ -102,9 +102,11 @@ urlpatterns = [
     path("opportunities/registrations/set_status/", views.set_selected_registration_status, name="set_selected_registration_status"),
     path("opportunities/registrations/get_registration_table/", views.get_registration_table, name="get_registration_table"),
     
-    #path("mentoring/", views.get_mentees, name="mentoring"),
-    #path("mentoring/<int:mentee_id>/", views.manage_mentee, name="mentee_manage"),
-    #path("mentoring/create/<int:volunteer_id>/", views.create_mentee, name="create_mentee"),
+    path("mentoring/", views.get_mentees, name="mentoring"),
+    path("mentoring/<int:mentee_id>/", views.manage_mentee, name="mentee_manage"),
+    path("mentoring/create/<int:volunteer_id>/", views.create_mentee, name="create_mentee"),
+    path("mentoring/log_hours/<int:mentee_id>/", views.log_hours, name="log_hours"),
+    path("mentoring/add_note/<int:mentee_id>/", views.add_note, name="add_note"),
     
     path("admin_management/", views.get_admins, name="admin_management"),
     path("admin_management/delete/<int:admin_id>/", views.delete_admin, name="delete_admin"),
