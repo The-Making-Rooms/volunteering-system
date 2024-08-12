@@ -53,7 +53,7 @@ def detail(request, organisation_id):
         opp_object = {
             "id": opp.id,
             "name": opp.name,
-            "images": OpportunityImage.objects.filter(opportunity=opp),
+            "images": OpportunityImage.objects.filter(opportunity=opp) if len(OpportunityImage.objects.filter(opportunity=opp)) > 0 else Image.objects.filter(organisation=org),
         }
         try:
             print (opp_object['images'][0].image.url)

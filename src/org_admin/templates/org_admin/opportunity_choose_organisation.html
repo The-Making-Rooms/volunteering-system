@@ -4,17 +4,7 @@
 
 <form method="POST">
     {% csrf_token %}
-    <div class="form-control">
-        <label class="label">
-            <span class="label-text>">Select Organisation to Create opportunity</span>
-        </label>
-        <select class="select select-bordered" name="organisation_id">
-            <option value="" disabled selected>Select Organisation</option>
-            {% for org in organisations %}
-            <option value="{{ org.id }}">{{ org.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
+    
     <button class="btn btn-primary" type="submit">Choose Organisation</button>
 </form>
 

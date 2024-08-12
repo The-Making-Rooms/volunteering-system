@@ -54,28 +54,35 @@
             />
           </div>
           <div class="flex-none hidden lg:block">
-            <ul class="menu menu-horizontal" hx-boost="true" hx-target=".htmx-navigator" hx-swap="outerHTML">
+            <ul
+              class="menu menu-horizontal"
+              hx-boost="true"
+              hx-target=".htmx-navigator"
+              hx-swap="outerHTML"
+            >
               <!-- Navbar menu content here -->
-              <li><a href="/org_admin/">Dashboard</a></li>
-              <li><a href="/org_admin/details/">Organisation Details</a></li>
-              <li><a href="/org_admin/opportunities/">Opportunities</a></li>
-              <li><a href="/org_admin/registrations/">Registrations</a></li>
-              <li><a href="/org_admin/volunteers/">Volunteers</a></li>
-              <li><a href="/org_admin/mentoring">Mentoring</a></li>
-              <li><a href="/org_admin/forms/">Forms</a></li>
-              <li><a href="/org_admin/communication/">Communication</a></li>
-              <li><a href="/org_admin/admin_management/">Organisation Admins</a></li>
-              <li><a href="/org_admin/profile/">Profile</a></li>
-              <li><a href="/org_admin/logout/">Logout</a></li>
 
-
-
+              <li><a href="/org_admin/details/#">Organisation Details</a></li>
+              <li><a href="/org_admin/opportunities/#">Opportunities</a></li>
+              <li><a href="/org_admin/registrations/#">Registrations</a></li>
+              <li><a href="/org_admin/volunteers/#">Volunteers</a></li>
+              <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
+              <li><a href="/org_admin/forms/#">Forms</a></li>
+              <li><a href="/org_admin/communication/#">Communication</a></li>
+              <li>
+                <a href="/org_admin/admin_management/#">Organisation Admins</a>
+              </li>
+              <li><a href="/org_admin/profile/#">Profile</a></li>
+              <li><a href="/org_admin/logout/#">Logout</a></li>
             </ul>
           </div>
         </div>
 
         {% endif %}
-        <div class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3">
+        <div
+          class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3"
+          hx-ext="remove-me"
+        >
           {% block page_content %} {% endblock %}
         </div>
 
@@ -92,24 +99,26 @@
           hx-boost="true"
           hx-target=".htmx-navigator"
         >
-        <img
-              src="{% static 'images/chip_in_logo.svg' %}"
-              alt="logo"
-              class="flex-none ml-5 w-20"
-            />
-            <div class="divider"></div>
+          <img
+            src="{% static 'images/chip_in_logo.svg' %}"
+            alt="logo"
+            class="flex-none ml-5 w-20"
+          />
+          <div class="divider"></div>
           <!-- Sidebar content here -->
-          <li><a href="/org_admin/">Dashboard</a></li>
-          <li><a href="/org_admin/details">Organisation Details</a></li>
-          <li><a href="/org_admin/opportunities">Opportunities</a></li>
-          <li><a href="/org_admin/registrations/">Registrations</a></li>
-          <li><a href="/org_admin/volunteers">Volunteers</a></li>
-          <li><a href="/org_admin/mentoring">Mentoring</a></li>
-          <li><a href="/org_admin/forms">Forms</a></li>
-          <li><a href="/org_admin/communication">Communication</a></li>
-          <li><a href="/org_admin/admin_management/">Organisation Admins</a></li>
-          <li><a href="/org_admin/profile/">Profile</a></li>
-          <li><a href="/org_admin/logout/">Logout</a></li>
+
+          <li><a href="/org_admin/details/#">Organisation Details</a></li>
+              <li><a href="/org_admin/opportunities/#">Opportunities</a></li>
+              <li><a href="/org_admin/registrations/#">Registrations</a></li>
+              <li><a href="/org_admin/volunteers/#">Volunteers</a></li>
+              <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
+              <li><a href="/org_admin/forms/#">Forms</a></li>
+              <li><a href="/org_admin/communication/#">Communication</a></li>
+              <li>
+                <a href="/org_admin/admin_management/#">Organisation Admins</a>
+              </li>
+              <li><a href="/org_admin/profile/#">Profile</a></li>
+              <li><a href="/org_admin/logout/#">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -119,6 +128,7 @@
       integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
       crossorigin="anonymous"
     ></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/remove-me.js"></script>
   </body>
 </html>
 {% endif %}

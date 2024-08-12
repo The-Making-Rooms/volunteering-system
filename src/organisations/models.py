@@ -4,7 +4,17 @@ from PIL import Image as PImage
 import uuid
 import os
 
-# Create your models here.
+def get_random_filename_image(instance, filename):
+    ext = filename.split('.')[-1]
+    random_filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('images/', random_filename)
+
+def get_random_filename_video(instance, filename):
+    ext = filename.split('.')[-1]
+    random_filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('videos/', random_filename)
+
+
 class Organisation(models.Model):
     name = models.CharField(max_length=200)
     logo = models.ImageField(upload_to='logos/', null=True, blank=True)
@@ -40,9 +50,9 @@ class Link(models.Model):
     clicks = models.IntegerField(default=0)
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to=get_random_filename_image)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
-    thumbnail_image = models.ImageField(upload_to='images/', null=True, blank=True)
+    thumbnail_image = models.ImageField(upload_to=get_random_filename_image, null=True, blank=True)
     
 class Badge(models.Model):
     name = models.CharField(max_length=200)
@@ -67,8 +77,8 @@ class VolunteerBadge(models.Model):
 
 
 class Video(models.Model):
-    video = models.FileField(upload_to='videos/')
-    video_thumbnail = models.ImageField(upload_to='videos/', null=True, blank=True)
+    video = models.FileField(upload_to=get_random_filename_video)
+    video_thumbnail = models.ImageField(upload_to=get_random_filename_video, null=True, blank=True)
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
 
 class thematicCategory(models.Model):

@@ -141,7 +141,7 @@ def search(request):
             results_org = results_org.filter(description__icontains=stringsearch)
         if len(results_org) == 0:
             results_org = Organisation.objects.all()
-            results_org = results_org.filter(organisation__name__icontains=stringsearch)
+            results_org = results_org.filter(name__icontains=stringsearch)
         
     
 
@@ -153,7 +153,7 @@ def search(request):
             "name": result.name,
             "description": result.description,
             "organisation": result.organisation,
-            "images": Image.objects.filter(opportunity=result),
+            "images": Image.objects.filter(opportunity=result) if len(Image.objects.filter(opportunity=result)) > 0 else OrgImage.objects.filter(organisation=result.organisation),
             "tags": LinkedTags.objects.filter(opportunity=result)
         }
         result_objs.append(res_obj)
@@ -177,5 +177,7 @@ def search(request):
         "hx" : check_if_hx(request),
         
     }
+    
+    print('search results:', result_objs)
 
     return render(request, 'explore/search.html', context=context)

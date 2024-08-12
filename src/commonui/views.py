@@ -158,16 +158,16 @@ def create_account(request):
         data = request.POST
 
         if User.objects.filter(email=data["email"]).exists():
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Email already in use"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email already in use"})
         
         if data["password"] != data["password_confirm"]:
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
         
         #check password is secure enough
         try:
             validate_password(data["password"])
         except ValidationError as e:
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": e})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": e})
         
         
         #print(data)

@@ -10,10 +10,12 @@ def get_admins(request, error=None, success=None):
         if request.user.is_superuser:
             admins = OrganisationAdmin.objects.all()
             organisations = Organisation.objects.all()
+            superusers = User.objects.filter(is_superuser=True)
         else:
             organisation = OrganisationAdmin.objects.get(user=request.user).organisation
             admins = OrganisationAdmin.objects.filter(organisation=organisation)
             organisations = None
+            superusers = None
             
         context = {
             "admins": admins,
@@ -21,6 +23,7 @@ def get_admins(request, error=None, success=None):
             "success": success,
             "superuser": request.user.is_superuser,
             "organisations": organisations,
+            "superusers": superusers,
             "hx": check_if_hx(request)
         }
         
@@ -99,4 +102,23 @@ def delete_admin(request, admin_id):
     else:
         return get_admins(request, error="You do not have permission to delete this admin")
     
+
+def add_super_user(request):
+    if request.method == "POST":
+        if request.user.is_superuser:
+            data = request.POST
+            email = data.get("email")
+            try:
+                user = User.objects.get(email=email)
+                user.is_superuser = True
+                user.save()
+                request.method = "GET"
+                return get_admins(request, success="Superuser added")
+            except User.DoesNotExist:
+                request.method = "GET"
+                return get_admins(request, error="User does not exist")
+        else:
+            request.method = "GET"
+            return get_admins(request, error="You do not have permission to add a superuser")
+        
     

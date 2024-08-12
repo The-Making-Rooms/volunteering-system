@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", views.details, name="index"),
     path("details/", views.details, name="details"),
     path("upload_organisation_logo/", views.upload_organisation_logo, name="upload_organisation_logo"),
     path("sign_in/", views.sign_in, name="sign_in"),
@@ -78,12 +78,23 @@ urlpatterns = [
     path("delete_media/organisation_image/<int:id>/<str:media_type>/", views.delete_media, name="delete_media_organisation", kwargs={'location': 'org_media'}),
 
     path("opportunities/", views.opportunity_admin, name="opportunity_admin", ),
+    path("opportunities/filter/", views.get_filtered_opportunities, name="opportunity_admin", ),
     path("opportunities/<int:id>/", views.opportunity_details, name="opportunity_details", kwargs={'index': True}),
     path("opportunities/<int:id>/<str:tab_name>/", views.opportunity_details, name="opportunity_details"),
     path("opportunities/details/<int:id>/", views.opportunity_details, name="opportunity_details"),
+    path("opportunities/sections/<int:id>/", views.opportunity_sections, name="opportunity_details"),
     path("opportunities/benefits/<int:id>/", views.opportunity_benefits, name="opportunity_benefits"),
+    
+    path("opportunities/tags/<int:opportunity_id>/", views.tag_details, name="manage_benefit"),
     path("opportunities/manage_tag/<int:opportunity_id>/", views.add_tag, name="manage_benefit"),
     path("opportunities/manage_tag/delete/<int:opportunity_id>/<int:linked_tag_id>/", views.add_tag, name="manage_benefit", kwargs={'delete': True}),
+    
+    path("opportunities/manage_section/new/<int:opportunity_id>/", views.create_new_section, name="opportunity_section_manage"),
+    path("opportunities/manage_section/delete/<int:section_id>/", views.delete_section, name="opportunity_section_delete"),
+    path("opportunities/manage_section/edit/<int:section_id>/", views.edit_section, name="opportunity_section_manage"),
+    path("opportunities/manage_section/move_up/<int:section_id>/", views.move_section_up, name="opportunity_section_manage"),
+    path("opportunities/manage_section/move_down/<int:section_id>/", views.move_section_down, name="opportunity_section_manage"),
+    
     
     path("opportunities/supp_info/<int:opp_id>/", views.opportunity_supplementary_info, name="opportunity_supplementary_info"),
     path("opportunities/supp_info/delete/<int:supp_id>/<int:opp_id>", views.opportunity_supplementary_info, name="opportunity_supplementary_info", kwargs={'delete': True}),
@@ -110,6 +121,7 @@ urlpatterns = [
     
     path("admin_management/", views.get_admins, name="admin_management"),
     path("admin_management/delete/<int:admin_id>/", views.delete_admin, name="delete_admin"),
+    path("admin_management/superuser/", views.add_super_user, name="add_superuser"),
     
     path("opportunities/schedule/<int:id>/", views.manage_schedule, name="opportunity_schedule"),
     path("delete_date/<int:opportunity_id>/<int:id>/", views.delete_date, name="delete_date"),
@@ -125,6 +137,8 @@ urlpatterns = [
     
     path("communications/", views.chats, name="communication_admin"),
     path("communications/<int:id>/", views.chat, name="communication_details"),
+    
+    path("create_new_organisation/", views.create_new_organisation, name="create_new_organisation"),
     
     
 ]

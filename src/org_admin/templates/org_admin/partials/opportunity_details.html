@@ -6,7 +6,7 @@
   <form class="post-form">
     {% csrf_token %}
     <label for="name">
-      <span class="label-text">Opportunity Name</span>
+      <span class="label-text">Opportunity Name (Maximum 50 characters)</span>
     </label>
     <input
       id="name"
@@ -14,12 +14,13 @@
       class="input input-bordered w-full mb-3"
       placeholder="Opportunity Name"
       name="name"
+      maxlength="50"
       value="{{ opportunity.name }}"
     />
     <br />
 
     <label for="description">
-      <span class="label-text">Opportunity Description</span>
+      <span class="label-text">Opportunity Description (Maximum 2000 characters)</span>
     </label>
 
     <textarea
@@ -27,6 +28,7 @@
       class="textarea textarea-bordered w-full text-wrap"
       name="description"
       placeholder="Opportunity Description"
+      maxlength="2000"
     >
 {{ opportunity.description }}</textarea
     >
@@ -73,78 +75,4 @@
 </form>
 </div>
 
-<div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
 
-    <div class="flex justify-between items-center">
-      <p class="text-xl">Additional Information</p>
-      <p>Add any additional information you would like to ask volunteers. Note that these need to be assigned to opportunities</p>
-    </div>
-  <div class="divider"></div>
-  {% if supp_infos %}
-  <table class="table w-full">
-    
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for info in supp_infos %}
-      <tr>
-        <td>{{ info.info.title }}</td>
-        <td>{{info.info.description}}</td>
-        <td>
-          <a
-            hx-get="/org_admin/supplementary_info/delete/{{ info.id }}/"
-            class="btn bg-red-600 btn-xs"
-            hx-target=".htmx-navigator"
-            hx-swap="outerHTML"
-            >Delete</a
-          >
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else%}
-  No Supplemental Information questions added yet
-  {%endif%}
-  
-  <div class="divider"></div>
-  
-    <form class="flex w-full">
-      {% csrf_token %}
-      
-      <select class="select select-bordered flex-grow" name="supp_id">
-        {% for info in avail_supp_infos %}
-        <option value="{{ info.id }}">{{ info.title }}</option>
-        {% endfor %}
-      </select>
-      <button class="btn btn-primary self-end" hx-post="/org_admin/opportunities/supp_info/{{opportunity.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">
-        Add
-      </button>
-    </form>
-
-  </div>
-  <div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
-
-    <div>
-      <p>Tags</p>
-      <p>Click on a tag to delete it</p>
-      <div class="flex">
-        <form>
-          {% csrf_token %}
-          <input name="tag" type="text" placeholder="Type to add a tag" class="input input-bordered w-full max-w-xs" />
-          <button class="btn bg-green-600" hx-target=".htmx-navigator" hx-post="/org_admin/opportunities/manage_tag/{{opportunity.id}}/" hx-swap="outerHTML" >Add</button>
-        </form>
-      </div>
-
-      <div class="flex flex-wrap">
-        {% for tag in tags %}
-        <a hx-swap="outerHTML" hx-target=".htmx-navigator" hx-get="/org_admin/opportunities/manage_tag/delete/{{opportunity.id}}/{{tag.id}}/"><div class="badge badge-primary mx-1 cursor-pointer">{{ tag.tag.tag }}</div></a>
-        {% endfor %}
-    </div>
-
-
-</div>

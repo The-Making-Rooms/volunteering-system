@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon, OpportunitySection
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
@@ -22,9 +22,13 @@ def detail(request, opportunity_id):
     benefits = Benefit.objects.filter(opportunity=opportunity)
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
+    sections = OpportunitySection.objects.filter(opportunity=opportunity)
     
-    print(opportunity.recurrences.rrules)
-    print(opportunity.recurrences.rdates)
+    #print(opportunity.recurrences.rrules)
+    #print(opportunity.recurrences.rdates)
+    
+    #Supplimental Information Requirements
+    supp_info_reqs = SupplimentaryInfoRequirement.objects.filter(opportunity=opportunity)
 
     view = OpportunityView(opportunity=opportunity)
     view.save()
@@ -81,7 +85,9 @@ def detail(request, opportunity_id):
         "opp_videos": opp_videos,
         "hx" : check_if_hx(request),
         "exists": active,
-        "linked_tags": tags
+        "linked_tags": tags,
+        "supp_info_reqs": supp_info_reqs,
+        "sections": sections
     }
 
     return HttpResponse(template.render(context, request))

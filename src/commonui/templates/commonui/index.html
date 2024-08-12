@@ -8,6 +8,19 @@
   <p class="text-2xl font-bold">Welcome, {{ user.first_name }}</p>
   <p>Explore opportunitites on chip in</p>
 </div>
+{% else %}
+
+<div class="bg-secondary rounded-xl p-5 text-base sm:text-xl md:text-2xl mb-3">
+<span class="font-bold">Welcome to Chip In!</span><br>
+Chip in is a place-based volunteering project for young people from the borough of Blackburn with Darwen, with mentoring at the heart.
+<br><br>
+However, it’s not just about volunteering, this project’s passion is about people, real people, people and communities. 
+<br><br>
+Building, supporting, connecting, upskilling. Investing.
+<br><br>
+
+Start by <a href="/volunteer/" class="text-primary">logging in</a> or <a href="/create_account" class="text-primary">signing up</a> to explore opportunities and organisations in your area.
+</div>
 {% endif %}
 
 

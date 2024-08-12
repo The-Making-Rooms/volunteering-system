@@ -5,6 +5,18 @@ import random
 import requests
 from io import BytesIO
 from django.core.files.base import ContentFile
+import os
+import uuid
+
+def get_random_filename_image(instance, filename):
+    ext = filename.split('.')[-1]
+    random_filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('images/', random_filename)
+
+def get_random_filename_video(instance, filename):
+    ext = filename.split('.')[-1]
+    random_filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('videos/', random_filename)
 
 def generate_random_pastel_hex():
     red = random.randint(0, 255)
@@ -51,8 +63,8 @@ def get_default_icon():
         
 # Create your models here.
 class Opportunity(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=500)
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=2000)
     recurrences = RecurrenceField(null=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -65,6 +77,18 @@ class Opportunity(models.Model):
     
     class Meta:
         verbose_name_plural = "Opportunities"
+
+class OpportunitySection(models.Model):
+    opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
+    title = models.CharField(max_length=100)
+    content = models.CharField(max_length=2000)
+    order = models.IntegerField()
+    
+    class Meta:
+        ordering = ['order']
+        
+        #unique between order and opportunity
+
 
 class OpportunityView(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
@@ -128,13 +152,16 @@ class RegistrationAbsence(models.Model):
     date = models.DateField(auto_now_add=True)
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/')
-    thumbnail_image = models.ImageField(upload_to='images/', null=True, blank=True)
+    
+    
+    
+    image = models.ImageField(upload_to=get_random_filename_image)
+    thumbnail_image = models.ImageField(upload_to=get_random_filename_image, null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
 
 class Video(models.Model):
-    video = models.FileField(upload_to='videos/')
-    video_thumbnail = models.ImageField(upload_to='videos/', null=True, blank=True)
+    video = models.FileField(upload_to=get_random_filename_video)
+    video_thumbnail = models.ImageField(upload_to=get_random_filename_video, null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
 
 class LinkedTags(models.Model):
