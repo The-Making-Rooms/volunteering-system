@@ -1,0 +1,48 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Create New Opportunity</p>
+</div>
+
+{% if error %}{% include "commonui/error.html" %} {% endif %}
+
+<!-- Form for Opportunity name, and description, if superuser, have a section to choose organisation -->
+
+<form method="post" hx-post="/org_admin/opportunities/add/" hx-swap="outerHTML" hx-target=".htmx-navigator" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if superuser %}
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text>">Select Organisation to Create opportunity</span>
+        </label>
+        <select class="select select-bordered" name="organisation_id">
+            <option value="" disabled selected>Select Organisation</option>
+            {% for org in organisations %}
+            <option value="{{ org.id }}">{{ org.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Name</span>
+        </label>
+        <input type="text" name="name" placeholder="Opportunity Name" maxlength="50" class="input input-bordered">
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text
+            ">Description</span>
+        </label>
+        <textarea name="description" placeholder="Opportunity Description" maxlength="2000" class="textarea textarea-bordered"></textarea>
+    </div>
+    <div class="form-control mt-3">
+        <button class="btn btn-primary">Create Opportunity</button>
+    </div>
+
+</form>
+    
+    {% endblock %}

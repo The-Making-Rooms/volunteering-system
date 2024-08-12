@@ -1,0 +1,47 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Create New Organisation</p>
+</div>
+
+{% if error %}{% include "commonui/error.html" %} {% endif %}
+
+<form method="post" hx-post="/org_admin/create_new_organisation/"  enctype="multipart/form-data">
+    {% csrf_token %}
+    <!-- Logo -->
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Logo</span>
+        </label>
+        <input
+        type="file"
+        class="file-input file-input-bordered file-input-primary w-full"
+        name="logo"
+        accept="image/png, image/jpeg"
+        multiple
+      />
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Name</span>
+        </label>
+        <input type="text" name="name" placeholder="Organisation Name" class="input input-bordered">
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text
+            ">Description</span>
+        </label>
+        <textarea name="description" placeholder="Organisation Description" class="textarea textarea-bordered"></textarea>
+
+    </div>
+    <div class="form-control mt-3">
+        <button class="btn btn-primary">Create Organisation</button>
+
+    </div>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+<div id="opportunity_results_table" class="p-5 rounded-lg bg-base-200 mb-3">
+    <table class="table table-auto border-spacing-2">
+      <thead>
+        <tr>
+          {% if superuser %}<th>Logo</th>{% endif%}
+          <th>Name</th>
+          <th>Description</th>
+          {% if superuser %}<th>Organisation</th>{% endif %}
+          <th>Number of sign ups</th>
+          <th>Total Views</th>
+          <th>Actions</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        {% for opportunity in opportunities %}
+        <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
+          {% if superuser %}
+            <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md h-12 w-12" /></td>
+          {% endif %}
+          <td>{{ opportunity.name }}</td>
+          <td>{{ opportunity.description|truncatewords:10 }}</td>
+          {% if superuser %}<td>{{ opportunity.organisation.name }}</td>{% endif %}
+          <td>{{ opportunity.registrations }}</td>
+          <td>{{ opportunity.views }}</td>
+          <td>
+            <a
+              href="/org_admin/opportunities/{{opportunity.id}}"
+              class="btn bg-green-600 mb-3 "
+              >View</a
+            >
+            <a
+              href="/org_admin/opportunities/registrations/{{opportunity.id}}"
+              class="btn btn-primary"
+              >Registrations</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>

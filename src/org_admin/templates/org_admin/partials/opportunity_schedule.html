@@ -17,17 +17,6 @@
             />
         </div>
 
-        <div class="divider divider-horizontal"></div>
-
-        <div class="w-full">
-          <p>End Date</p>
-          <input
-            type="date"
-            name="end_date"
-            class="input input-bordered w-full mb-3"
-            value="{{end_date | date:'Y-m-d'}}"
-          />
-        </div>
       </div>
  
 
@@ -45,7 +34,20 @@
         </select>
       </div>
 
+      <div class="w-full">
+        <p>End Date</p>
+        <input
+          type="date"
+          name="end_date"
+          class="input input-bordered w-full mb-3"
+          value="{{end_date | date:'Y-m-d'}}"
+        />
+      </div>
+
       <div class="divider my-1"></div>
+
+
+
       <p>Each occurance</p>
       <div class="flex">
         <div class="w-full">

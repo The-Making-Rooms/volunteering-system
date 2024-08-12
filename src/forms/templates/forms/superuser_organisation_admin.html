@@ -1,0 +1,31 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Organisations</p>
+  </div>
+  {% if error %}{% include "commonui/error.html" %} {% endif %}
+
+  <div class="p-5 rounded-lg bg-base-200 mb-3">
+    <table class="table table-auto border-spacing-2">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for organisation in organisations %}
+      <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
+        <td>{{ organisation.name }}</td>
+        <td>{{ organisation.description|truncatewords:10 }}</td>
+        <td>
+          <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-primary mb-3">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+</div>
+{% endblock %}

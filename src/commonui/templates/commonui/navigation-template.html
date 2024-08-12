@@ -12,6 +12,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="robots" content="noindex">
     <title>Chip In</title>
 
     <style>
@@ -83,6 +84,7 @@
       
         <div
           class="z-0 relative htmx-navigator mx-5 md:mx-20 xl:mx-40 2xl:mx-80 pb-24"
+          hx-ext="remove-me"
         >
           {% block page_content %} {% endblock %}
         </div>
@@ -140,6 +142,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-video@0.8.0/dist/js/splide-extension-video.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/loading-states.js"></script>
     <script src="{% static '/js/registerSw.js' %}"></script>
+    <script src="https://unpkg.com/htmx-ext-remove-me@2.0.0/remove-me.js"></script>
     <script>
 
       setPageTheme();

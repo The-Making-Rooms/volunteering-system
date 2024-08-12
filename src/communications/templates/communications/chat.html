@@ -5,7 +5,7 @@
         <div class="flex flex-col h-full">
 
             {% if error %}
-            <div class="alert alert-error">{{ error }}</div>
+            <div class="alert alert-error">{% include "commonui/error.html" %}</div>
             {% endif %}
 
             <h1 class="text-2xl font-bold mb-3">Chat wth {{ chat.organisation.name }}</h1>

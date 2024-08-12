@@ -12,6 +12,7 @@ from PIL import Image as PImage
 import os
 import cv2
 from django.core.files.base import ContentFile
+import random
 
 
 def opportunity_gallery(request, id):
@@ -103,6 +104,10 @@ def upload_media(request, location, id=None, organisation_id=None):
                             return details(request, error="Organisation not found")
                         else:
                             organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+                        
+                        #rename file before saving to randomise
+                        
+                        
                         
                         image_instance = OrgImage.objects.create(
                             image=file,

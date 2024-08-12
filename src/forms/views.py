@@ -3,12 +3,16 @@ from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
 from .models import Form, Question, Options, Answer, Response, FormResponseRequirement
 from volunteer.views import index
+from org_admin.models import OrganisationAdmin
 # Create your views here.
 def fill_form(request, form_id):
     form = Form.objects.get(pk=form_id)
     question_objects = Question.objects.filter(form=form).order_by('index')
     
-    allowed_to_fill = FormResponseRequirement.objects.get(form=form, user=request.user, completed=False) if FormResponseRequirement.objects.filter(form=form, user=request.user, completed=False).exists() else None
+    if not form.filled_by_organisation:
+        allowed_to_fill = FormResponseRequirement.objects.get(form=form, user=request.user, completed=False) if FormResponseRequirement.objects.filter(form=form, user=request.user, completed=False).exists() else None
+    else:
+        allowed_to_fill = len(OrganisationAdmin.objects.filter(user=request.user)) > 0
     
     responses = Response.objects.filter(form=form, user=request.user)
     
@@ -33,6 +37,9 @@ def fill_form(request, form_id):
         "questions": questions,
         "hx": check_if_hx(request),
     }
+    
+    if OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, 'forms/admin_fill_org_from.html', context=context)
     return render(request, 'forms/render_form.html', context=context)
 
 
@@ -51,6 +58,17 @@ def submit_response(request, form_id):
     if errors:#if there are errors
         return render (request, 'forms/errors.html', context={"errors": errors})
     
+    requirement = None
+    
+    if not Form.objects.get(pk=form_id).filled_by_organisation:
+        try:
+            requirement = FormResponseRequirement.objects.get(form=Form.objects.get(pk=form_id), user=request.user, completed=False)
+        except FormResponseRequirement.DoesNotExist:
+            return render(request, 'forms/redirect_profile.html')
+    else:
+        if len(OrganisationAdmin.objects.filter(user=request.user)) == 0:
+            return render(request, 'forms/redirect_profile.html')
+    
     response = Response.objects.create(user=request.user, form=Form.objects.get(pk=form_id))
     for question in form_questions:
         if question.question_type == "multi_choice" and question.allow_multiple and len(request.POST.getlist(str(question.pk))) > 1:
@@ -68,12 +86,12 @@ def submit_response(request, form_id):
                 answer=request.POST.get(str(question.pk)),
                 response=response,
             )
-            
-        try:
-            requirement = FormResponseRequirement.objects.get(form=Form.objects.get(pk=form_id), user=request.user, completed=False)
-            requirement.completed = True
-            requirement.save()
-        except FormResponseRequirement.DoesNotExist:
-            return render(request, 'forms/redirect_profile.html')
+    
+    if not Form.objects.get(pk=form_id).filled_by_organisation:        
+        requirement.completed = True
+        requirement.save()
 
+
+    if OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, 'forms/redirect_admin.html')
     return render(request, 'forms/redirect_profile.html')

@@ -11,6 +11,7 @@ from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.password_validation import validate_password
 import random
+from org_admin.models import OrganisationAdmin
 
 # create uswer
 from django.contrib.auth.models import User
@@ -57,11 +58,14 @@ def password_reset_sent(request):
         request, "commonui/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
 
+def redirect_admins(request):
+    if request.user.is_authenticated:
+        if OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
 
 # Create your views here.
 def index(request):
     template = loader.get_template("commonui/index.html")
-
     orgs = Organisation.objects.filter(featured=True)
     opps = Opportunity.objects.filter(featured=True)
     org_objects = []
@@ -154,16 +158,16 @@ def create_account(request):
         data = request.POST
 
         if User.objects.filter(email=data["email"]).exists():
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Email already in use"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email already in use"})
         
         if data["password"] != data["password_confirm"]:
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
         
         #check password is secure enough
         try:
             validate_password(data["password"])
         except ValidationError as e:
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": e})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": e})
         
         
         #print(data)

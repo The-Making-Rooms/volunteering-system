@@ -1,0 +1,11 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<form method="POST">
+    {% csrf_token %}
+    
+    <button class="btn btn-primary" type="submit">Choose Organisation</button>
+</form>
+
+{% endblock %}

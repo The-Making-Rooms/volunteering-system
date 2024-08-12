@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon, OpportunitySection
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
@@ -22,9 +22,13 @@ def detail(request, opportunity_id):
     benefits = Benefit.objects.filter(opportunity=opportunity)
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
+    sections = OpportunitySection.objects.filter(opportunity=opportunity)
     
-    print(opportunity.recurrences.rrules)
-    print(opportunity.recurrences.rdates)
+    #print(opportunity.recurrences.rrules)
+    #print(opportunity.recurrences.rdates)
+    
+    #Supplimental Information Requirements
+    supp_info_reqs = SupplimentaryInfoRequirement.objects.filter(opportunity=opportunity)
 
     view = OpportunityView(opportunity=opportunity)
     view.save()
@@ -81,7 +85,9 @@ def detail(request, opportunity_id):
         "opp_videos": opp_videos,
         "hx" : check_if_hx(request),
         "exists": active,
-        "linked_tags": tags
+        "linked_tags": tags,
+        "supp_info_reqs": supp_info_reqs,
+        "sections": sections
     }
 
     return HttpResponse(template.render(context, request))
@@ -91,10 +97,10 @@ def register(request, opportunity_id):
     #The registration process is as follows:
     #1. Check if the user is logged in
     #2. Check if the user has a volunteer profile
-    #Query the opportunity if it requires any supplementary information
-    #Generat a form with the supplementary information
+    #Query the opportunity if it requires any Additional Information
+    #Generat a form with the Additional Information
     #If the form is valid, create a registration object
-    #Grant organisaton access to the supplementary information
+    #Grant organisaton access to the Additional Information
     #Return a success message
 
     if request.user.is_authenticated:
@@ -126,7 +132,7 @@ def register(request, opportunity_id):
                     initial_data.append({'info': vol_supp_info.info, 'data': vol_supp_info.data})
             except VolunteerSupplementaryInfo.DoesNotExist:
                 initial_data.append({'info': req.info, 'value': ''})
-        #crete a form for the supplementary information
+        #crete a form for the Additional Information
         formset = SuppInfoFormSet(initial=initial_data)
 
 

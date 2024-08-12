@@ -1,0 +1,77 @@
+<div class="p-5 rounded-lg  bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+      <p class="text-xl">Sections</p>
+      <a>
+        <button
+          class="btn btn-primary"
+          hx-get="/org_admin/opportunities/manage_section/new/{{ opportunity.id }}/"
+          hx-target="#sections_editor"
+          hx-swap="outerHTML"
+          >Add Section</button
+        >
+    </div>
+
+    <div class="divider"></div>
+
+    <div id="sections_editor">
+    <table class="table">
+        <tr class="border-b border-gray-600">
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+
+        {% if sections|length == 0 %}
+        <tr>
+            <td colspan="4" class="text-center">No sections</td>
+        </tr>
+        {% endif %}
+
+        {% for section in sections %}
+        <tr>
+            <td class="flex-grow">{{ section.title }}</td>
+            <td>
+            <a
+                hx-get="/org_admin/opportunities/manage_section/edit/{{ section.id }}/"
+                class="btn bg-blue-600"
+                hx-target="#sections_editor"
+                hx-swap="outerHTML"
+                hx-push-url="false"
+                >Edit</a
+            >
+
+            <a
+                hx-get="/org_admin/opportunities/manage_section/move_up/{{ section.id }}/"
+                class="btn bg-gray-700"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                hx-push-url="false"
+                >↑</a
+            >
+
+            <a
+                hx-get="/org_admin/opportunities/manage_section/move_down/{{ section.id }}/"
+                class="btn bg-gray-700"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                hx-push-url="false"
+                >↓</a
+            >  
+
+            <a
+                hx-get="/org_admin/opportunities/manage_section/delete/{{ section.id }}/"
+                class="btn bg-red-600"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                hx-push-url="false"
+                >Delete</a
+            >
+            </td>
+        </tr>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% with active_link="sections" %}
+{% include "org_admin/partials/tabs.html" %}
+{% endwith %}

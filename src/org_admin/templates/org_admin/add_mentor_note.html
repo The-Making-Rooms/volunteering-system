@@ -1,0 +1,30 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+
+<p class="text-2xl">Add a Mentoring Note</p>
+<p>For mentee: {{ mentee.user.first_name }} {{ mentee.user.last_name }}</p>
+<div class="divider"></div>
+
+<form method="POST">
+    {% csrf_token %}
+
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Notes:</span>
+        </label>
+        <textarea name="session_notes" class="textarea textarea-bordered" required ></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <button type="submit" hx-post="/org_admin/mentoring/add_note/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" class="btn btn-primary">Add Note</button>
+
+</form>
+</div>
+        
+
+{% endblock %}

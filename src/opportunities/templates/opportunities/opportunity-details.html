@@ -6,9 +6,11 @@
 <div class="w-full rounded-xl mb-5">
 
   <style>
+
     .splide__slide img {
-      width: 100%;
-      height: auto;
+      height: 100%;
+      width: auto;
+      margin: 0 auto;
     }
 
     .splide__arrow:disabled {
@@ -25,7 +27,7 @@
             <img src="{{video.video_thumbnail.url}}">
           </li>
         {% endfor %}
-          <li class="splide__slide">
+          <li class="splide__slide bg-black">
             <img src="{{image.image.url}}" alt="">
           </li>
         {% endfor %}
@@ -172,7 +174,7 @@
         <ul class="list-disc w-full">
             {% for benefit in benefits %}
                 <li class="flex items-center p-1 rounded-xl border border-gray-400 w-full mb-2">
-                  <img class="invert h-16 w-16 p-2" src="{{benefit.icon.icon.url}}"></img>
+                  <img class="dark:invert h-16 w-16 p-2" src="{{benefit.icon.icon.url}}"></img>
                   <div class="divider divider-vertical"></div>
                   <p>{{ benefit.description }}</p>
                 </li>
@@ -182,6 +184,18 @@
     </div>
   </div>
   {% endif %}
+
+  {% for section in sections%}
+  <div class="card w-full bg-base-300 shadow-xl mb-5">
+    <div class="card-body">
+      <h2 class="card-title">{{ section.title }}</h2>
+      <div class="divider"></div> 
+      <div class="card-actions">
+        <p>{{ section.content }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 
   {% if locations %}
 <div class="card w-full bg-base-300 shadow-xl mb-5">
@@ -235,9 +249,25 @@
       initMap();  
       </script>
       <div id="map" class="w-full h-96"></div>
+
+
+  </div>
+</div>
+{% endif %}
+
+{% if supp_info_reqs|length > 0 %}
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">Information you will have to provide:</h2>
     <div class="divider"></div> 
-    <div class="card-actions justify-center">
-      <a href="https://www.google.com/maps/dir/?api=1" class="btn btn-primary">Check directions</a>
+    <div class="card-actions">
+      <ul class="list-disc w-full">
+          {% for req in supp_info_reqs %}
+              <li class="ml-3">
+                <p>{{ req.info.title }} - Required by: {% if req.info.organisation != None %} {{req.info.organisation}} {%else%}Chip In{%endif%}</p>
+              </li>
+          {% endfor %}
+      </ul>
     </div>
   </div>
 </div>

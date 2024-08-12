@@ -12,3 +12,6 @@ from .opportunity_registrations import *
 from .mentor import *
 from .admin_assignment import *
 from .admin_profile import *
+from .opportunity_sections import *
+from .opportunity_tags import *
+from .opportunity_additional_info import *

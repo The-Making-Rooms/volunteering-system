@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import timedelta
 
 # Create your models here.
 class Volunteer(models.Model):
@@ -18,17 +19,22 @@ class MentorRecord(models.Model):
     volunteer = models.OneToOneField('Volunteer', on_delete=models.CASCADE)
     organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
     
+    def get_hours(self):
+        deltas = [session.time for session in MentorSession.objects.filter(MentorRecord=self)]
+        return sum(deltas, timedelta())
+    
 class MentorSession(models.Model):
     date = models.DateField()
     time = models.DurationField()
     session_notes = models.TextField(blank=True)
+    mentor_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     MentorRecord = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
 
 class MentorNotes(models.Model):
     note = models.TextField()
     MentorRecord = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('org_admin.OrganisationAdmin', on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now=True)
     
 class VolunteerAddress(models.Model):

@@ -6,45 +6,30 @@
     >Create New Opportunity</a
   >
 </div>
-{% if error %} {{ error }} {% endif %}
 
-<div class="p-5 rounded-lg bg-base-200 mb-3">
-  <table class="table table-auto border-spacing-2">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        {% if superuser %}<th>Organisation</th>{% endif %}
-        <th>Number of sign ups</th>
-        <th>Total Views</th>
-        <th>Actions</th>
-        
-      </tr>
-    </thead>
-    <tbody>
-      {% for opportunity in opportunities %}
-      <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
-        <td>{{ opportunity.name }}</td>
-        <td>{{ opportunity.description|truncatewords:10 }}</td>
-        {% if superuser %}<td>{{ opportunity.organisation.name }}</td>{% endif %}
-        <td>{{ opportunity.registrations }}</td>
-        <td>{{ opportunity.views }}</td>
-        <td>
-          <a
-            href="/org_admin/opportunities/{{opportunity.id}}"
-            class="btn btn-primary mb-3"
-            >View</a
-          >
-          <a
-            href="/org_admin/opportunities/registrations/{{opportunity.id}}"
-            class="btn btn-primary"
-            >Registrations</a
-          >
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="flex items-center justify-between">
+  <label class="input input-bordered flex items-center gap-2 w-full mb-2">
+    <input type="text" class="grow" placeholder="Search" name="search" id="search_input"
+      hx-post="/org_admin/opportunities/filter/"
+      hx-trigger="keyup changed delay:500ms"
+      hx-target="#opportunity_results_table"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' />
+    <a hx-on:click="document.getElementById('search_input').value = ''"
+      hx-get="/org_admin/opportunities/filter/"
+      hx-target="#opportunity_results_table"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+      </svg>
+  </a>
+  </label>
 </div>
+{% if error %} {% include "commonui/error.html" %} {% endif %}
+
+
+{% include "org_admin/opportunity_admin_table.html" %}
 
 {% endblock %}

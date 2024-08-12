@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
 from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity
-from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation
+from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags
 from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
 from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo
@@ -19,7 +20,35 @@ import csv
 from django.core.files import File
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.password_validation import validate_password
+from .auth import sign_in
 
+
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = "org_admin/password_reset.html"
+    email_template_name = "org_admin/password_reset_email.html"
+    subject_template_name = "org_admin/password_reset_subject.txt"
+    success_message = (
+        "We've emailed you instructions for setting your password, "
+        "if an account exists with the email you entered. You should receive them shortly."
+        " If you don't receive an email, "
+        "please make sure you've entered the address you registered with, and check your spam folder."
+    )
+    success_url = reverse_lazy("password_reset_sent")
+
+    # add hx context to the view
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hx"] = check_if_hx(self.request)
+        return context
+
+
+def password_reset_sent(request):
+    return render(
+        request, "org_admin/password_reset_sent.html", {"hx": check_if_hx(request)}
+    )
 
 # Create your views here.
 def volunteer_admin(request):
@@ -91,7 +120,52 @@ def opportunity_admin(request, error=None, success=None):
         "success": success,
          },
     )
+    
+def get_filtered_opportunities(request):
+    if request.method == "POST":
+        data = request.POST
+        search_term = data["search"]
+        
+        opportunities = None
+        
+        if request.user.is_superuser:
+            opportunities = Opportunity.objects.filter(name__icontains=search_term) | Opportunity.objects.filter(description__icontains=search_term) | Opportunity.objects.filter(organisation__name__icontains=search_term) | Opportunity.objects.filter(id__in=LinkedTags.objects.filter(tag__tag__icontains=search_term).values_list('opportunity', flat=True))
+        else:
+            admin_org = OrganisationAdmin.objects.get(user=request.user).organisation
+            Opportunity.objects.filter(organisation=admin_org).filter(name__icontains=search_term) | Opportunity.objects.filter(organisation=admin_org).filter(description__icontains=search_term) | Opportunity.objects.filter(organisation=admin_org).filter(organisation__name__icontains=search_term) | Opportunity.objects.filter(organisation=admin_org).filter(id__in=LinkedTags.objects.filter(tag__tag__icontains=search_term).values_list('opportunity', flat=True))
 
+        for opportunity in opportunities:
+            opportunity.registrations = Registration.objects.filter(opportunity=opportunity).count()
+            opportunity.views = OpportunityView.objects.filter(opportunity=opportunity).count()
+            
+        context = {
+            "hx": check_if_hx(request),
+            "opportunities": opportunities,
+            "superuser": request.user.is_superuser,
+        }
+        
+        return render(request, "org_admin/opportunity_admin_table.html", context=context)
+    else:
+        if request.user.is_superuser:
+            opportunities = Opportunity.objects.all()
+        else:
+            opportunities = Opportunity.objects.filter(
+                organisation=OrganisationAdmin.objects.get(user=request.user).organisation
+            )
+        
+        for opportunity in opportunities:
+            opportunity.registrations = Registration.objects.filter(opportunity=opportunity).count()
+            opportunity.views = OpportunityView.objects.filter(opportunity=opportunity).count()
+            
+        context = {
+            "hx": check_if_hx(request),
+            "opportunities": opportunities,
+            "superuser": request.user.is_superuser,
+        }
+        
+        return render(request, "org_admin/opportunity_admin_table.html", context=context)
+
+            
 
 def upload_organisation_logo(request, organisation_id=None):
     if request.method == "GET":
@@ -123,7 +197,28 @@ def delete_opportunity(request, id):
     return opportunity_admin(request)
 
 
+def create_new_organisation(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            print(request.FILES, request.POST)
+            data = request.POST
+            logo = request.FILES["logo"]
+            
+            
+            
+            org = Organisation.objects.create(
+                name=data["name"],
+                description=data["description"],
+                logo = logo,
+            )
+            return HTTPResponseHXRedirect("/org_admin/organisations/{}/".format(org.id))
+        return render(request, "org_admin/create_new_organisation.html", {"hx": check_if_hx(request)})
+    else:
+        return opportunity_admin(request, error="You do not have permission to create an organisation")
+
 def details(request, error=None, success=None, organisation_id=None):
+    if not request.user.is_authenticated:
+        return sign_in(request)
     print(request.user.is_superuser)
     if request.method == "POST":
         if organisation_id and request.user.is_superuser:

@@ -22,7 +22,7 @@
             <div class="w-11/12 h-11/12 md:w-5/12 md:h-5/12 bg-secondary rounded-xl p-5">
             <p class="text-2xl">Sign in to Chip In Admin</p>
             {% if error %}
-                <p class="text-red-500">{{ error }}</p>
+                {% include "commonui/error.html" %}
             {% endif %}
             <form method="post">
             {% csrf_token %}
@@ -39,6 +39,7 @@
                     <input type="password" name="password" placeholder="Password" class="input input-bordered" required>
                 </div>
                 <button class="btn btn-primary mt-5" type="submit">Sign in</button>
+                <a href="/org_admin/password_reset/" class="btn btn-secondary mt-5">Forgot Password?</a>
             </form>
             <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
             

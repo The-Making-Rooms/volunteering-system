@@ -502,10 +502,10 @@ def sign_up(request):
         data = request.POST
         
         if User.objects.filter(email=data["email"]).exists():
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Email already in use"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email already in use"})
         
         if data["password"] != data["password_confirm"]:
-            return render(request, "commonui/error_div.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
         #print(data)
         username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
         #ensure a user with that username does not exist
