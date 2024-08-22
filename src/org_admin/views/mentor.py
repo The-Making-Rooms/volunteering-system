@@ -5,6 +5,8 @@ from django.shortcuts import render
 from commonui.views import check_if_hx
 from .common import check_ownership
 from datetime import datetime, timedelta
+from forms.models import Form, Response
+from forms.views import fill_form
 
 def get_mentees(request):
     if request.user.is_superuser:
@@ -89,3 +91,20 @@ def add_note(request, mentee_id):
                 "mentee_record": mentee_record,
             }
             return render(request, "org_admin/add_mentor_note.html", context=context)
+
+
+def fill_entry_form(request, mentee_id):
+    
+    try:
+        mentoring_start_form = Form.objects.get(name="Mentoring Start Form")
+    except Form.DoesNotExist:
+        return render(request, "org_admin/mentoring.html", context={"error": "No mentoring start form found. Contact Admin"})
+
+    mentee_record = MentorRecord.objects.get(id=mentee_id)
+
+    form_filled = Response.objects.filter(form=mentoring_start_form, user=mentee_record.volunteer.user).count() > 0
+    
+    if form_filled:
+        return render(request, "org_admin/mentoring.html", context={"error": "Form already filled"})
+    else:
+        return fill_form(request, mentoring_start_form.id, True)

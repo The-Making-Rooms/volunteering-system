@@ -140,5 +140,20 @@ urlpatterns = [
     
     path("create_new_organisation/", views.create_new_organisation, name="create_new_organisation"),
     
+    path("benefits/", views.benefits_index, name="benefits_index"),
+    path("benefits/add/", views.add_benefit, name="add_benefit"),
+    path("benefits/<int:benefit_id>/", views.benefit_crud, name="benefit_crud"),
+    path("benefits/<int:benefit_id>/delete/", views.delete_benefit, name="benefit_delete"),
+    path("benefits/select_opportunity/", views.select_opportunity, name="select_opportunity"),
+    path("benefits/add_to_opportunity/", views.add_benefit_to_opportunity, name="add_benefit_to_opportunity"),
+    
+    path("benefits/unlink/<int:link_id>/<int:opportunity_id>/", views.unlink_benefit, name="unlink_benefit_inplace"),
+    path("benefits/<int:benefit_id>/<int:opportunity_id>/", views.benefit_crud, name="benefit_crud_inplace"),
+    path("benefits/add/<int:opportunity_id>/", views.add_benefit, name="add_benefit_inplace"),
+    
+    path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
+    
+    path("reporting/", views.reporting, name="reporting"),
+    
     
 ]

@@ -152,7 +152,7 @@
     </div>
   </div>
 
-
+  {% if mentor_profile %}
   <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">
       <div class="card-actions items-center">
@@ -162,6 +162,7 @@
       <div class="divider my-2"></div>
 
 
+      <p>Mentor Sessions:</p>
       <div class="overflow-x-auto">
         <table class="table">
           <!-- head -->
@@ -174,6 +175,11 @@
           </thead>
           <tbody>
             <!-- row 1 -->
+            {% if mentor_sessions|length == 0%}
+            <tr>
+              <td>No sessions</td>
+            </tr>
+            {% endif %}
             {% for session in mentor_sessions %}
             <tr>
               <td>{{ session.date }}</td>
@@ -188,6 +194,7 @@
 
         <div class="divider my-2"></div>
 
+        <p>Mentor Notes:</p>
         <table class="table">
           <!-- head -->
           <thead>
@@ -198,6 +205,12 @@
           </thead>
           <tbody>
             <!-- row 1 -->
+            {% if mentor_notes|length == 0%}
+            <tr>
+              <td>No notes</td>
+            </tr>
+            {% endif %}
+            
             {% for note in mentor_notes %}
             <tr>
               <td>{{ note.created_by }}</td>
@@ -212,7 +225,7 @@
   </div>
 
 
-
+  {%endif%}
 
   <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">

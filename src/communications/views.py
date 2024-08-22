@@ -6,10 +6,19 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import send_user_notification
 from django.conf import settings
 from better_profanity import profanity
+from org_admin.models import OrganisationAdmin
+from django.http import HttpResponseRedirect
 # Create your views here.
 
 
 def index(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     user = request.user
     chats = Chat.objects.filter(participants=user)
     return render(

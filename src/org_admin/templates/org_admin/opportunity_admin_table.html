@@ -16,7 +16,7 @@
         {% for opportunity in opportunities %}
         <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
           {% if superuser %}
-            <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md h-12 w-12" /></td>
+            <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md aspect-square w-24" /></td>
           {% endif %}
           <td>{{ opportunity.name }}</td>
           <td>{{ opportunity.description|truncatewords:10 }}</td>

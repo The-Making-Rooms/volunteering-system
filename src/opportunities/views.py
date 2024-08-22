@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon, OpportunitySection
+from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon, OpportunitySection, OpportunityBenefit
 from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, Volunteer
 from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
@@ -12,14 +12,23 @@ from communications.models import Chat
 
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 
-
+from django.http import HttpResponse
+from organisations.models import OrganisationAdmin
 
 # Create your views here.
 def detail(request, opportunity_id):
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     #print(opportunity_id)
     template = loader.get_template("opportunities/opportunity-details.html")
     opportunity = Opportunity.objects.get(id=opportunity_id)
-    benefits = Benefit.objects.filter(opportunity=opportunity)
+    benefits = [benefit.benefit for benefit in OpportunityBenefit.objects.filter(opportunity=opportunity)]
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
     sections = OpportunitySection.objects.filter(opportunity=opportunity)

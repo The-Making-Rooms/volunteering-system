@@ -5,7 +5,7 @@ from .models import Form, Question, Options, Answer, Response, FormResponseRequi
 from volunteer.views import index
 from org_admin.models import OrganisationAdmin
 # Create your views here.
-def fill_form(request, form_id):
+def fill_form(request, form_id, custom_respondee=False):
     form = Form.objects.get(pk=form_id)
     question_objects = Question.objects.filter(form=form).order_by('index')
     
@@ -21,7 +21,7 @@ def fill_form(request, form_id):
         allowed_to_fill.save()
         return index(request)
     
-    if not allowed_to_fill:
+    if not allowed_to_fill and not custom_respondee:
         print("You are not allowed to fill this form")
         return index(request)
     
@@ -36,6 +36,7 @@ def fill_form(request, form_id):
         "form": form,
         "questions": questions,
         "hx": check_if_hx(request),
+        "custom_respondee": custom_respondee,
     }
     
     if OrganisationAdmin.objects.filter(user=request.user).exists():
@@ -43,12 +44,9 @@ def fill_form(request, form_id):
     return render(request, 'forms/render_form.html', context=context)
 
 
-def submit_response(request, form_id):
+def submit_response(request, form_id, custom_redirect=None, override_respondee=None):
     print(request.POST)
     errors = []
-    
-    
-    
     
     form_questions = Question.objects.filter(form=Form.objects.get(pk=form_id))
     for question in form_questions:
@@ -69,7 +67,12 @@ def submit_response(request, form_id):
         if len(OrganisationAdmin.objects.filter(user=request.user)) == 0:
             return render(request, 'forms/redirect_profile.html')
     
+    
+    if override_respondee:
+        response = Response.objects.create(user=override_respondee, form=Form.objects.get(pk=form_id))
     response = Response.objects.create(user=request.user, form=Form.objects.get(pk=form_id))
+    
+    
     for question in form_questions:
         if question.question_type == "multi_choice" and question.allow_multiple and len(request.POST.getlist(str(question.pk))) > 1:
             
@@ -91,7 +94,10 @@ def submit_response(request, form_id):
         requirement.completed = True
         requirement.save()
 
+    if custom_redirect:
+        return
 
     if OrganisationAdmin.objects.filter(user=request.user).exists():
         return render(request, 'forms/redirect_admin.html')
+
     return render(request, 'forms/redirect_profile.html')

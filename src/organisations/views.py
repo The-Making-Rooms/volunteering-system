@@ -8,7 +8,7 @@ from googlemaps import Client as GoogleMaps
 from communications.models import Chat
 from org_admin.models import OrganisationAdmin
 from commonui.views import HTTPResponseHXRedirect
-
+from django.http import HttpResponseRedirect
 
 
 # Create your views here
@@ -42,6 +42,14 @@ def create_chat(request, organisation_id):
     return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
 
 def detail(request, organisation_id):
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     template = loader.get_template("organisations/organisation_details.html")
 
     org = Organisation.objects.get(id=organisation_id)

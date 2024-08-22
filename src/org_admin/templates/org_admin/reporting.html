@@ -1,0 +1,33 @@
+{% extends "org_admin/navigation_template.html"%}
+
+{% block page_content %}
+<div class="flex items-center justify-between">
+    <p class="text-2xl font-bol mb-5">Reporting</p>
+</div>
+
+<div class="bg-secondary rounded-lg p-5">
+    <p class="text-2xl">Select Dates:</p>
+    <div class="divider"></div>
+    <form hx-post="/org_admin/get_report/" hx-target="#report-container">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div class="flex flex-col">
+                <label for="start_date" class="text-sm font-medium">Start Date</label>
+                <input type="date" name="start_date" id="start_date" class="input input-bordered" />
+            </div>
+            <div class="flex flex-col">
+                <label for="end_date" class="text-sm font-medium">End Date</label>
+                <input type="date" name="end_date" id="end_date" class="input input-bordered" />
+            </div>
+        </div>
+    </div>
+
+
+
+    {% include "org_admin/partials/report.html"%}
+
+
+
+
+
+{% endblock %}

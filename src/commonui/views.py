@@ -44,7 +44,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
         " If you don't receive an email, "
         "please make sure you've entered the address you registered with, and check your spam folder."
     )
-    success_url = reverse_lazy("password_reset_sent")
+    success_url = reverse_lazy("password_reset_sent_user")
 
     # add hx context to the view
     def get_context_data(self, **kwargs):
@@ -54,17 +54,31 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 
 
 def password_reset_sent(request):
+    print("password reset sent")
     return render(
         request, "commonui/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
 
 def redirect_admins(request):
     if request.user.is_authenticated:
+        print("user is authenticated")
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
         if OrganisationAdmin.objects.filter(user=request.user).exists():
             return HttpResponseRedirect("/org_admin")
+            
 
 # Create your views here.
 def index(request):
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     template = loader.get_template("commonui/index.html")
     orgs = Organisation.objects.filter(featured=True)
     opps = Opportunity.objects.filter(featured=True)

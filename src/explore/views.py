@@ -4,10 +4,18 @@ from organisations.models import Image as OrgImage
 from opportunities.models import Opportunity, Location, Image, Video, LinkedTags, Tag
 from commonui.views import check_if_hx
 import random
+from django.http import HttpResponseRedirect
+from org_admin.models import OrganisationAdmin
 # Create your views here.
 
 def index(request):
 
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
 
     orgs = Organisation.objects.all()
     opps = Opportunity.objects.filter(active=True)

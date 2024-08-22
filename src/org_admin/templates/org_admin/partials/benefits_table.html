@@ -1,0 +1,29 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Benefit Icon</th>
+            <th>Benefit Description</th>
+            <th>Organisation</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for benefit in benefits %}
+        <tr>
+            <td><input class="checkbox" type="checkbox" name="benefit" value="{{ benefit.id }}" /></td>
+            <td>
+                <img src="{{ benefit.icon.icon.url }}" alt="{{ benefit.name }}" class="invert w-12" />
+            </td>
+            <td>{{ benefit.description }}</td>
+            <td>
+                {{ benefit.organisation}}
+            <td>
+                <a hx-get="/org_admin/benefits/{{ benefit.id }}/" hx-target=".htmx-navigator" class="btn btn-primary">Edit</a>
+                <a href="/org_admin/benefits/{{ benefit.id }}/delete/" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
