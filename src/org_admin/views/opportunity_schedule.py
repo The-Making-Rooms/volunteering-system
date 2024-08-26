@@ -3,7 +3,7 @@ import recurrence
 from django.shortcuts import render
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from .opportunity_details import opportunity_details, opportunity_admin_list
-from .common import check_ownership
+from .common import check_ownership, check_schedule_dates
 import datetime
 
 
@@ -73,10 +73,12 @@ def manage_schedule(request, id):
             opportunity.recurrences.dtend = end_date
             
             if start_date > end_date:
-                return opportunity_details(request, id, error="Start date must be before end date")
+                request.method = "GET"
+                return opportunity_details(request, id, error="Start date must be before end date", tab_name="schedule")
             
             if start_time > end_time:
-                return opportunity_details(request, id, error="Start time must be before end time")
+                request.method = "GET"
+                return opportunity_details(request, id, error="Start time must be before end time", tab_name="schedule")
             
             
         #Set recurrance frequency   
@@ -98,9 +100,18 @@ def manage_schedule(request, id):
             opportunity.recurrences.rrules = [recurrence.Rule(recurrence.YEARLY)]
             
         opportunity.save()
+
+        
+        opportunity_toggled = False
+        if not check_schedule_dates(opportunity) and opportunity.active:
+            opportunity.active = False
+            opportunity_toggled = True
+            opportunity.save()
+
+        status_message = "Schedule updated" if not opportunity_toggled else "Schedule updated. Opportunity is not active as it does not have any dates upcoming"
         
         request.method = "GET"
-        return opportunity_details(request, id, success="Schedule updated", tab_name="schedule")
+        return opportunity_details(request, id, success=status_message, tab_name="schedule")
         
 def delete_date(request, id, opportunity_id):
     opp = Opportunity.objects.get(id=opportunity_id)

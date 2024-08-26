@@ -118,6 +118,8 @@ urlpatterns = [
     path("mentoring/create/<int:volunteer_id>/", views.create_mentee, name="create_mentee"),
     path("mentoring/log_hours/<int:mentee_id>/", views.log_hours, name="log_hours"),
     path("mentoring/add_note/<int:mentee_id>/", views.add_note, name="add_note"),
+    path("mentoring/edit_session/<int:session_id>/", views.edit_hours, name="edit_hours"),
+     path("mentoring/delete_session/<int:session_id>/", views.delete_hours, name="delete_hours"),
     
     path("admin_management/", views.get_admins, name="admin_management"),
     path("admin_management/delete/<int:admin_id>/", views.delete_admin, name="delete_admin"),

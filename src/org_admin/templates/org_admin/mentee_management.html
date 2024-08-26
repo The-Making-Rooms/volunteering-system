@@ -19,6 +19,7 @@
                 <th>Session Date</th>
                 <th>Session Duration</th>
                 <th>Session Notes</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +35,10 @@
                 <td>{{ session.date }}</td>
                 <td>{{ session.time }}</td>
                  <td>{% if session.session_notes|length > 0%}{{ session.session_notes }}{%else%}-{%endif%}</td>
+                 <td>
+                    <button class="btn btn-sm btn-secondary" hx-get="/org_admin/mentoring/edit_session/{{session.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Edit</button>
+                    <button class="btn btn-sm btn-error" hx-get="/org_admin/mentoring/delete_session/{{session.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                </td>
             </tr>
             {% endfor %}
             {% endif %}

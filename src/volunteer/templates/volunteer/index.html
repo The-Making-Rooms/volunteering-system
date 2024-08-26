@@ -192,33 +192,7 @@
 
         <!-- Notes -->
 
-        <div class="divider my-2"></div>
-
-        <p>Mentor Notes:</p>
-        <table class="table">
-          <!-- head -->
-          <thead>
-            <tr>
-              <th>Created By</th>
-              <th>Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- row 1 -->
-            {% if mentor_notes|length == 0%}
-            <tr>
-              <td>No notes</td>
-            </tr>
-            {% endif %}
-            
-            {% for note in mentor_notes %}
-            <tr>
-              <td>{{ note.created_by }}</td>
-              <td>{{ note.note }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    
 
       </div>
     </div>

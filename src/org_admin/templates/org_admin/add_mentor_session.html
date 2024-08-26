@@ -2,39 +2,67 @@
 
 {% block page_content %}
 
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
 
 <p class="text-2xl">Add a Mentoring Session</p>
 <p>For mentee: {{ mentee.user.first_name }} {{ mentee.user.last_name }}</p>
+
 <div class="divider"></div>
 
 <form method="POST">
     {% csrf_token %}
 
+    
+
     <div class="form-control">
         <label class="label">
             <span class="label-text">Session Date</span>
         </label>
-        <input type="date" value="{{date|date:"Y-m-d"}}" name="date" class="input input-bordered" required>
+        <input type="date" value="{% if edit %}{{session.date|date:"Y-m-d"}}{%else%}{{date|date:"Y-m-d"}}{%endif%}" name="date" class="input input-bordered" required>
     </div>
 
     <div class="form-control">
         <label class="label">
             <span class="label-text">Session Duration (HH:MM)</span>
         </label>
-        <input type="time" value="01:00" name="time" class="input input-bordered" required>
+        <input type="time" value="{% if edit %}{{session_duration_HH_MM}}{%else%}01:00{%endif%}" name="time" class="input input-bordered" required>
     </div>
 
     <div class="form-control">
         <label class="label">
             <span class="label-text">Session Notes</span>
         </label>
-        <textarea name="session_notes" class="textarea textarea-bordered" required placeholder="Use this to log briefly what was discussed. Use mentoring notes for more comprehensive notes."></textarea>
+        <textarea name="session_notes" class="textarea textarea-bordered" required placeholder="Use this to log briefly what was discussed. Use mentoring notes for more comprehensive notes.">{%if edit%}{{session.session_notes}}{%endif%}</textarea>
     </div>
 
     <div class="divider"></div>
+        <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer if they request thier information through GDPR!</p>
+        <div class="form-control flex flex-row items-center">
+            <input class="checkbox checkbox-primary" type="checkbox" name="gdpr" value="gdpr" onchange="document.getElementById('submit_gdpr_block').disabled = !this.checked;">
+            <label class="label">
+                <span class="label-text">Please confirm you understand that this note can be seen by the volunteer if requested through GDPR.</span>
+            </label>
+            
+        </div>
 
-    <button type="submit" hx-post="/org_admin/mentoring/log_hours/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" class="btn btn-primary">Add Session</button>
+
+    <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer when logging into the app.</p>
+    <button type="submit" 
+    id = "submit_gdpr_block"
+    hx-post={% if edit %}"/org_admin/mentoring/edit_session/{{session.id}}/"{%else%}"/org_admin/mentoring/log_hours/{{mentee_record.id}}/"{%endif%}
+    hx-target=".htmx-navigator" 
+    hx-swap="outerHTML" 
+    class="btn btn-primary">
+    {% if edit %}Save{%else%}Add Session{%endif%}
+</button>
 
 </form>
 </div>

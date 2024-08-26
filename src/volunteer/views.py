@@ -29,7 +29,7 @@ from django.core.mail import send_mail
 
 from volunteer.models import MentorNotes, MentorRecord, MentorSession
 
-from forms.models import FormResponseRequirement
+from forms.models import FormResponseRequirement, Form as FormModel, Question, Answer, Response
 
 from organisations.models import OrganisationAdmin
 
@@ -66,6 +66,24 @@ def index(request):
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
+            
+            #check for incomplete forms that with required_on_signup = True
+            req_forms = FormModel.objects.filter(required_on_signup=True)
+            for form in req_forms:
+                if FormResponseRequirement.objects.filter(user=current_user, form=form).exists() == False:
+                    #Create a form Response Requirement, which lets the system know that the user has to fill out this form
+                    form_req = FormResponseRequirement(user=current_user, form=form)
+                    form_req.save()
+                    return HTTPResponseHXRedirect("/forms/" + str(form.id))
+                else:
+                    #check if the form has been completed
+                    form_req = FormResponseRequirement.objects.get(user=current_user, form=form)
+                    if form_req.completed == False:
+                        #redirect to form
+                        return HttpResponseRedirect("/forms/" + str(form.id))
+                    else:
+                        continue
+            
             
             incomplete_forms = FormResponseRequirement.objects.filter(user=current_user, completed=False)
             print(incomplete_forms)

@@ -2,28 +2,42 @@
 
 {% block page_content %}
 
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
 
-<p class="text-2xl">Add a Mentoring Note</p>
-<p>For mentee: {{ mentee.user.first_name }} {{ mentee.user.last_name }}</p>
-<div class="divider"></div>
-
-<form method="POST">
-    {% csrf_token %}
-
-
-    <div class="form-control">
-        <label class="label">
-            <span class="label-text">Notes:</span>
-        </label>
-        <textarea name="session_notes" class="textarea textarea-bordered" required ></textarea>
-    </div>
-
+    <p class="text-2xl">Add a Mentoring Note</p>
+    <p>For mentee: {{ mentee.user.first_name }} {{ mentee.user.last_name }}</p>
+    
     <div class="divider"></div>
 
-    <button type="submit" hx-post="/org_admin/mentoring/add_note/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" class="btn btn-primary">Add Note</button>
+    <form method="POST">
+        {% csrf_token %}
 
-</form>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">Notes:</span>
+            </label>
+            <textarea name="session_notes" class="textarea textarea-bordered" required ></textarea>
+        </div>
+
+        <div class="divider"></div>
+        <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer if they request thier information through GDPR!</p>
+        <div class="form-control flex flex-row items-center">
+            <input class="checkbox checkbox-primary" type="checkbox" name="gdpr" value="gdpr" onchange="document.getElementById('submit_gdpr_block').disabled = !this.checked;">
+            <label class="label">
+                <span class="label-text">Please confirm you understand that this note can be seen by the volunteer if requested through GDPR.</span>
+            </label>
+            
+        </div>
+
+        <button disabled id="submit_gdpr_block" type="submit" hx-post="/org_admin/mentoring/add_note/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" class="btn btn-primary">Add Note</button>
+
+    </form>
+
 </div>
         
 

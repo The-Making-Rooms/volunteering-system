@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from commonui.views import check_if_hx
-from .common import check_ownership
+from .common import check_ownership, check_schedule_dates
 from ..models import OrganisationAdmin
 from opportunities.models import Opportunity, Location, Image, Video, OpportunityView, Registration, Tag, LinkedTags, SupplimentaryInfoRequirement
 
@@ -24,10 +24,14 @@ def create_new_opportunity(request):
         else:
             organisation = OrganisationAdmin.objects.get(user=request.user).organisation
             
+        lorem_ipsum = """
+        Lorem ipsum odor amet, consectetuer adipiscing elit. Habitasse suspendisse semper ipsum netus nostra ac class enim. Rhoncus consequat neque natoque eget ornare id penatibus molestie orci. Adipiscing curabitur sed augue orci tortor in aliquam. Turpis vehicula taciti velit ligula diam inceptos litora penatibus. Ridiculus parturient libero eros velit orci leo nascetur sociosqu. Litora ante metus nec sed, vel elit mattis massa. Vehicula vehicula aliquam finibus et lacus; purus varius elit ornare. 
+        """
+            
         new_opportunity = Opportunity.objects.create(
             organisation=organisation,
             name="New Opportunity",
-            description="New Opportunity",
+            description=lorem_ipsum,
             active=False,
             recurrences=recurrence.Recurrence(),
             end_time=datetime.datetime.now(),
@@ -150,15 +154,34 @@ def opportunity_details(request, id, error=None, success=None, index=False, tab_
         #print(form_data)
         
         opp.name = form_data["name"]
+        opp.save()
+        
         opp.description = form_data["description"]
+        opp.save()
 
         try: opp.featured = True if form_data["featured"] == "on" else False
         except KeyError: opp.featured = False
-            
-        try: opp.active = True if form_data["active"] == "on" else False
-        except: opp.active = False
         
-        opp.save()
+        print(form_data)
+        
+        try:
+            if form_data["active"] == "on":
+                if not check_schedule_dates(opp):
+                    request.method = "GET"
+                    return opportunity_details(request, id, error="Opportunity must have a schedule to be active", index=True)
+                opp.active = True
+                opp.save()
+            else:
+                opp.active = False
+                opp.save()
+                
+        except KeyError:
+            opp.active = False
+            opp.save()
+            
+        #try: opp.active = True if form_data["active"] == "on" else False
+        #except: opp.active = False
+        
         
         request.method = "GET"
         return opportunity_details(request, id, success="Opportunity updated successfully", index=True)

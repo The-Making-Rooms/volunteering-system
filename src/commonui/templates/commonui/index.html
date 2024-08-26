@@ -14,20 +14,24 @@
 <span class="font-bold">Welcome to Chip In!</span><br>
 Chip in is a place-based volunteering project for young people from the borough of Blackburn with Darwen, with mentoring at the heart.
 <br><br>
-However, it’s not just about volunteering, this project’s passion is about people, real people, people and communities. 
+We have teamed up with local organisations to offer a diverse and high quality selection of volunteering opportunities where you can learn new skills, develop and grow. 
+<br><br>
+Chip in is not just about volunteering, this project’s passion is about people, real people, people and communities.
 <br><br>
 Building, supporting, connecting, upskilling. Investing.
+<br><br>
+Have a look at what we can offer, if you need some support or are not sure what you may be interested in please get in touch to see how we can support you.
 <br><br>
 
 Start by <a href="/volunteer/" class="text-primary">logging in</a> or <a href="/create_account" class="text-primary">signing up</a> to explore opportunities and organisations in your area.
 </div>
 {% endif %}
 
-
+<!--
 <div>
   {% if organisations %}
   <h1 class="flex-none text-xl pb-0 font-semibold ">
-    Featured Organisations
+    Organisations
   </h1>
   <div class="relative">
       <div id="left_button" class="opacity-90 absolute left-0 top-1/2 transform -translate-y-1/2 z-50" hx-on:click="document.getElementById('org_carousel').scrollLeft = document.getElementById('org_carousel').scrollLeft - 500">
@@ -50,9 +54,10 @@ Start by <a href="/volunteer/" class="text-primary">logging in</a> or <a href="/
   </div>
 
   {% endif %} {% if opportunities %}
+-->
 
   <h1 class="flex-none text-xl pb-0 font-semibold">
-    Featured Opportunities
+    Opportunities
   </h1>
 
   <div class="relative">
@@ -74,8 +79,32 @@ Start by <a href="/volunteer/" class="text-primary">logging in</a> or <a href="/
       {% for opp in opportunities %} {% include "opp-card.html" %} {% endfor %}
     </div>
   </div>
-
-
   {% endif %}
+
+  <div class="flex flex-col mt-5">
+    <p class="text-center">
+      Chip in is a partnership project with The Bureau Centre for the Arts, Community CVS, Blackburn with Darwen Borough Council, The Making Rooms and the creative sectors in the borough. 
+    </p>
+
+    <div class="divider"></div>
+  
+    <div class="flex flex-wrap items-center justify-between">
+      <img src="static/images/bureau.png" alt="The Bureau Centre for the Arts" class="w-auto h-20 m-3 dark:invert">
+      <img src="static/images/cvs.png" alt="Community CVS" class="w-auto h-20 m-3">
+      <img src="static/images/bwd.png" alt="Blackburn with Darwen Borough Council" class="w-auto h-20 m-3 dark:invert">
+      <img src="static/images/tmr.png" alt="The Making Rooms" class="w-auto h-20 m-3">
+      <img src="static/images/dcm.jfif" alt="Department for culture, meida and sport" class="w-auto h-20 m-3 dark:invert">
+  
+    </div>
+
 </div>
-{% include "navbar.html" %} {% endblock %}
+
+
+
+
+</div>
+
+
+{% include "navbar.html" %} 
+
+{% endblock %}

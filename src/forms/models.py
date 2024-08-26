@@ -5,7 +5,8 @@ class Form(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=500)
     allow_multiple = models.BooleanField(default=False)
-    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE, null=True)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE, null=True, blank=True)
+    required_on_signup = models.BooleanField(default=False)
     filled_by_organisation = models.BooleanField(default=False)
     visible_to_all = models.BooleanField(default=False)
     def __str__(self):
