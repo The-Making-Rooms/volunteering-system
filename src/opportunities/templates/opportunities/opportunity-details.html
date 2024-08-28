@@ -264,7 +264,7 @@
       <ul class="list-disc w-full">
           {% for req in supp_info_reqs %}
               <li class="ml-3">
-                <p>{{ req.info.title }} - Required by: {% if req.info.organisation != None %} {{req.info.organisation}} {%else%}Chip In{%endif%}</p>
+                <p>{{ req.info.title }}</p>
               </li>
           {% endfor %}
       </ul>

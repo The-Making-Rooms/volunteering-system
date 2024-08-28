@@ -4,6 +4,24 @@
 
 <p class="text-2xl mb-3">Mentee Record: {{mentee.user.first_name}} {{mentee.user.last_name}} </p>
 
+
+
+{% if mentor_form_found %}
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+        <p class="text-2xl">Mentoring Forms:</p>
+        
+            {% if mentor_start %}
+            <button class="btn btn-primary" hx-get="/org_admin/mentoring/fill_mentee_start_form/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Fill Mentee Start Form</button>
+            {% elif mentor_end %}
+            <button class="btn btn-primary" hx-get="/org_admin/mentoring/fill_mentee_end_form/{{mentee_record.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Fill Mentee End Form</button>
+            {% else %}
+            <button class="btn btn-primary" disabled>No forms to complete</button>
+            {% endif %}
+    </div>
+</div>
+{% endif %}
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
     <div class="flex justify-between">
         <p class="text-2xl">Mentor Sessions:</p>
@@ -19,6 +37,7 @@
                 <th>Session Date</th>
                 <th>Session Duration</th>
                 <th>Session Notes</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +53,10 @@
                 <td>{{ session.date }}</td>
                 <td>{{ session.time }}</td>
                  <td>{% if session.session_notes|length > 0%}{{ session.session_notes }}{%else%}-{%endif%}</td>
+                 <td>
+                    <button class="btn btn-sm btn-secondary" hx-get="/org_admin/mentoring/edit_session/{{session.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Edit</button>
+                    <button class="btn btn-sm btn-error" hx-get="/org_admin/mentoring/delete_session/{{session.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                </td>
             </tr>
             {% endfor %}
             {% endif %}
@@ -73,6 +96,7 @@
             </tr>
             {% endfor %}
         </tbody>
+    </table>
 </div>
 
 {% endblock %}

@@ -29,6 +29,7 @@
                 <input type="checkbox" class="checkbox" name="allow_multiple" {% if form.allow_multiple %}checked{%endif%}>
                 <label class="label cursor-pointer">Allow multiple submissions</label>
             </div>
+            <div class="divider"></div>
             {% if superuser %}
             <div class="flex items-center">
                 <input type="checkbox" class="checkbox" name="filled_by_organisations" {% if form.filled_by_organisation %}checked{%endif%}>
@@ -38,6 +39,22 @@
                 <input type="checkbox" class="checkbox" name="visible_to_all" {% if form.visible_to_all %}checked{%endif%}>
                 <label class="label cursor-pointer">Assignable by organisations</label>
             </div>
+
+            <div class="divider"></div>
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="mentor_start_form" {% if form.mentor_start_form %}checked{%endif%}>
+                <label class="label cursor-pointer">Mentor start form</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="mentor_end_form" {% if form.mentor_end_form %}checked{%endif%}>
+                <label class="label cursor-pointer">Mentor end form</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" class="checkbox" name="required_on_signup" {% if form.required_on_signup %}checked{%endif%}>
+                <label class="label cursor-pointer">Required on initial sign up</label>
+            </div>
+            <div class="divider"></div>
+
             {% endif %}
         </div>
 

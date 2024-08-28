@@ -41,7 +41,7 @@ def opportunity_supplementary_info(request, opp_id):
         }
         
         request.method = "GET"
-        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="details")
+        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="supp_info")
     else:
         opportunity = Opportunity.objects.get(id=opp_id)
         if not check_ownership(request, opportunity):
@@ -52,9 +52,11 @@ def opportunity_supplementary_info(request, opp_id):
         unavail_ids = [supp_info.info.id for supp_info in supp_infos]
         
         if not request.user.is_superuser:
-            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exclude(id__in=unavail_ids)
+            #Get all the supplementary info that the organisation has, and ones without any organisation (From chip In) and exclude the ones already added
+            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=opportunity.organisation).exclude(id__in=unavail_ids) | SupplementaryInfo.objects.filter(organisation=None).exclude(id__in=unavail_ids)
+            #avail_supp_infos = SupplementaryInfo.objects.filter(organisation=).exclude(id__in=unavail_ids) | SupplementaryInfo.objects.filter(organisation=opportunity.organisation).exclude(id__in=unavail_ids)
         else:
-            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=opportunity.organisation).exclude(id__in=unavail_ids)
+            avail_supp_infos = SupplementaryInfo.objects.filter(organisation=opportunity.organisation).exclude(id__in=unavail_ids) | SupplementaryInfo.objects.filter(organisation=None).exclude(id__in=unavail_ids)
         
         context = {
             "hx": check_if_hx(request),
@@ -66,6 +68,8 @@ def opportunity_supplementary_info(request, opp_id):
         return render(request, "org_admin/partials/oppportunity_additional_info.html", context)
     
 def delete_info_req(request, supp_id):
+    
+    print(supp_id)
     supp = SupplimentaryInfoRequirement.objects.get(id=supp_id)
     opp = supp.opportunity
     
@@ -74,4 +78,4 @@ def delete_info_req(request, supp_id):
     
     supp.delete()
     
-    return opportunity_details(request, opp, success="Supplementary Info deleted successfully")
+    return opportunity_details(request, opp.id, success="Supplementary Info deleted successfully", tab_name="supp_info")

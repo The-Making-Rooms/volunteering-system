@@ -8,7 +8,7 @@ class Volunteer(models.Model):
     avatar = models.ImageField(upload_to='avatars/', blank=True)
     date_of_birth = models.DateField()
     phone_number = models.CharField(max_length=11)
-    bio = models.TextField()
+    bio = models.TextField(null=True, blank=True)
     CV = models.FileField(upload_to='CV/', blank=True)
 
     def __str__(self):
@@ -20,7 +20,7 @@ class MentorRecord(models.Model):
     organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
     
     def get_hours(self):
-        deltas = [session.time for session in MentorSession.objects.filter(MentorRecord=self)]
+        deltas = [session.time for session in MentorSession.objects.filter(mentor_record=self)]
         return sum(deltas, timedelta())
     
 class MentorSession(models.Model):
@@ -28,7 +28,7 @@ class MentorSession(models.Model):
     time = models.DurationField()
     session_notes = models.TextField(blank=True)
     mentor_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    MentorRecord = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
+    mentor_record = models.ForeignKey('MentorRecord', on_delete=models.CASCADE)
 
 class MentorNotes(models.Model):
     note = models.TextField()

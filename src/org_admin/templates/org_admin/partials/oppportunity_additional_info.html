@@ -2,8 +2,8 @@
 <div class="p-5 rounded-lg bg-base-200 mb-3" hx-push-url="false">
 
     <div class="flex justify-between items-center">
-      <p class="text-xl">Additional Information</p>
-      <p>Add any additional information you would like to ask volunteers. Note that these need to be assigned to opportunities</p>
+      <p class="text-xl mr-3">Additional Information</p>
+      <p>Add any additional information you would like to ask volunteers. Note that these need to be assigned to opportunities. Try to use Chip In system values where possible. You can add or manage your own information on the Additional Information Menu.</p>
     </div>
   <div class="divider"></div>
   {% if supp_infos %}
@@ -23,11 +23,11 @@
         <td>{{info.info.description}}</td>
         <td>
           <a
-            hx-get="/org_admin/supplementary_info/delete/{{ info.id }}/"
+            hx-get="/org_admin/opportunities/supp_info/delete/{{ info.id }}/"
             class="btn bg-red-600 btn-xs"
             hx-target=".htmx-navigator"
             hx-swap="outerHTML"
-            >Delete</a
+            >Unlink</a
           >
       </tr>
       {% endfor %}
@@ -44,7 +44,7 @@
       
       <select class="select select-bordered flex-grow" name="supp_id">
         {% for info in avail_supp_infos %}
-        <option value="{{ info.id }}">{{ info.title }}</option>
+        <option value="{{ info.id }}">{% if info.organisation == None %}Chip In System - {%endif%}{{ info.title }}</option>
         {% endfor %}
       </select>
       <button class="btn btn-primary self-end" hx-post="/org_admin/opportunities/supp_info/{{opportunity.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">

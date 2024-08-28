@@ -44,7 +44,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
         " If you don't receive an email, "
         "please make sure you've entered the address you registered with, and check your spam folder."
     )
-    success_url = reverse_lazy("password_reset_sent")
+    success_url = reverse_lazy("password_reset_sent_user")
 
     # add hx context to the view
     def get_context_data(self, **kwargs):
@@ -54,17 +54,31 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 
 
 def password_reset_sent(request):
+    print("password reset sent")
     return render(
         request, "commonui/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
 
 def redirect_admins(request):
     if request.user.is_authenticated:
+        print("user is authenticated")
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
         if OrganisationAdmin.objects.filter(user=request.user).exists():
             return HttpResponseRedirect("/org_admin")
+            
 
 # Create your views here.
 def index(request):
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     template = loader.get_template("commonui/index.html")
     orgs = Organisation.objects.filter(featured=True)
     opps = Opportunity.objects.filter(featured=True)
@@ -121,7 +135,7 @@ def index_alias(request):
 
 
 def authenticate_user(request):
-    username = request.POST["email"]
+    username = request.POST["email"].lower()
     password = request.POST["password"]
 
     user = authenticate(request, username=username, password=password)
@@ -176,7 +190,7 @@ def create_account(request):
         while User.objects.filter(username=username).exists():
             username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
         # create django user
-        user = User.objects.create_user(username, data["email"], data["password"])
+        user = User.objects.create_user(username, data["email"].lower(), data["password"])
         user.save()
         user = authenticate(request, username=username, password=data["password"])
         login(request, user)

@@ -25,6 +25,68 @@
 </div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Addresses</p>
+  <div class="divider my-2"></div>
+  {% if addresses|length == 0 %}
+  <p>No addresses</p>
+  {% else %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>First Line</th>
+        <th>Second Line</th>
+        <th>Postcode</th>
+        <th>City</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for address in addresses %}
+      <tr>
+        <td>{{ address.first_line }}</td>
+        <td>{{ address.second_line }}</td>
+        <td>{{ address.postcode }}</td>
+        <td>{{ address.city }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Emegency Contacts</p>
+  <div class="divider my-2"></div>
+  {% if contacts|length == 0 %}
+  <p>No Emegency Contacts specified</p>
+  {% else %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Relationship</th>
+        <th>Phone</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for contact in contacts %}
+      <tr>
+        <td>{{ contact.name }}</td>
+        <td>{{ contact.relation }}</td>
+        <td>{{ contact.phone_number }}</td>
+        <td>{{ contact.email }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
   <p class="text-xl font-bold">Conditions</p>
   <div class="divider my-2"></div>
   {% if conditions|length == 0 %}
@@ -82,6 +144,9 @@
 <div class="p-5 rounded-lg bg-base-200 mb-3">
   <p class="text-xl font-bold">Volunteer Registrations</p>
   <div class="divider my-2"></div>
+  {% if registrations|length == 0 %}
+  <p>No registrations</p>
+  {% else %}
   <table class="table">
     <thead>
       <tr>
@@ -107,7 +172,7 @@
       {% endfor %}
     </tbody>
   </table>
-
+  {% endif %}
  
 </div>
 {% endblock %}

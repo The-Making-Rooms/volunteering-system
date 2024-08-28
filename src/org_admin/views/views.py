@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
@@ -8,7 +8,7 @@ from organisations.models import Location, Video as OrgVideo, Image as OrgImage,
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags
 from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
-from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo
+from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo, VolunteerAddress, EmergencyContacts
 from .common import check_ownership
 from datetime import datetime, timedelta, date
 import requests
@@ -244,7 +244,8 @@ def details(request, error=None, success=None, organisation_id=None):
             else:
                 organisation = OrganisationAdmin.objects.get(user=request.user).organisation
         except OrganisationAdmin.DoesNotExist:
-            return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+            return HttpResponseRedirect("/volunteer/")
+
 
         org_videos = OrgVideo.objects.filter(organisation=organisation)
         org_images = OrgImage.objects.filter(organisation=organisation)
@@ -368,6 +369,8 @@ def volunteer_details_admin(request, id):
         
     
     conditions = VolunteerConditions.objects.filter(volunteer=volunteer)
+    addresses = VolunteerAddress.objects.filter(volunteer=volunteer)
+    emergency_contacts = EmergencyContacts.objects.filter(volunteer=volunteer)
     
     context = {
         "hx": check_if_hx(request),
@@ -375,6 +378,8 @@ def volunteer_details_admin(request, id):
         "registrations": registrations,
         "conditions": conditions,
         "vol_supp_info": vol_supp_info,
+        "addresses": addresses,
+        "contacts": emergency_contacts,
     }
     
     return render(request, "org_admin/volunteer_details_admin.html", context=context)

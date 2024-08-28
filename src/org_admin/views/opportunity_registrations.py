@@ -58,7 +58,7 @@ def set_selected_registration_status(request):
                 registration = Registration.objects.get(id=registration_id)
                 
                 
-                if registration.opportunity.organisation != OrganisationAdmin.objects.get(user=request.user).organisation and not request.user.is_superuser:
+                if not request.user.is_superuser and registration.opportunity.organisation != OrganisationAdmin.objects.get(user=request.user).organisation:
                     return opportunity_registrations(request, return_id, error="You do not have permission to change the status of this registration")
                 
                 status = RegistrationStatus.objects.get(id=selected_status_id)

@@ -42,7 +42,7 @@ def get_admins(request, error=None, success=None):
             org = OrganisationAdmin.objects.get(user=request.user).organisation
         
         
-        email = data.get("email")
+        email = data.get("email").lower()
             
         try:
             user = User.objects.get(email=email)

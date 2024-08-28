@@ -1,0 +1,48 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+
+    <div class="flex justify-between">
+        <p class="text-2xl">Additional Information</p>
+        <button class="btn btn-primary" hx-get="/org_admin/additional_information/add/" hx-target=".htmx-navigator" hx-swap="outerHTML">New</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>title</th>
+                <th>Description</th>
+                <th>Organisation</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for info in additional_information %}
+            <tr>
+                <td>{{ info.title }}</td>
+                <td>{{ info.description }}</td>
+                <td>{% if info.organisation == None%}Chip In{%else%}{{ info.organisation }}{%endif%}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" hx-get="/org_admin/additional_information/{{info.id}}/edit" hx-target=".htmx-navigator" hx-swap="outerHTML">Edit</button>
+                    <button class="btn btn-sm btn-error" hx-get="/org_admin/additional_information/{{info.id}}/delete" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

@@ -11,18 +11,37 @@
     {% csrf_token %}
     {% include "org_admin/partials/select_opportunity_icon.html" %}
 
+    <input type="hidden" name="opportunity_id" value="{{opportunity_id}}">
+
+
     <div class="divider"></div>
     <textarea class="textarea textarea-bordered w-full mb-3 h-24" placeholder="Description" name="description">{% if benefit %}{{benefit.description}}{%endif%}</textarea>
+    
+
+
+    {% if superuser and not opportunity_id %}
+      <select class="select select-bordered w-full mb-3" name="organisation">
+        <option {% if not benefit %}selected{%endif%} disabled>Select Organisation</option>
+        {% for org in organisations %}
+        <option value="{{org.id}}" {% if benefit and benefit.organisation == org %}selected {%endif%}>{{org.name}}</option>
+        {% endfor %}
+      </select>
+
+    {% else %}
+      <input type="hidden" name="organisation" value="{{organisation_id}}">
+    {% endif %}
+
+    
     <button
       class="btn btn-primary"
       type="submit"
-      {% if benefit %}hx-post="/org_admin/opportunities/manage_benefit/edit/{{benefit.id}}/"
-      {%else%}hx-post="/org_admin/opportunities/manage_benefit/{{opportunity.id}}/"
+      {% if benefit %}hx-post="/org_admin/benefits/{{benefit.id}}/"
+      {%else%}hx-post="/org_admin/benefits/add/"
       {%endif%}
       hx-target=".htmx-navigator"
       hx-swap="outerHTML"
     >
-      Add Benefit
+      {% if benefit %}Save{%else%}Add Benefit{%endif%}
     </button>
   </form>
 </div>

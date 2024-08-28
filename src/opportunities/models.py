@@ -103,8 +103,13 @@ class Icon(models.Model):
 class Benefit(models.Model):
     icon = models.ForeignKey('Icon', default=get_default_icon, on_delete=models.CASCADE)
     description = models.CharField(max_length=200)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
+    opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE, null=True, blank=True)
+    
+class OpportunityBenefit(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
-
+    benefit = models.ForeignKey('Benefit', on_delete=models.CASCADE)
+    
 class Location(models.Model):
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)

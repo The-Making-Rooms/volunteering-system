@@ -1,0 +1,41 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+<form>
+{% csrf_token %}
+
+<div class="flex justify-between">
+    <div class="w-1/2">
+        <p class="text-2xl font-bold mb-5">Benefits</p>
+    </div>
+    
+    <div class="flex">
+        <div class="w-1/2 text-right">
+            <a 
+            class="btn btn-primary mr-3"
+            hx-get="/org_admin/benefits/add/"
+            hx-target=".htmx-navigator"
+            >New Benefit</a>
+        </div>
+        <div class="w-1/2 text-right">
+            <a hx-post="/org_admin/benefits/select_opportunity/" hx-target=".htmx-navigator" hx-swap="outerHTML" class="btn btn-primary mb-3"
+            >Assign Benefit</a>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<div id="benefits-table">
+{% include "org_admin/partials/benefits_table.html" %}
+</div>
+</form>
+{% endblock %}

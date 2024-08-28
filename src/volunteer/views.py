@@ -7,12 +7,13 @@ from volunteer.models import (
     EmergencyContacts,
     VolunteerConditions,
     VolunteerSupplementaryInfo
+
 )
 from opportunities.models import Registration, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus
 from django.core.exceptions import ObjectDoesNotExist
 import random
 from django.contrib.auth.decorators import login_required
-from commonui.views import check_if_hx, HTTPResponseHXRedirect
+from commonui.views import check_if_hx, HTTPResponseHXRedirect, redirect_admins
 from datetime import datetime, date
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -24,8 +25,14 @@ from .forms import (
 )
 import random
 
+from django.core.mail import send_mail
 
-from forms.models import FormResponseRequirement
+from volunteer.models import MentorNotes, MentorRecord, MentorSession
+
+from forms.models import FormResponseRequirement, Form as FormModel, Question, Answer, Response
+
+from organisations.models import OrganisationAdmin
+
 
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
@@ -46,16 +53,54 @@ def check_valid_origin(func, expected_url_end, redirect_path):
         return inner()
     
 def index(request):
+    
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            print("user is superuser")
+            return HttpResponseRedirect("/org_admin")
+        elif OrganisationAdmin.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/org_admin")
+    
     if request.user.is_authenticated:
         current_user = request.user
         try:
             volunteer_profile = Volunteer.objects.get(user=current_user)
             print(volunteer_profile)
             
+            #check for incomplete forms that with required_on_signup = True
+            req_forms = FormModel.objects.filter(required_on_signup=True)
+            for form in req_forms:
+                if FormResponseRequirement.objects.filter(user=current_user, form=form).exists() == False:
+                    #Create a form Response Requirement, which lets the system know that the user has to fill out this form
+                    form_req = FormResponseRequirement(user=current_user, form=form)
+                    form_req.save()
+                    return HTTPResponseHXRedirect("/forms/" + str(form.id))
+                else:
+                    #check if the form has been completed
+                    form_req = FormResponseRequirement.objects.get(user=current_user, form=form)
+                    if form_req.completed == False:
+                        #redirect to form
+                        return HttpResponseRedirect("/forms/" + str(form.id))
+                    else:
+                        continue
+            
+            
             incomplete_forms = FormResponseRequirement.objects.filter(user=current_user, completed=False)
             print(incomplete_forms)
             
             supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer_profile)
+
+            mentor_profile = MentorRecord.objects.filter(volunteer=volunteer_profile)
+            
+            print(mentor_profile)
+            if mentor_profile.exists():
+                mentor_profile = mentor_profile.first()
+                mentor_notes = MentorNotes.objects.filter(MentorRecord=mentor_profile)
+                mentor_sessions = MentorSession.objects.filter(MentorRecord=mentor_profile)
+            else:
+                mentor_profile = None
+                mentor_notes = None
+                mentor_sessions = None
 
             context = {
                 "hx": check_if_hx(request),
@@ -73,6 +118,12 @@ def index(request):
                 "forms": incomplete_forms,
                 "link_active": "volunteer",
                 "supp_info": supp_info,
+                
+                "mentor_profile": mentor_profile,
+                "mentor_notes": mentor_notes,
+                "mentor_sessions": mentor_sessions,
+                
+                
             }
 
             return render(request, "volunteer/index.html", context=context)
@@ -118,6 +169,16 @@ def stop_volunteering(request, id):
             
             stopped_vol_status = VolunteerRegistrationStatus(registration=registration, registration_status=stopped_status, date=datetime.now())
             stopped_vol_status.save()
+            
+            #Send confirmation email
+            send_m = send_mail(
+                'Chip in - Volunteer Event Confirmation',
+                'You have stopped volunteering for the event: ' + registration.opportunity.name,
+                None,
+                [current_user.email],
+                fail_silently=True,
+            )
+            
             return HTTPResponseHXRedirect("/volunteer/your-opportunities")
         else:
             current_user = request.user

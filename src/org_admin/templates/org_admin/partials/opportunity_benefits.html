@@ -3,7 +3,7 @@
     <p class="text-xl">Benefits</p>
     <button
       class="btn btn-primary"
-      hx-get="/org_admin/opportunities/manage_benefit/{{opportunity.id}}/"
+      hx-get="/org_admin/benefits/add/{{ opportunity.id }}/"
       hx-on:htmx:after-request="my_modal_2.showModal();"
       hx-target="#modalDiv"
       hx-swap="innerHTML"
@@ -17,14 +17,14 @@
 
   <div class="flex flex-col">
     {% if benefits %} 
-    {% for benefit in benefits %}
+    {% for benefitLink in benefits %}
     <div class="flex justify-between items-center bg-secondary-200 my-2">
-      <img class="invert h-16 w-16 p-2" src="{{benefit.icon.icon.url}}"></img>
-      <p class="text flex-grow ml-5">{{ benefit.description }}</p>
+      <img class="invert h-16 w-16 p-2" src="{{benefitLink.benefit.icon.icon.url}}"></img>
+      <p class="text flex-grow ml-5">{{ benefitLink.benefit.description }}</p>
       <div class="min-w-44">
       <button
         class="btn btn-primary"
-        hx-get="/org_admin/opportunities/manage_benefit/edit/{{ benefit.id }}/"
+        hx-get="/org_admin/benefits/{{ benefitLink.benefit.id }}/{{ opportunity.id }}/"
         hx-on:htmx:after-request="my_modal_2.showModal();"
         hx-target="#modalDiv"
         hx-swap="innerHTML"
@@ -32,9 +32,9 @@
         Edit
       </button>
       <a
-        href="/org_admin/opportunities/manage_benefit/delete/{{ benefit.id }}/"
+        href="/org_admin/benefits/unlink/{{ benefitLink.id }}/{{ opportunity.id }}/"
         class="btn bg-red-600"
-        >Delete</a
+        >Unlink</a
       >
     </div>
     </div>

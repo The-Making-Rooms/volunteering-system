@@ -1,0 +1,46 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<form>
+{% csrf_token %}
+    {% for benefit in benefits %}
+    <input type="hidden" name="benefit_ids" value="{{ benefit }}" />
+    {% endfor %}
+
+    <p> Assign Benefits to Opportunities </p>
+    <div class="divider"></div>
+
+    <table class="table">
+        <th>
+            <td>Opportunity Name</td>
+        </th>
+
+        {% for opportunity in opportunities %}
+        <tr>
+            <td>
+                <input class="checkbox" type="checkbox" name="opportunity_ids" value="{{ opportunity.id }}" />
+            </td>
+            <td>
+                {{ opportunity.name }}
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <div class="divider"></div>
+
+    <button
+        class="btn btn-primary"
+        type="submit"
+        hx-post="/org_admin/benefits/add_to_opportunity/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+    >
+        Assign Benefits
+    </button>
+
+{% endblock %}
+

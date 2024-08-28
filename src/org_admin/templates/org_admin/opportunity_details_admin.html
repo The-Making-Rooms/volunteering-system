@@ -29,6 +29,24 @@
     >Details</a
   >
   <a
+  role="tab"
+  role="tab"
+  aria-controls="tab-contents"
+  aria-selected="true"
+  hx-get="/org_admin/opportunities/tags/{{ opportunity.id }}/"
+  class="tab"
+  >Tags</a
+>
+<a
+role="tab"
+role="tab"
+aria-controls="tab-contents"
+aria-selected="true"
+hx-get="/org_admin/opportunities/supp_info/{{ opportunity.id }}/"
+class="tab"
+>Additional Info</a
+>
+  <a
     role="tab"
     role="tab"
     aria-controls="tab-contents"
@@ -73,15 +91,7 @@
     class="tab"
     >Gallery</a
   >
-  <a
-    role="tab"
-    role="tab"
-    aria-controls="tab-contents"
-    aria-selected="true"
-    hx-get="/org_admin/opportunities/staistics/{{ opportunity.id }}/"
-    class="tab"
-    >Statistics</a
-  >
+
 </div>
 
 {% if not tab_name %}
@@ -96,6 +106,20 @@
   id="tab-contents"
   role="tabpanel"
   hx-get="/org_admin/opportunities/details/{{ opportunity.id }}/"
+  hx-trigger="load"
+></div>
+{% elif tab_name == "tags" %}
+<div
+  id="tab-contents"
+  role="tabpanel"
+  hx-get="/org_admin/opportunities/tags/{{ opportunity.id }}/"
+  hx-trigger="load"
+></div>
+{% elif tab_name == "supp_info" %}
+<div
+  id="tab-contents"
+  role="tabpanel"
+  hx-get="/org_admin/opportunities/supp_info/{{ opportunity.id }}/"
   hx-trigger="load"
 ></div>
 {% elif tab_name == "sections" %}

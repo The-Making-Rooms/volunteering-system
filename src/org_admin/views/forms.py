@@ -56,6 +56,25 @@ def update_form(request, form_id):
     form.name = data["name"]
     form.description = data["description"]
     form.allow_multiple = True if "allow_multiple" in data.keys() else False
+    
+    form.required_on_signup = True if "required_on_signup" in data.keys() else False
+    
+    if request.user.is_superuser:
+    
+        if "mentor_start_form" in data.keys():
+            forms = Form.objects.filter()
+            for uform in forms: uform.mentor_start_form = False
+            form.mentor_start_form = True
+        else:
+            form.mentor_start_form = False
+                
+        if "mentor_end_form" in data.keys():
+            forms = Form.objects.filter()
+            for uform in forms: uform.mentor_end_form = False
+            form.mentor_end_form = True
+        else:
+            form.mentor_end_form = False
+    
     form.save()
     return form_detail(request, form_id, success="Form Updated")
     
