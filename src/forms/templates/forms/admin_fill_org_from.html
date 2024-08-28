@@ -7,10 +7,10 @@
 {% endif %}
 
 <div id="response_div"></div>
-
 <div class="p-5 bg-secondary rounded-xl mb-3">
 <p class="text-2xl font-bold mb-3">{{ form.name }}</p>
 <p class="text-lg mb-3">{{ form.description }}</p>
+{% if custom_respondee %}<p>You are filling this form on behalf of a volunteer</p>{% endif %}
 </div>
 <form>
     {% csrf_token %}
@@ -26,7 +26,11 @@
     </div>
 {% endfor %}
 
+{% if custom_repondee %}
+<button class="btn btn-primary" hx-post="/forms/{{form.id}}/submit/{{custom_respondee}}" hx-target="#response_div" hx-swap="outerHTML">Submit</button>
+{% else %}
 <button class="btn btn-primary" hx-post="/forms/{{form.id}}/submit/" hx-target="#response_div" hx-swap="outerHTML">Submit</button>
+{% endif %}
 </form>
 
 {%endblock%}

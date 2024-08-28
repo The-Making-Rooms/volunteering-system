@@ -135,7 +135,7 @@ def index_alias(request):
 
 
 def authenticate_user(request):
-    username = request.POST["email"]
+    username = request.POST["email"].lower()
     password = request.POST["password"]
 
     user = authenticate(request, username=username, password=password)
@@ -190,7 +190,7 @@ def create_account(request):
         while User.objects.filter(username=username).exists():
             username = "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=10))
         # create django user
-        user = User.objects.create_user(username, data["email"], data["password"])
+        user = User.objects.create_user(username, data["email"].lower(), data["password"])
         user.save()
         user = authenticate(request, username=username, password=data["password"])
         login(request, user)

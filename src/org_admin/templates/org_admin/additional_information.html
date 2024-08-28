@@ -1,0 +1,45 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+
+    <p class="text-2xl">{% if edit %}Edit{%else%}Add{%endif%} Additional Information</p>
+
+    <div class="divider"></div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">Name:</span>
+            </label>
+            <input type="text" name="title" class="input input-bordered" {% if edit %}value="{{additional_info.title}}"{%endif%} required>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text">Description:</span>
+            </label>
+            <textarea name="description" class="textarea textarea-bordered" required>{%if edit%}{{additional_info.description}}{%endif%}</textarea>
+        </div>
+
+        {% if edit %}
+            <button class="btn btn-primary mt-3" hx-post="/org_admin/additional_information/{{additional_info.id}}/edit/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update</button>
+        {% else %}
+            <button class="btn btn-primary mt-3" hx-post="/org_admin/additional_information/add/" hx-target=".htmx-navigator" hx-swap="outerHTML">Create</button>
+        {% endif %}
+    </form>
+
+</div>
+
+{% endblock %}

@@ -25,8 +25,8 @@ def add_tag(request, opportunity_id=None, linked_tag_id=None, delete=False):
     if request.method == "GET":
         if delete:
             LinkedTags.objects.get(id=linked_tag_id).delete()
-            return opportunity_details(request, opportunity_id, tab_name="details")
-        return opportunity_details(request, opportunity_id, tab_name="details")
+            return opportunity_details(request, opportunity_id, tab_name="tags")
+        return opportunity_details(request, opportunity_id, tab_name="tags")
     if request.method == "POST":
         opportunity = Opportunity.objects.get(id=opportunity_id)
         
@@ -35,7 +35,7 @@ def add_tag(request, opportunity_id=None, linked_tag_id=None, delete=False):
         
         if request.POST.get("tag") == "":
             request.method = "GET"
-            return opportunity_details(request, opportunity_id, error="Tag cannot be empty", tab_name="details")
+            return opportunity_details(request, opportunity_id, error="Tag cannot be empty", tab_name="tags")
         
         try:
             tag = Tag.objects.get(tag=request.POST.get("tag").lower())
@@ -48,7 +48,7 @@ def add_tag(request, opportunity_id=None, linked_tag_id=None, delete=False):
             new_tag = LinkedTags.objects.create(opportunity=opportunity, tag=tag)
         except:
             request.method = "GET"
-            return opportunity_details(request, opportunity_id, error="Tag already exists", tab_name="details")
+            return opportunity_details(request, opportunity_id, error="Tag already exists", tab_name="tags")
         
         request.method = "GET"
-        return opportunity_details(request, opportunity_id, tab_name="details")
+        return opportunity_details(request, opportunity_id, tab_name="tags")

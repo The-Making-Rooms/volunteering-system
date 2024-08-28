@@ -40,7 +40,7 @@
             <p>Volunteer since: {{ loop.registration.date_created|date:"d/m/Y" }}</p>
             <p>
               Volunteer status: 
-              {% if loop.status.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to Approve 
+              {% if loop.status.registration_status.status == 'awaiting_approval' %} Waiting for Organisation to respond 
               {% else %} 
               {{ loop.status.registration_status.status }} 
               {% endif %}

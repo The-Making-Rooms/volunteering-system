@@ -3739,6 +3739,46 @@ html:has(.drawer-toggle:checked) {
   top: 50%;
 }
 
+.right-16 {
+  right: 4rem;
+}
+
+.left-16 {
+  left: 4rem;
+}
+
+.left-8 {
+  left: 2rem;
+}
+
+.left-2 {
+  left: 0.5rem;
+}
+
+.-left-16 {
+  left: -4rem;
+}
+
+.right-2 {
+  right: 0.5rem;
+}
+
+.right-32 {
+  right: 8rem;
+}
+
+.-right-1\/4 {
+  right: -25%;
+}
+
+.right-1\/4 {
+  right: 25%;
+}
+
+.right-1\/2 {
+  right: 50%;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -4051,6 +4091,10 @@ html:has(.drawer-toggle:checked) {
   width: 100%;
 }
 
+.w-32 {
+  width: 8rem;
+}
+
 .min-w-44 {
   min-width: 11rem;
 }
@@ -4215,6 +4259,14 @@ html:has(.drawer-toggle:checked) {
 
 .overflow-auto {
   overflow: auto;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-scroll {
+  overflow: scroll;
 }
 
 .overflow-x-auto {
@@ -4654,6 +4706,18 @@ html:has(.drawer-toggle:checked) {
 
 .opacity-90 {
   opacity: 0.9;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-100 {
+  opacity: 1;
+}
+
+.opacity-30 {
+  opacity: 0.3;
 }
 
 .shadow-lg {

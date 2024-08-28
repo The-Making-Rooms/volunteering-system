@@ -3,12 +3,7 @@
 {% block page_content %}
 
 
-{% if user.is_authenticated %}
-<div class="mb-5">
-  <p class="text-2xl font-bold">Welcome, {{ user.first_name }}</p>
-  <p>Explore opportunitites on chip in</p>
-</div>
-{% else %}
+
 
 <div class="bg-secondary rounded-xl p-5 text-base sm:text-xl md:text-2xl mb-3">
 <span class="font-bold">Welcome to Chip In!</span><br>
@@ -22,10 +17,11 @@ Building, supporting, connecting, upskilling. Investing.
 <br><br>
 Have a look at what we can offer, if you need some support or are not sure what you may be interested in please get in touch to see how we can support you.
 <br><br>
-
+{% if user.is_authenticated %}
 Start by <a href="/volunteer/" class="text-primary">logging in</a> or <a href="/create_account" class="text-primary">signing up</a> to explore opportunities and organisations in your area.
-</div>
 {% endif %}
+</div>
+
 
 <!--
 <div>

@@ -8,7 +8,7 @@ class Volunteer(models.Model):
     avatar = models.ImageField(upload_to='avatars/', blank=True)
     date_of_birth = models.DateField()
     phone_number = models.CharField(max_length=11)
-    bio = models.TextField()
+    bio = models.TextField(null=True, blank=True)
     CV = models.FileField(upload_to='CV/', blank=True)
 
     def __str__(self):

@@ -44,23 +44,26 @@
     </div>
 
     <div class="divider"></div>
-        <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer if they request thier information through GDPR!</p>
+    <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer when logging into the app.</p>
+
         <div class="form-control flex flex-row items-center">
             <input class="checkbox checkbox-primary" type="checkbox" name="gdpr" value="gdpr" onchange="document.getElementById('submit_gdpr_block').disabled = !this.checked;">
             <label class="label">
-                <span class="label-text">Please confirm you understand that this note can be seen by the volunteer if requested through GDPR.</span>
+                <span class="label-text">Please confirm you understand that this note can be seen by the in the app.</span>
             </label>
             
         </div>
 
 
-    <p class="font-bold text-red-500 mb-3">Information logged here can be seen by the volunteer when logging into the app.</p>
     <button type="submit" 
     id = "submit_gdpr_block"
     hx-post={% if edit %}"/org_admin/mentoring/edit_session/{{session.id}}/"{%else%}"/org_admin/mentoring/log_hours/{{mentee_record.id}}/"{%endif%}
     hx-target=".htmx-navigator" 
     hx-swap="outerHTML" 
-    class="btn btn-primary">
+    class="btn btn-primary"
+    disabled
+    >
+    
     {% if edit %}Save{%else%}Add Session{%endif%}
 </button>
 

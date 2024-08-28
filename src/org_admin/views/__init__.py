@@ -17,3 +17,4 @@ from .opportunity_tags import *
 from .opportunity_additional_info import *
 from .reporting import *
 from .benefits import *
+from .additional_information import *

@@ -97,7 +97,7 @@ urlpatterns = [
     
     
     path("opportunities/supp_info/<int:opp_id>/", views.opportunity_supplementary_info, name="opportunity_supplementary_info"),
-    path("opportunities/supp_info/delete/<int:supp_id>/<int:opp_id>", views.opportunity_supplementary_info, name="opportunity_supplementary_info", kwargs={'delete': True}),
+    path("opportunities/supp_info/delete/<int:supp_id>/", views.delete_info_req, name="delete_supp_info_requirement"),
     path("opportunities/supp_info/assign/", views.opportunity_supplementary_info, name="opportunity_supplementary_info"),
     
     path("opportunities/manage_benefit/<int:opportunity_id>/", views.manage_benefit, name="manage_benefit"),
@@ -119,7 +119,10 @@ urlpatterns = [
     path("mentoring/log_hours/<int:mentee_id>/", views.log_hours, name="log_hours"),
     path("mentoring/add_note/<int:mentee_id>/", views.add_note, name="add_note"),
     path("mentoring/edit_session/<int:session_id>/", views.edit_hours, name="edit_hours"),
-     path("mentoring/delete_session/<int:session_id>/", views.delete_hours, name="delete_hours"),
+    path("mentoring/delete_session/<int:session_id>/", views.delete_hours, name="delete_hours"),
+    path("mentoring/fill_mentee_start_form/<int:mentee_id>/", views.fill_mentee_form, name="fill_mentee_form_start", kwargs={'start_end': 'start'}),
+    path("mentoring/fill_mentee_end_form/<int:mentee_id>/", views.fill_mentee_form, name="fill_mentee_form_end", kwargs={'start_end': 'end'}),
+     
     
     path("admin_management/", views.get_admins, name="admin_management"),
     path("admin_management/delete/<int:admin_id>/", views.delete_admin, name="delete_admin"),
@@ -152,6 +155,11 @@ urlpatterns = [
     path("benefits/unlink/<int:link_id>/<int:opportunity_id>/", views.unlink_benefit, name="unlink_benefit_inplace"),
     path("benefits/<int:benefit_id>/<int:opportunity_id>/", views.benefit_crud, name="benefit_crud_inplace"),
     path("benefits/add/<int:opportunity_id>/", views.add_benefit, name="add_benefit_inplace"),
+    
+    path("additional_information/", views.additional_information, name="additional_information"),
+     path("additional_information/<int:id>/delete/", views.delete_additional_info, name="delete_additional_info"),
+     path("additional_information/add/", views.add_additional_info, name="add_additional_info"),
+     path("additional_information/<int:id>/edit/", views.edit_additional_info, name="edit_additional_info"),
     
     path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     

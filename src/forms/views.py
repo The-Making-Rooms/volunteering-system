@@ -3,9 +3,14 @@ from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
 from .models import Form, Question, Options, Answer, Response, FormResponseRequirement
 from volunteer.views import index
+
+from volunteer.models import Volunteer
+from opportunities.models import Opportunity, Registration
 from org_admin.models import OrganisationAdmin
+from django.contrib.auth.models import User
 # Create your views here.
 def fill_form(request, form_id, custom_respondee=False):
+    print("custom_user_respondee",custom_respondee)
     form = Form.objects.get(pk=form_id)
     question_objects = Question.objects.filter(form=form).order_by('index')
     
@@ -17,9 +22,14 @@ def fill_form(request, form_id, custom_respondee=False):
     responses = Response.objects.filter(form=form, user=request.user)
     
     if not form.allow_multiple and responses.exists() and allowed_to_fill:
+        
+        if custom_respondee:
+            allowed_to_fill = FormResponseRequirement.objects.get(form=form, user=User.objects.get(id=custom_respondee), completed=False)
+        
         allowed_to_fill.completed = True
         allowed_to_fill.save()
         return index(request)
+
     
     if not allowed_to_fill and not custom_respondee:
         print("You are not allowed to fill this form")
@@ -60,6 +70,18 @@ def submit_response(request, form_id, custom_redirect=None, override_respondee=N
     
     if not Form.objects.get(pk=form_id).filled_by_organisation:
         try:
+            if override_respondee:
+                user = User.objects.get(id=override_respondee)
+                requirement = FormResponseRequirement.objects.get(form=Form.objects.get(pk=form_id), user=user, completed=False)
+                
+                #check if requsting user is org admin or admin of the users volunteer org
+                org = OrganisationAdmin.objects.get(user=request.user).organisation
+                vol_org = Registration.objects.filter(volunteer=Volunteer.objects.get(user=user), opportunity__in=Opportunity.objects.filter(organisation = org))
+                
+                if len(vol_org) == 0 and request.user.is_superuser == False:
+                    return render(request, 'forms/redirect_profile.html')
+                
+                
             requirement = FormResponseRequirement.objects.get(form=Form.objects.get(pk=form_id), user=request.user, completed=False)
         except FormResponseRequirement.DoesNotExist:
             return render(request, 'forms/redirect_profile.html')
@@ -67,10 +89,13 @@ def submit_response(request, form_id, custom_redirect=None, override_respondee=N
         if len(OrganisationAdmin.objects.filter(user=request.user)) == 0:
             return render(request, 'forms/redirect_profile.html')
     
+    response = None
     
     if override_respondee:
-        response = Response.objects.create(user=override_respondee, form=Form.objects.get(pk=form_id))
-    response = Response.objects.create(user=request.user, form=Form.objects.get(pk=form_id))
+        user = User.objects.get(id=override_respondee)
+        response = Response.objects.create(user=user, form=Form.objects.get(pk=form_id))
+    else:    
+        response = Response.objects.create(user=request.user, form=Form.objects.get(pk=form_id))
     
     
     for question in form_questions:

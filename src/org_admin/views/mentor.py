@@ -5,8 +5,9 @@ from django.shortcuts import render
 from commonui.views import check_if_hx
 from .common import check_ownership
 from datetime import datetime, timedelta
-from forms.models import Form, Response
+from forms.models import Form, Response, FormResponseRequirement
 from forms.views import fill_form
+
 
 def get_mentees(request):
     if request.user.is_superuser:
@@ -40,18 +41,40 @@ def create_mentee(request, volunteer_id):
         record.save()
         return manage_mentee(request, record.id)
         
-def manage_mentee(request, mentee_id):
+def manage_mentee(request, mentee_id, error=None, success=None):
     mentee_record = MentorRecord.objects.get(id=mentee_id)
     if check_ownership(request, mentee_record):
         mentee = mentee_record.volunteer
         sessions = MentorSession.objects.filter(mentor_record=mentee_record)
         notes = MentorNotes.objects.filter(MentorRecord=mentee_record)
+        
+        
+        try:
+            start_form = Form.objects.get(mentor_start_form=True)
+            end_form = Form.objects.get(mentor_end_form=True)
+            
+            print(start_form, end_form)
+            
+            
+            start_form_response = Response.objects.filter(form=start_form, user=mentee.user).exists()
+            end_form_response = Response.objects.filter(form=end_form, user=mentee.user).exists()
+        except:
+            start_form = None
+            end_form = None
+            start_form_response = False
+            end_form_response = False
+        
         context = {
             "hx": check_if_hx(request),
             "mentee": mentee,
             "mentee_record": mentee_record,
             "mentor_sessions": sessions,
             "mentor_notes": notes,
+            "mentor_form_found": start_form and end_form ,
+            "mentor_start": not start_form_response,
+            "mentor_end": not end_form_response,
+            "error": error,
+            "success": success
         }
         return render(request, "org_admin/mentee_management.html", context=context)
     
@@ -185,18 +208,29 @@ def add_note(request, mentee_id):
             return render(request, "org_admin/add_mentor_note.html", context=context)
 
 
-def fill_entry_form(request, mentee_id):
-    
-    try:
-        mentoring_start_form = Form.objects.get(name="Mentoring Start Form")
-    except Form.DoesNotExist:
-        return render(request, "org_admin/mentoring.html", context={"error": "No mentoring start form found. Contact Admin"})
 
-    mentee_record = MentorRecord.objects.get(id=mentee_id)
 
-    form_filled = Response.objects.filter(form=mentoring_start_form, user=mentee_record.volunteer.user).count() > 0
+def fill_mentee_form(request, start_end, mentee_id):
+ 
+        
+        if start_end == "end":
+            form = Form.objects.get(mentor_end_form=True)
+        else:  
+            form = Form.objects.get(mentor_start_form=True)
+            
+        print("found form", form)
+            
+        mentee_user_id = MentorRecord.objects.get(id=mentee_id).volunteer.user.id
+        response_requirement = FormResponseRequirement.objects.get(form=form, user=mentee_user_id) if FormResponseRequirement.objects.filter(form=form, user=mentee_user_id).exists() else None
+        mentee_user = MentorRecord.objects.get(id=mentee_id).volunteer.user
+        
+        if response_requirement is None:
+            response_requirement = FormResponseRequirement(form=form, user=mentee_user)
+            response_requirement.save()
+            return fill_form(request, form.id, custom_respondee=mentee_user_id)
+        elif response_requirement.completed:
+            return manage_mentee(request, mentee_id, error="Form already filled")
+        else:
+            return fill_form(request, form.id, custom_respondee=mentee_user_id)
+
     
-    if form_filled:
-        return render(request, "org_admin/mentoring.html", context={"error": "Form already filled"})
-    else:
-        return fill_form(request, mentoring_start_form.id, True)

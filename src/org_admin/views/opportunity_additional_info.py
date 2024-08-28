@@ -41,7 +41,7 @@ def opportunity_supplementary_info(request, opp_id):
         }
         
         request.method = "GET"
-        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="details")
+        return opportunity_details(request, opp_id, success="Supplementary Info added successfully", tab_name="supp_info")
     else:
         opportunity = Opportunity.objects.get(id=opp_id)
         if not check_ownership(request, opportunity):
@@ -78,4 +78,4 @@ def delete_info_req(request, supp_id):
     
     supp.delete()
     
-    return opportunity_details(request, opp, success="Supplementary Info deleted successfully")
+    return opportunity_details(request, opp.id, success="Supplementary Info deleted successfully", tab_name="supp_info")

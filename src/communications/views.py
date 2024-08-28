@@ -8,6 +8,8 @@ from django.conf import settings
 from better_profanity import profanity
 from org_admin.models import OrganisationAdmin
 from django.http import HttpResponseRedirect
+from django.core.mail import send_mail
+
 # Create your views here.
 
 
@@ -90,6 +92,21 @@ def send_message(request, chat_id):
     for user in chat.participants.all():
         if user != request.user:
             send_user_notification(user=user, payload=payload, ttl=1000)
+            
+            send_mail(
+                'Chip In - New Message from {} {} ({})'.format(request.user.first_name, request.user.last_name, request.user.email),
+                """
+                You have a new message from {} {} ({}) in the chat with {}.
+                Please log onto the Chip In app to view the message.
+                
+                """.format(request.user.first_name, request.user.last_name, request.user.email, org_name),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+                
+            
+            
             
     
     #Send an automated message

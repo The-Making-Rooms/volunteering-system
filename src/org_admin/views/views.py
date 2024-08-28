@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
@@ -244,7 +244,8 @@ def details(request, error=None, success=None, organisation_id=None):
             else:
                 organisation = OrganisationAdmin.objects.get(user=request.user).organisation
         except OrganisationAdmin.DoesNotExist:
-            return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+            return HttpResponseRedirect("/volunteer/")
+
 
         org_videos = OrgVideo.objects.filter(organisation=organisation)
         org_images = OrgImage.objects.filter(organisation=organisation)
