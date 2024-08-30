@@ -66,17 +66,19 @@ def add_benefit(request, opportunity_id=None):
         if post_data.get("icon"):
             add_icon(benefit, post_data.get("icon"))
             
-    
-            
+        print('icon added')
+        print(post_data.get("opportunity_id")==None)
         if post_data.get("opportunity_id"):
+            if post_data.get("opportunity_id") == "None": 
+                print("no opportunity")
+            else:
+                OpportunityBenefit.objects.create(
+                    opportunity=Opportunity.objects.get(id=post_data.get("opportunity_id")),
+                    benefit=benefit
+                )
             
-            OpportunityBenefit.objects.create(
-                opportunity=Opportunity.objects.get(id=post_data.get("opportunity_id")),
-                benefit=benefit
-            )
-            
-            request.method = "GET"
-            return opportunity_details(request, post_data.get("opportunity_id"), tab_name="benefits", success="Benefit has been added to the opportunity")
+                request.method = "GET"
+                return opportunity_details(request, post_data.get("opportunity_id"), tab_name="benefits", success="Benefit has been added to the opportunity")
         
         return HTTPResponseHXRedirect("/org_admin/benefits/")
 
