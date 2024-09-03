@@ -24,7 +24,7 @@ from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.password_validation import validate_password
 from .auth import sign_in
-
+from django.contrib.auth.models import User
 
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = "org_admin/password_reset.html"
@@ -49,6 +49,15 @@ def password_reset_sent(request):
     return render(
         request, "org_admin/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
+    
+    
+def utils_set_emails_lower(request):
+    users = User.objects.all()
+    for user in users:
+        user.email = user.email.lower()
+        user.username = user.email
+        user.save()
+    return HttpResponse("Done")
 
 # Create your views here.
 def volunteer_admin(request):
