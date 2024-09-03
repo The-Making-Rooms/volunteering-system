@@ -4,6 +4,9 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from commonui.views import check_if_hx
 from django.contrib.auth.forms import PasswordResetForm
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 def get_admins(request, error=None, success=None):
     if request.method == "GET":
@@ -51,6 +54,15 @@ def get_admins(request, error=None, success=None):
             if not org_admin_exists:
                 OrganisationAdmin.objects.create(user=user, organisation=org)
                 request.method = "GET"
+                
+                send_mail(
+                    subject='Welcome to Chip In',
+                    message='You have been added as an admin to the organisation {}. Use the following link to login: http://chipinbwd.co.uk/org_admin/'.format(org.name),
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email],
+                    fail_silently=True,
+                )
+                
                 return get_admins(request, success="Admin added")
             else:
                 request.method = "GET"
@@ -59,26 +71,14 @@ def get_admins(request, error=None, success=None):
             
             new_user = User.objects.create_user(email=email, username=email)
             new_user.save()
-
-            """
-            form = PasswordResetForm({"email": email})
-            if form.is_valid():
-                form.save(
-                    request=request,
-                    use_https=request.is_secure(),
-                    email_template_name='registration/password_reset_email.html',
-                    subject_template_name='registration/password_reset_subject.txt',
-                    from_email=None,
-                    html_email_template_name=None,
-                    extra_email_context=None,
-                )
-            else:
-                print (form.errors)
-            """
             
-            
-            #send password reset email
-            
+            prompt_mail = send_mail(
+                subject='Welcome to Chip In',
+                message="""You have been added as an admin to the organisation {}. Please visit the following link to reset your password: http://chipinbwd.co.uk/org_admin/password_reset/""".format(org.name),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=True,
+            )
             
             request.method = "GET"
             return get_admins(request, success="User was cretaed. Reset password to login")
@@ -107,7 +107,7 @@ def add_super_user(request):
     if request.method == "POST":
         if request.user.is_superuser:
             data = request.POST
-            email = data.get("email")
+            email = data.get("email").lower()
             try:
                 user = User.objects.get(email=email)
                 user.is_superuser = True

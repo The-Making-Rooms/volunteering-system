@@ -162,6 +162,7 @@ urlpatterns = [
      path("additional_information/<int:id>/edit/", views.edit_additional_info, name="edit_additional_info"),
     
     path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
+    path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),
     
     path("reporting/", views.reporting, name="reporting"),
     

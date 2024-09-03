@@ -8,7 +8,7 @@ def sign_in(request):
         return render(request, "org_admin/sign_in.html", {"hx": check_if_hx(request)})
     
     if request.method == "POST":
-            username = request.POST["email"]
+            username = request.POST["email"].lower()
             password = request.POST["password"]
 
             user = authenticate(request, username=username, password=password)

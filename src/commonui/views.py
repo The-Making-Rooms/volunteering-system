@@ -170,8 +170,7 @@ def create_account(request):
     if request.method == "POST":
 
         data = request.POST
-
-        if User.objects.filter(email=data["email"]).exists():
+        if User.objects.filter(email=data["email"].lower()).exists():
             return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email already in use"})
         
         if data["password"] != data["password_confirm"]:
