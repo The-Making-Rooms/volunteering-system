@@ -1,0 +1,10 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<form  hx-post="/org_admin/utils/data_import/"  enctype="multipart/form-data">
+    {% csrf_token %}
+<input type="file" name="csv_file" class="file-input file-input-bordered w-full max-w-xs" />
+<button class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}

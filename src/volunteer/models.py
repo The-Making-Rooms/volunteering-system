@@ -38,10 +38,10 @@ class MentorNotes(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     
 class VolunteerAddress(models.Model):
-    first_line = models.CharField(max_length=200)
+    first_line = models.CharField(max_length=200, blank=True, null=True)
     second_line = models.CharField(max_length=200, blank=True, null=True)
     postcode = models.CharField(max_length=200)
-    city = models.CharField(max_length=200)
+    city = models.CharField(max_length=200, blank=True, null=True)
     volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
 
 
