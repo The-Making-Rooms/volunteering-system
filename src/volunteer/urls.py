@@ -21,6 +21,9 @@ urlpatterns = [
     path("emergency_contact_form/<int:contact_id>/delete", views.emergency_contact_form, name="emergency_contact_form", kwargs={"delete": True}),
     path("volunteer_conditions_form/<int:condition_id>/delete", views.volunteer_conditions_form, name="volunteer_conditions_form", kwargs={"delete": True}),
     path("volunteer_address_form/<int:address_id>/delete", views.volunteer_address_form, name="volunteer_address_form", kwargs={"delete": True}),
+    
+    path("toggle_interest/<int:organisation_id>/", views.toggle_interest, name="toggle_interest"),
+    
     #User views
     path("sign-up/", views.sign_up, name="sign-up"),
     path("logout/", views.user_logout, name="logout"),

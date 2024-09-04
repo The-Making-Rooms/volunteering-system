@@ -17,12 +17,14 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect, redirect_admins
 from datetime import datetime, date
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
-from .forms import (
+from ..forms import (
     VolunteerForm,
     VolunteerAddressForm,
     EmergencyContactsForm,
     VolunteerConditionsForm,
 )
+
+from organisations.models import OrganisationInterest
 import random
 
 from django.core.mail import send_mail
@@ -89,6 +91,8 @@ def index(request):
             print(incomplete_forms)
             
             supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer_profile)
+            
+            organisaton_interests = OrganisationInterest.objects.filter(volunteer=volunteer_profile)
 
             mentor_profile = MentorRecord.objects.filter(volunteer=volunteer_profile)
             
@@ -122,8 +126,7 @@ def index(request):
                 "mentor_profile": mentor_profile,
                 "mentor_notes": mentor_notes,
                 "mentor_sessions": mentor_sessions,
-                
-                
+                "organisation_interests": organisaton_interests, 
             }
 
             return render(request, "volunteer/index.html", context=context)
