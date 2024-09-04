@@ -1,0 +1,21 @@
+<form>
+    {% csrf_token %}
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Section Name</span>
+        </label>
+        <input name="name" maxlength="200" type="text" placeholder="Section Name (Max 200 Chars)" value="{{section.title}}" class="input input-bordered">
+    </div>
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text" >Section Description</span>
+        </label>
+        <textarea maxlength="1000" name="description" class="textarea textarea-bordered" placeholder="Section Description (Max 1000 chars)">{{section.content}}</textarea>
+    </div>
+    {% if section %}
+        <button class="btn btn-primary" hx-post="/org_admin/organisations/manage_section/edit/{{section.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update Section</button>
+    {% else %}
+        <button class="btn btn-primary" hx-post="/org_admin/organisations/manage_section/new/{{organisation.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Add Section</button>
+    {% endif %}
+</form>
+

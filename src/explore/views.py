@@ -69,7 +69,7 @@ def getTagResult(request, tag):
         try:
             tag = Tag.objects.get(tag=tag)
             linked_opps = LinkedTags.objects.filter(tag=tag)
-            opps = Opportunity.objects.filter(id__in=linked_opps.values_list('opportunity', flat=True))
+            opps = Opportunity.objects.filter(id__in=linked_opps.values_list('opportunity', flat=True), active=True)
         except:
             opps = []
         try:

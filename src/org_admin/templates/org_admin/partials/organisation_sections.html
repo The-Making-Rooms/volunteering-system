@@ -1,10 +1,10 @@
-<div class="p-5 rounded-lg  bg-base-200 mb-3">
+<div class="rounded-lg  bg-base-200 mb-3">
     <div class="flex justify-between items-center">
       <p class="text-xl">Sections</p>
       <a>
         <button
           class="btn btn-primary"
-          hx-get="/org_admin/opportunities/manage_section/new/{{ opportunity.id }}/"
+          hx-get="/org_admin/organisations/manage_section/new/{{ organisation.id }}/"
           hx-target="#sections_editor"
           hx-swap="outerHTML"
           >Add Section</button
@@ -31,7 +31,7 @@
             <td class="flex-grow">{{ section.title }}</td>
             <td>
             <a
-                hx-get="/org_admin/opportunities/manage_section/edit/{{ section.id }}/"
+                hx-get="/org_admin/organisations/manage_section/edit/{{ section.id }}/"
                 class="btn bg-blue-600"
                 hx-target="#sections_editor"
                 hx-swap="outerHTML"
@@ -40,7 +40,7 @@
             >
 
             <a
-                hx-get="/org_admin/opportunities/manage_section/move_up/{{ section.id }}/"
+                hx-get="/org_admin/organisations/manage_section/move_up/{{ section.id }}/"
                 class="btn bg-gray-700"
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
@@ -49,7 +49,7 @@
             >
 
             <a
-                hx-get="/org_admin/opportunities/manage_section/move_down/{{ section.id }}/"
+                hx-get="/org_admin/organisations/manage_section/move_down/{{ section.id }}/"
                 class="btn bg-gray-700"
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
@@ -58,7 +58,7 @@
             >  
 
             <a
-                hx-get="/org_admin/opportunities/manage_section/delete/{{ section.id }}/"
+                hx-get="/org_admin/organisations/manage_section/delete/{{ section.id }}/"
                 class="btn bg-red-600"
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
@@ -72,7 +72,3 @@
     </div>
 
 </div>
-
-{% with active_link="sections" %}
-{% include "org_admin/partials/tabs.html" %}
-{% endwith %}
