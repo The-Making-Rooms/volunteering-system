@@ -4,13 +4,13 @@
         <label class="label">
             <span class="label-text">Section Name</span>
         </label>
-        <input name="name" type="text" placeholder="Section Name" value="{{section.title}}" class="input input-bordered">
+        <input name="name" maxlength="200" type="text" placeholder="Section Name (Max 200 chars)" value="{{section.title}}" class="input input-bordered">
     </div>
     <div class="form-control">
         <label class="label">
             <span class="label-text">Section Description</span>
         </label>
-        <textarea name="description" class="textarea textarea-bordered" placeholder="Section Description">{{section.content}}</textarea>
+        <textarea maxlength="1000" name="description" class="textarea textarea-bordered" placeholder="Section Description  (Max 1000 chars)">{{section.content}}</textarea>
     </div>
     {% if section %}
         <button class="btn btn-primary" hx-post="/org_admin/opportunities/manage_section/edit/{{section.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Update Section</button>

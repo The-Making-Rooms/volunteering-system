@@ -95,6 +95,18 @@
   </div>
 </div>
 
+{% for section in sections%}
+<div class="card w-full bg-base-300 shadow-xl mb-5">
+  <div class="card-body">
+    <h2 class="card-title">{{ section.title }}</h2>
+    <div class="divider"></div> 
+    <div class="card-actions">
+      <p>{{ section.content }}</p>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
 {% if links %}
 <div class="card w-full bg-base-300 shadow-xl mb-5">
   <div class="card-body">

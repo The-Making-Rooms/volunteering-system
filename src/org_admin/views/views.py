@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
-from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity, OrganisationInterest
+from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity, OrganisationInterest, OrganisationSection
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags
 from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
@@ -276,6 +276,7 @@ def details(request, error=None, success=None, organisation_id=None):
         automated_message = AutomatedMessage.objects.get(organisation=organisation) if AutomatedMessage.objects.filter(organisation=organisation).exists() else None
         supp_info = SupplementaryInfo.objects.filter(organisation=organisation)
         interested_vols = OrganisationInterest.objects.filter(organisation=organisation)
+        sections = OrganisationSection.objects.filter(organisation=organisation)
         
         link_obj = []
         
@@ -299,6 +300,7 @@ def details(request, error=None, success=None, organisation_id=None):
             "success": success,
             "interested_vols": interested_vols,
             "superuser": request.user.is_superuser,
+            "sections": sections,
         }
 
         return render(request, "org_admin/organisation_details_admin.html", context)

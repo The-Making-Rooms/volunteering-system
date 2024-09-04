@@ -21,6 +21,17 @@ class Organisation(models.Model):
     description = models.TextField()
     featured = models.BooleanField(default=False)
 
+class OrganisationSection(models.Model):
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    title = models.CharField(max_length=100)
+    content = models.CharField(max_length=2000)
+    order = models.IntegerField()
+    
+    class Meta:
+        ordering = ['order']
+        
+        #unique between order and opportunity
+
     def get_orgnanisation_admin_users(self):
         return OrganisationAdmin.objects.filter(organisation=self).values_list('user', flat=True)
     

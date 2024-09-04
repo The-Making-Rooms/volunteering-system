@@ -67,6 +67,13 @@ urlpatterns = [
     
     path("upload_organisation_logo/<int:organisation_id>/", views.upload_organisation_logo, name="upload_organisation_logo"),
     path("organisations/<int:organisation_id>/", views.details, name="organisation_details"),
+    path("organisations/manage_section/new/<int:organisation_id>/", views.org_create_new_section, name="opportunity_section_manage"),
+    path("organisations/manage_section/delete/<int:section_id>/", views.org_delete_section, name="opportunity_section_delete"),
+    path("organisations/manage_section/edit/<int:section_id>/", views.org_edit_section, name="opportunity_section_manage"),
+    path("organisations/manage_section/move_up/<int:section_id>/", views.org_move_section_up, name="opportunity_section_manage"),
+    path("organisations/manage_section/move_down/<int:section_id>/", views.org_move_section_down, name="opportunity_section_manage"),
+    
+    
     path("links/<int:organisation_id>/", views.org_links, name="add_link"),
     path("location/<int:organisation_id>/", views.add_location_by_id, name="locations"),
     path("upload_media/organisation_image/<int:organisation_id>/", views.upload_media, name="upload_media_organisation", kwargs={'location': 'org_media'}),
