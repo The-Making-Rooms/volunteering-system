@@ -18,7 +18,7 @@
       </tr>
       <tr>
         <th>Phone</th>
-        <td>{{volunteer.phone}}</td>
+        <td>{{volunteer.phone_number}}</td>
       </tr>
     </tbody>
   </table>
@@ -85,6 +85,33 @@
   </table>
   {% endif %}
 </div>
+
+{% if superuser %}
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Followed Organisations</p>
+  <div class="divider my-2"></div>
+  {% if interests|length == 0 %}
+  <p>Not following any organisations</p>
+  {% else %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Organisation Name</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for org in interests %}
+      <tr>
+        <td>{{ org.organisation.name }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endif %}
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">
   <p class="text-xl font-bold">Conditions</p>

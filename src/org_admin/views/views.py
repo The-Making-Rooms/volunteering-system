@@ -397,6 +397,7 @@ def volunteer_details_admin(request, id):
     conditions = VolunteerConditions.objects.filter(volunteer=volunteer)
     addresses = VolunteerAddress.objects.filter(volunteer=volunteer)
     emergency_contacts = EmergencyContacts.objects.filter(volunteer=volunteer)
+    interests = OrganisationInterest.objects.filter(volunteer=volunteer)
     
     context = {
         "hx": check_if_hx(request),
@@ -406,6 +407,8 @@ def volunteer_details_admin(request, id):
         "vol_supp_info": vol_supp_info,
         "addresses": addresses,
         "contacts": emergency_contacts,
+        "interests": interests,
+        "superuser": request.user.is_superuser,
     }
     
     return render(request, "org_admin/volunteer_details_admin.html", context=context)
