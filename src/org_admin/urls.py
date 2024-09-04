@@ -163,7 +163,7 @@ urlpatterns = [
     
     path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),
-    
+    path("utils/gen_random_passwords/", views.utils_set_random_password, name="gen_random_passwords"),
     path("reporting/", views.reporting, name="reporting"),
     
     

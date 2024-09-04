@@ -77,6 +77,20 @@
       >
         Ask A Question
       </button>
+
+      {% if interest != None%}
+        <button
+          class="btn btn-primary"
+          hx-target=".htmx-navigator"
+          hx-get="/volunteer/toggle_interest/{{ organisation.id }}/"
+        >
+          {% if interest == False %}
+          Follow
+          {% else %}
+          Unfollow
+          {% endif %}
+        </button>
+      {% endif %}
     </div>
   </div>
 </div>

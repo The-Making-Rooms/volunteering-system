@@ -21,7 +21,7 @@ class Form(models.Model):
 class Question(models.Model):
     form = models.ForeignKey('Form', on_delete=models.CASCADE)
     index = models.IntegerField()
-    question = models.CharField(max_length=200)
+    question = models.CharField(max_length=1000)
     question_type = models.CharField(max_length=200)
     required = models.BooleanField(default=False)
     allow_multiple = models.BooleanField(default=False)

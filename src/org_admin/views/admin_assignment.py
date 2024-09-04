@@ -6,6 +6,7 @@ from commonui.views import check_if_hx
 from django.contrib.auth.forms import PasswordResetForm
 from django.core.mail import send_mail
 from django.conf import settings
+import random
 
 
 def get_admins(request, error=None, success=None):
@@ -69,8 +70,10 @@ def get_admins(request, error=None, success=None):
                 return get_admins(request, error="Admin already exists")
         except User.DoesNotExist:
             
-            new_user = User.objects.create_user(email=email, username=email)
+            new_user = User.objects.create_user(email=email, username=email, password="".join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", k=12)))
             new_user.save()
+            org_admin = OrganisationAdmin.objects.create(user=new_user, organisation=org)
+            
             
             prompt_mail = send_mail(
                 subject='Welcome to Chip In',

@@ -333,6 +333,34 @@
   </div>
 </div>
 
+<div class="p-5 rounded-lg bg-base-200 mt-3">
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Volunteers Following: {{interested_vols|length}}</p>
+    <p>The following volunteers have registered for updates about this organisation</p>
+  </div>
+<div class="divider"></div>
+    {% if interested_vols|length == 0 %}
+    <p>No volunteers are following this organisation</p>
+    {% else %}
+<table class="table w-full">
+  <thead>
+    <tr>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+
+    {% for vols in interested_vols %}
+    <tr>
+      <td>{{ vols.volunteer.user.first_name}} {{ vols.volunteer.user.last_name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endif %}
+
 <!-- Open the modal using ID.showModal() method -->
 <dialog id="my_modal_2" class="modal">
   <div id="modalDiv" class="modal-box">

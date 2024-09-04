@@ -41,10 +41,6 @@
               <td>{{volunteer.phone_number}}</td>
             </tr>
             <!-- row 5 -->
-            <tr>
-              <th>Bio</th>
-              <td>{{volunteer.bio}}</td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -88,6 +84,52 @@
     </div>
   </div>
 {% endif %}
+
+<div class="card w-full bg-base-200 mb-3">
+  <div class="card-body p-5">
+    <div class="card-actions items-center">
+      <p class="text-2xl font-bold">Followed Organisations</p>
+    </div>
+
+    <div class="divider my-2"></div>
+
+    {% if organisation_interests|length < 1%}
+    <p>No organisations followed</p>
+    {% else %}
+
+    <div class="overflow-x-auto">
+      <table class="table">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th>Organisation Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- row 1 -->
+          
+          {% for org in organisation_interests %}
+          
+          <tr>
+            <td>{{ org.organisation.name }}</td>
+            <td>
+              <a class="btn btn-primary" href="/volunteer/toggle_interest/{{ org.organisation.id }}/">Remove</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% endif %}
+
+
+  </div>
+</div>
+
+
+
   <div class="card w-full bg-base-200 mb-3">
     <div class="card-body p-5">
       <div class="card-actions items-center">
@@ -328,6 +370,11 @@
 
       <div class="divider my-2"></div>
 
+
+      {% if supp_info|length == 0%}
+      <p>No additional information added</p>
+      {% else %}
+
       <div class="overflow-x-auto">
         <table class="table">
           <!-- head -->
@@ -370,6 +417,7 @@
           </tbody>
         </table>
       </div>
+      {% endif %}
     </div>
   </div>
 

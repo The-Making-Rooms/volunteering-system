@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
-from organisations.models import Organisation, Link, Image, Video, Location
+from organisations.models import Organisation, Link, Image, Video, Location, OrganisationInterest
 from opportunities.models import Opportunity, Image as OpportunityImage
 from commonui.views import check_if_hx
 from googlemaps import Client as GoogleMaps
@@ -79,6 +79,15 @@ def detail(request, organisation_id):
     links = Link.objects.filter(organisation=org)
     images = Image.objects.filter(organisation=org)
     videos = Video.objects.filter(organisation=org)
+    
+    interest = None
+    
+    if request.user.is_authenticated:
+        try:
+            interest = OrganisationInterest.objects.filter(volunteer__user=request.user, organisation=org).exists()
+        except:
+            pass
+        
 
 
     context = {
@@ -88,6 +97,7 @@ def detail(request, organisation_id):
         "videos": videos,
         "locations": location,
         "opportunities": opp_objects,
+        "interest": interest,
         "hx": check_if_hx(request)
     }
     return HttpResponse(template.render(context, request))

@@ -92,5 +92,12 @@ class thematicCategory(models.Model):
 class organisationnThematicLink(models.Model):
     organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
     theme = models.ForeignKey('thematicCategory', on_delete=models.CASCADE)
-
+    
+class OrganisationInterest(models.Model):
+    volunteer = models.ForeignKey('volunteer.Volunteer', on_delete=models.CASCADE)
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    date_interest = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('volunteer', 'organisation')
 

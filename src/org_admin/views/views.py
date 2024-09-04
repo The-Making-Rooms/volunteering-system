@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
-from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity
+from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity, OrganisationInterest
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags
 from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
@@ -25,7 +25,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.password_validation import validate_password
 from .auth import sign_in
 from django.contrib.auth.models import User
-
+import random
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = "org_admin/password_reset.html"
     email_template_name = "org_admin/password_reset_email.html"
@@ -37,6 +37,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
         "please make sure you've entered the address you registered with, and check your spam folder."
     )
     success_url = reverse_lazy("password_reset_sent")
+    
 
     # add hx context to the view
     def get_context_data(self, **kwargs):
@@ -50,6 +51,18 @@ def password_reset_sent(request):
         request, "org_admin/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
     
+    
+def utils_set_random_password(request):
+    users = User.objects.filter()
+    for user in users:
+        if user.has_usable_password():
+            continue
+        else:
+            user.set_password("".join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", k=24)))
+            user.save()
+        
+    return HttpResponse("Done")
+            
     
 def utils_set_emails_lower(request):
     users = User.objects.all()
@@ -262,6 +275,7 @@ def details(request, error=None, success=None, organisation_id=None):
         link_types = LinkType.objects.all()
         automated_message = AutomatedMessage.objects.get(organisation=organisation) if AutomatedMessage.objects.filter(organisation=organisation).exists() else None
         supp_info = SupplementaryInfo.objects.filter(organisation=organisation)
+        interested_vols = OrganisationInterest.objects.filter(organisation=organisation)
         
         link_obj = []
         
@@ -283,6 +297,7 @@ def details(request, error=None, success=None, organisation_id=None):
             "locations": Location.objects.filter(organisation=organisation),
             "error": error,
             "success": success,
+            "interested_vols": interested_vols,
             "superuser": request.user.is_superuser,
         }
 
