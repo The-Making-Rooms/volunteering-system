@@ -88,7 +88,7 @@ def getTagResult(request, tag):
             "name": result.name,
             "description": result.description,
             "organisation": result.organisation,
-            "images": Image.objects.filter(opportunity=result),
+            "images": Image.objects.filter(opportunity=result) if len(Image.objects.filter(opportunity=result)) > 0 else OrgImage.objects.filter(organisation=result.organisation),
             "tags": LinkedTags.objects.filter(opportunity=result)
              }
             result_objs.append(res_obj)
