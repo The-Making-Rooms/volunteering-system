@@ -52,7 +52,7 @@ def data_import(request):
             user, created = User.objects.get_or_create(
                 username=row['Email Address:'],
                 first_name=row['Full Name:'].split(' ')[0],
-                last_name=''.join(row['Full Name:'].split(' ')[1:]),
+                last_name=' '.join(row['Full Name:'].split(' ')[1:]),
                 defaults={
                     'email': row['Email Address:'],
                     'password': ''.join(random.choices('abcdefghijklmnopqrstuvwxyz1234567890', k=12))
