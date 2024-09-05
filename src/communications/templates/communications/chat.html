@@ -8,7 +8,7 @@
             <div class="alert alert-error">{% include "commonui/error.html" %}</div>
             {% endif %}
 
-            <h1 class="text-2xl font-bold mb-3">Chat wth {{ chat.organisation.name }}</h1>
+            <h1 class="text-2xl font-bold mb-3">Chat with {% if chat.chip_in_admins_chat %}Chip in{%else%}{{ chat.organisation.name }}{%endif%} </h1>
             <p>{% if chat.broadcast %}This is a broadcast chat.{% else %}Chats can be seen by system admins. Please do not share private or personal information over chat.{% endif %}</p>
 
             <div class='flex flex-col-reverse overflow-x-auto h-full w-full mb-3'>

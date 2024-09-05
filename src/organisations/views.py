@@ -41,6 +41,34 @@ def create_chat(request, organisation_id):
     
     return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
 
+def create_chipin_chat(request):
+    user = request.user
+    
+    if not user.is_authenticated:
+        return HTTPResponseHXRedirect('/volunteer')
+
+    try:
+        chat = Chat.objects.get(chip_in_admins_chat=True, participants=user)
+        return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+    except Chat.DoesNotExist:
+        pass
+    
+
+    superusers = OrganisationAdmin.objects.filter(user__is_superuser=True)
+    users = []
+    for admin in superusers:
+        users.append(admin.user)
+    users.append(user)
+    # participants = models.ManyToManyField(User, related_name='chats')
+    chat = Chat(
+        chip_in_admins_chat=True
+    )
+    
+    chat.save()
+    chat.participants.add(*users)
+    
+    return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+
 def detail(request, organisation_id):
     
     if request.user.is_authenticated:

@@ -161,6 +161,11 @@ def delete_question(request, question_id):
     form = question.form
     
     check_form_ownership(request, form)
+    
+    responses = Response.objects.filter(form=form)
+    
+    if responses.count() > 0:
+        return form_detail(request, form.id, error="Cannot delete question with responses")
         
     form_id = question.form.id
     question.delete()
@@ -181,6 +186,12 @@ def delete_option(request, option_id):
     form_id = option.question.form.id
     form = option.question.form
     check_form_ownership(request, form)
+    
+    responses = Response.objects.filter(form=form)
+    
+    if responses.count() > 0:
+        return form_detail(request, form.id, error="Cannot delete question with responses")
+    
     option.delete()
     return form_detail(request, form_id, success="Option Deleted")
 
