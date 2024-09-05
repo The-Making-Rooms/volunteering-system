@@ -9,21 +9,31 @@ from datetime import datetime
 def get_org_chats(request):
     if not request.user.is_superuser:
         org = OrganisationAdmin.objects.get(user=request.user).organisation
-        chat_admins = OrganisationAdmin.objects.filter(organisation=org).values_list("user", flat=True)
         chats = Chat.objects.filter(organisation=org)
     elif request.user.is_superuser:
-        chat_admins = []
         chats = Chat.objects.all()
+        
+    chat_admins = OrganisationAdmin.objects.filter().values_list("user", flat=True)
+    superusers = OrganisationAdmin.objects.filter(user__is_superuser=True).values_list("user", flat=True)
         
     print(chats)
     chat_objs = []
     
     for chat in chats:
         non_org_participants = chat.participants.exclude(id__in=chat_admins)
+        non_org_participants = non_org_participants.exclude(id__in=superusers)
+        has_messages = Message.objects.filter(chat=chat).exists()
+        if not has_messages:
+            continue
+        latest_message = Message.objects.filter(chat=chat).order_by("-timestamp").first()
+        if latest_message:
+            latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=chat_admins).exists() if chat.organisation else MessageSeen.objects.filter(message=latest_message, user__in=superusers).exists()
         chat_obj = {
             "id": chat.id,
             "participants": non_org_participants,
+            "organisation": "Chip In" if chat.chip_in_admins_chat else chat.organisation.name,
             "broadcast": chat.broadcast,
+            "latest_read_by_org_admin": latest_read_by_org_admin,
         }
         
         chat_objs.append(chat_obj)
@@ -102,9 +112,9 @@ def send_message(request, chat_id):
         "url": "/communications/" + str(chat_id) + "/",
     }
 
-    for user in chat.participants.all():
-        if user != request.user:
-            send_user_notification(user=user, payload=payload, ttl=1000)
+    #for user in chat.participants.all():
+    #    if user != request.user:
+    #        send_user_notification(user=user, payload=payload, ttl=1000)
 
     request.method = "GET"
     return get_chat_content(request, chat_id)

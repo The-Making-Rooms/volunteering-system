@@ -3327,10 +3327,6 @@ details.collapse summary::-webkit-details-marker {
   }
 }
 
-.artboard.phone {
-  width: 320px;
-}
-
 .badge-lg {
   height: 1.5rem;
   font-size: 1rem;
@@ -3731,52 +3727,16 @@ html:has(.drawer-toggle:checked) {
   right: 0px;
 }
 
+.right-1\/2 {
+  right: 50%;
+}
+
 .top-0 {
   top: 0px;
 }
 
 .top-1\/2 {
   top: 50%;
-}
-
-.right-16 {
-  right: 4rem;
-}
-
-.left-16 {
-  left: 4rem;
-}
-
-.left-8 {
-  left: 2rem;
-}
-
-.left-2 {
-  left: 0.5rem;
-}
-
-.-left-16 {
-  left: -4rem;
-}
-
-.right-2 {
-  right: 0.5rem;
-}
-
-.right-32 {
-  right: 8rem;
-}
-
-.-right-1\/4 {
-  right: -25%;
-}
-
-.right-1\/4 {
-  right: 25%;
-}
-
-.right-1\/2 {
-  right: 50%;
 }
 
 .z-0 {
@@ -4091,10 +4051,6 @@ html:has(.drawer-toggle:checked) {
   width: 100%;
 }
 
-.w-32 {
-  width: 8rem;
-}
-
 .min-w-44 {
   min-width: 11rem;
 }
@@ -4205,6 +4161,10 @@ html:has(.drawer-toggle:checked) {
 
 .place-items-center {
   place-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
 }
 
 .items-end {
@@ -4420,6 +4380,21 @@ html:has(.drawer-toggle:checked) {
 .bg-slate-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+}
+
+.bg-gray-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+}
+
+.bg-slate-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity));
+}
+
+.bg-slate-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {
@@ -4692,6 +4667,11 @@ html:has(.drawer-toggle:checked) {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.text-blue-500 {
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246 / var(--tw-text-opacity));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -4700,24 +4680,20 @@ html:has(.drawer-toggle:checked) {
   opacity: 0;
 }
 
-.opacity-70 {
-  opacity: 0.7;
-}
-
-.opacity-90 {
-  opacity: 0.9;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
 .opacity-100 {
   opacity: 1;
 }
 
 .opacity-30 {
   opacity: 0.3;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.opacity-90 {
+  opacity: 0.9;
 }
 
 .shadow-lg {
@@ -4829,6 +4805,11 @@ html:has(.drawer-toggle:checked) {
     font-size: 1.5rem;
     line-height: 2rem;
   }
+
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -4842,6 +4823,11 @@ html:has(.drawer-toggle:checked) {
 
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 }
 

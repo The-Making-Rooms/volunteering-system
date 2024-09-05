@@ -17,11 +17,11 @@ def create_chat(request, organisation_id):
     user = request.user
     
     if not user.is_authenticated:
-        return HTTPResponseHXRedirect('/volunteer')
+        return HttpResponseRedirect('/volunteer')
 
     try:
         chat = Chat.objects.get(organisation_id=organisation_id, participants=user)
-        return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+        return HttpResponseRedirect('/communications/' + str(chat.id) + '/')
     except Chat.DoesNotExist:
         pass
     
@@ -39,17 +39,17 @@ def create_chat(request, organisation_id):
     chat.save()
     chat.participants.add(*users)
     
-    return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+    return HttpResponseRedirect('/communications/' + str(chat.id) + '/')
 
 def create_chipin_chat(request):
     user = request.user
     
     if not user.is_authenticated:
-        return HTTPResponseHXRedirect('/volunteer')
+        return HttpResponseRedirect('/volunteer')
 
     try:
         chat = Chat.objects.get(chip_in_admins_chat=True, participants=user)
-        return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+        return HttpResponseRedirect('/communications/' + str(chat.id) + '/')
     except Chat.DoesNotExist:
         pass
     
@@ -67,7 +67,7 @@ def create_chipin_chat(request):
     chat.save()
     chat.participants.add(*users)
     
-    return HTTPResponseHXRedirect('/communications/' + str(chat.id) + '/')
+    return HttpResponseRedirect('/communications/' + str(chat.id) + '/')
 
 def detail(request, organisation_id):
     
