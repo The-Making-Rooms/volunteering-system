@@ -9,9 +9,10 @@ from organisations.models import Organisation
 class Chat(models.Model):
     participants = models.ManyToManyField(User, related_name="chats")
     organisation = models.ForeignKey(
-        "organisations.Organisation", on_delete=models.CASCADE, related_name="chats"
+        "organisations.Organisation", on_delete=models.CASCADE, related_name="chats", null=True, blank=True
     )
     broadcast = models.BooleanField(default=False)
+    chip_in_admins_chat = models.BooleanField(default=False)
     
 
     def is_participant(self, user):

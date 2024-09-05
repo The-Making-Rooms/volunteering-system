@@ -24,5 +24,9 @@
 <button class="btn btn-primary" hx-post="/forms/{{form.id}}/submit/" hx-target="#response_div" hx-swap="outerHTML">Submit</button>
 </form>
 
+<br><br>
+{% if form.required_on_signup %}
+<a href="/volunteer/logout/" class="btn btn-primary mb-3">Logout</a>
+{% endif %}
 
 {% endblock %}
