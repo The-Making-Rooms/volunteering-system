@@ -5,7 +5,7 @@ from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
 from organisations.models import Location, Video as OrgVideo, Image as OrgImage, Link, LinkType, Organisation, Badge, VolunteerBadge, BadgeOpporunity, OrganisationInterest, OrganisationSection
-from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags
+from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, Location as OppLocation, Tag, LinkedTags, Benefit, OpportunityBenefit
 from communications.models import Message, Chat, AutomatedMessage
 from opportunities.models import Opportunity, Image as OppImage, Video as OppVideo, Registration, OpportunityView, SupplimentaryInfoRequirement, VolunteerRegistrationStatus, RegistrationAbsence, RegistrationStatus, Icon, Benefit, Tag, LinkedTags
 from volunteer.models import Volunteer, VolunteerConditions, VolunteerSupplementaryInfo, SupplementaryInfo, VolunteerAddress, EmergencyContacts
@@ -51,6 +51,18 @@ def password_reset_sent(request):
         request, "org_admin/password_reset_sent.html", {"hx": check_if_hx(request)}
     )
     
+def utils_set_benefit_org(request):
+    opp_benefits = OpportunityBenefit.objects.all()
+    for opp_benefit in opp_benefits:
+        benefit = opp_benefit.benefit #
+        org = opp_benefit.opportunity.organisation
+        
+        if benefit.organisation != org:
+            benefit.organisation = org
+            benefit.save()
+            
+    return HttpResponse("Done")
+        
     
 def utils_set_random_password(request):
     users = User.objects.filter()

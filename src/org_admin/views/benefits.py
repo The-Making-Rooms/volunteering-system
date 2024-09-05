@@ -117,7 +117,7 @@ def benefit_crud(request, benefit_id=None, opportunity_id=None):
             if request.POST.get("icon"):
                 add_icon(benefit, request.POST.get("icon"))
                 
-            if request.POST.get("opportunity_id"):
+            if request.POST.get("opportunity_id") and request.POST.get("opportunity_id") != "None":
                 request.method = "GET"                
                 return opportunity_details(request, request.POST.get("opportunity_id"), tab_name="benefits", success="Benefit has been updated")
             
