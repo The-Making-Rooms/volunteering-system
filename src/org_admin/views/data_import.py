@@ -9,6 +9,7 @@ import csv
 import io
 import random
 import datetime
+from forms.models import Form, Question, Response, Answer, Options
 
 def data_import(request):
     if not request.user.is_superuser:
@@ -120,6 +121,9 @@ def data_import(request):
                         else:
                             errors.append('Could not find organisation: ' + interest)
                             
+                            
+                create_survey_response(row, user)
+                
                 num += 1
             except Exception as e:
                 errors.append(row)
@@ -129,6 +133,104 @@ def data_import(request):
                     
     return render(request, 'org_admin/data_import.html')
 
+
+def create_survey_response(data, user):
+    form = Form.objects.get(required_on_signup=True)
+    form_questions = Question.objects.filter(form=form)
+    
+    errors = []
+    string_date = data['Date:']
+    
+    response = Response(
+        user=user,
+        form=form,
+        response_date=datetime.datetime.strptime(string_date, '%d/%m/%Y') if len(string_date) > 0 else datetime.datetime.now()
+    ) if not Response.objects.filter(user=user, form=form).exists() else Response.objects.get(user=user, form=form)
+    
+    response.save()
+    
+    for question in form_questions:
+        if question.question_type == "text":
+            #fuzzy find a key in data that matches the question
+            fuzzy_key = fuzzy_return_closest_key(question.question, data.keys())
+            if fuzzy_key:
+                answer = Answer(
+                    question=question,
+                    answer=data[fuzzy_key],
+                    response=response
+                ) if not Answer.objects.filter(question=question, response=response).exists() else Answer.objects.get(question=question, response=response)
+                answer.save()
+            else:
+                errors.append('Could not find a match for question: ' + question.question)
+        elif question.question_type == "multi_choice":
+            fuzzy_key = fuzzy_return_closest_key(question.question, data.keys())
+            
+            if fuzzy_key is None:
+                errors.append('Could not find a match for question: ' + question.question)
+                continue
+            
+            if '|' in data[fuzzy_key]:
+                answers = data[fuzzy_key].split('|')
+            else:
+                answers = [data[fuzzy_key]]
+            
+            option_ids = []
+            
+            for answer in answers:
+                option_id = fuzzy_return_closest_option(question, answer)
+                if option_id:
+                    option_ids.append(str(option_id.id))
+                else:
+                    errors.append('Could not find a match for option: ' + answer)
+            
+            if len(option_ids) > 0:
+                answer = Answer(
+                    question=question,
+                    answer=','.join(option_ids),
+                    response=response
+                ) if not Answer.objects.filter(question=question, response=response).exists() else Answer.objects.get(question=question, response=response)
+                answer.save()
+        elif question.question_type == "boolean":
+            fuzzy_key = fuzzy_return_closest_key(question.question, data.keys())
+            if data[fuzzy_key].lower() == 'yes':
+                answer = Answer(
+                    question=question,
+                    answer='yes',
+                    response=response
+                ) if not Answer.objects.filter(question=question, response=response).exists() else Answer.objects.get(question=question, response=response)
+                answer.save()
+            elif data[fuzzy_key].lower() == 'no':
+                answer = Answer(
+                    question=question,
+                    answer='no',
+                    response=response
+                ) if not Answer.objects.filter(question=question, response=response).exists() else Answer.objects.get(question=question, response=response)
+                answer.save()
+            else:
+                errors.append('Could not find a match for boolean question: ' + question.question)
+                
+    print(errors)
+                
+
+def fuzzy_return_closest_option(question, option):
+    options = Options.objects.filter(question=question)
+    option_names = [option.option for option in options]
+    
+    best_match, score = process.extractOne(option, option_names, scorer=fuzz.partial_ratio)
+    
+    if score >= 80:
+        return Options.objects.get(option=best_match)
+    
+    return None
+
+            
+    
+
+def fuzzy_return_closest_key(string, keys):
+    for key in keys:
+        if fuzz.ratio(string, key) >= 80:
+            return key
+    
 
 def fuzzy_return_org(org_name):
     orgs = Organisation.objects.all()
