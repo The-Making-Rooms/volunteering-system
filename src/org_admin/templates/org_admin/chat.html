@@ -13,7 +13,7 @@
                     <p class="text-xs text-gray-200">{{ message.timestamp }}</p>
                 </div>
             {% else %}
-            <div class="p-3 rounded-2xl bg-gray-500 my-2 w-fit max-w-52 text-white break-words">
+            <div class="p-3 rounded-2xl bg-gray-500 my-2 w-fit max-w-52 text-white break-words" {% if not message.seen %} hx-get="/communications/mark_seen/{{message.id}}/" hx-trigger="revealed" hx-swap="none" {% endif %}>
                 <p class="text-xs text-gray-200">{{message.sender.first_name }}</p>
                 <p class="text-sm">{{ message.content }}</p>
                 <p class="text-xs text-gray-200">{{ message.timestamp }}</p>
