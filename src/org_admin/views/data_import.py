@@ -256,18 +256,27 @@ def create_survey_response(data, user):
                 
                 
 def utils_fix_organisation_interests(request):
-    interest_question = Question.object.get(question="Organisations of Interest")
-    responses = Response.objects.filter(question=interest_question)
+    interest_question = Question.objects.get(question="Organisations of Interest")
+    responses = Response.objects.filter(form=interest_question.form)
     errors = []
+    count = 0
     
     try:
     
         for response in responses:
             volunteer = Volunteer.objects.get(user=response.user)
-            orgs = response.response.split(",")
+            
+            try:
+                answer = Answer.objects.get(question=interest_question, response=response)
+            except:
+                errors.append('Could not find answer for response: ' + str(response.id))
+                continue
+            
+            orgs = answer.answer.split(",")
             org_ids = [Options.objects.get(id=org) for org in orgs]
             
             for org_id in org_ids:
+                interest = org_id.option
                 if interest == 'Blackburn Youth Zone':
                     interest = 'Blackburn & Darwen Youth Zone'
                 elif interest == 'Blackburn Library Service':
@@ -278,6 +287,7 @@ def utils_fix_organisation_interests(request):
                         org = fuzzy_return_org(festival)
                         if org:
                             create_follower_if_not_exists(volunteer, org)
+                            count += 1
                         else:
                             errors.append('Could not find organisation: ' + festival)
 
@@ -285,6 +295,7 @@ def utils_fix_organisation_interests(request):
                 org = fuzzy_return_org(org_id.option)
                 if org:
                     create_follower_if_not_exists(volunteer, org)
+                    count += 1
                 else:
                     errors.append('Could not find organisation: ' + org_id.option)
                     
@@ -292,6 +303,7 @@ def utils_fix_organisation_interests(request):
         print(e)
         return HttpResponse('An error occurred while fixing organisation interests {}'.format(e))
 
+    return HttpResponse('{} Organisation interests fixed successfully {}'.format(count, errors))
 
 def create_follower_if_not_exists(volunteer, org):
     if not OrganisationInterest.objects.filter(volunteer=volunteer, organisation=org).exists():
