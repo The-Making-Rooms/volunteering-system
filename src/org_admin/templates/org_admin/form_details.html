@@ -21,7 +21,7 @@
         </div>
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea class="form-control textarea textarea-bordered w-full h-24" id="description" name="description">{{ form.description }}</textarea>
+            <textarea class="form-control textarea textarea-bordered w-full h-24" id="description" name="description" placeholder="Type a description">{{ form.description }}</textarea>
         </div>
 
         <div class="flex mb-3 w-full  flex-col">
@@ -73,7 +73,8 @@
         <div class="badge badge-accent">{{question.question.question_type}}</div>
         <div class="flex">
             <button class="btn bg-gray-700 btn-sm mr-3" hx-get="/org_admin/forms/{{question.question.id}}/move_down/" hx-target=".htmx-navigator" hx-swap="outerHTML">Move Up</button>
-            <button class="btn bg-gray-700 btn-sm" hx-get="/org_admin/forms/{{question.question.id}}/move_up/" hx-target=".htmx-navigator" hx-swap="outerHTML">Move Down</button>
+            <button class="btn bg-gray-700 btn-sm mr-3" hx-get="/org_admin/forms/{{question.question.id}}/move_up/" hx-target=".htmx-navigator" hx-swap="outerHTML">Move Down</button>
+            <button class="btn bg-gray-700 btn-sm" hx-get="/org_admin/forms/{{question.question.id}}/duplicate_question/" hx-target=".htmx-navigator" hx-swap="outerHTML">Duplicate</button>
         </div>
     </div>
     <div class="divider"></div>

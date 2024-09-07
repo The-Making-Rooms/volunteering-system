@@ -48,6 +48,30 @@
       </div>
       <textarea name="bio" class="textarea h-24 textarea-bordered w-full" placeholder="Type here">{{ volunteer.bio }}</textarea>
 -->
+<div class="divider"></div>
+
+{% if initial_onboarding %}
+<div class="form-control w-full col-span-2">
+  <div class="label">
+    <span class="font-bold">Choose some organisations you are interested in:</span>
+  </div>
+  {% for organisation in organisations %}
+    <label class="cursor-pointer">
+      <input
+        type="checkbox"
+        name="followed_organisations"
+        value="{{ organisation.id }}"
+        class="checkbox"
+      />
+      <span class="ml-2">{{ organisation.name }}</span>
+    </label>
+  {% endfor %}
+</div>
+<div class="divider"></div>
+{% endif %}
+
+
+
   <a
     href="#"
     class="btn btn-primary col-span-2"

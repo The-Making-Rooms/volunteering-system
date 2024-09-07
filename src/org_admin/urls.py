@@ -57,6 +57,7 @@ urlpatterns = [
     path("forms/delete/<int:form_id>/", views.delete_form, name="delete_form"),
     path("forms/<int:form_id>/add_multi_choice/", views.add_multi_choice, name="add_multi_choice"),
     path("forms/<int:form_id>/add_question/", views.add_question, name="add_question"),
+    path("forms/<int:question_id>/duplicate_question/", views.duplicate_question, name="duplicate_question"),
     path("forms/<int:form_id>/add_boolean/", views.add_question, name="add_question", kwargs={'boolean': True}),
     path("forms/<int:question_id>/save/", views.save_question, name="save_question"),
     path("forms/<int:question_id>/delete/", views.delete_question, name="delete_question"),
@@ -173,6 +174,8 @@ urlpatterns = [
     path("utils/gen_random_passwords/", views.utils_set_random_password, name="gen_random_passwords"),
     path("utils/data_import/", views.data_import, name="data_import"),
     path("utils/fix_benefit_orgs/", views.utils_set_benefit_org, name="fix_benefit_rogs"),
+    path("utils/fix_festival_followers/", views.utils_fix_festival_followers, name="fix_festival_followers"),
+    path("utils/utils_fix_organisation_interests/", views.utils_fix_organisation_interests, name="utils_fix_organisation_interests"),
     
     path("reporting/", views.reporting, name="reporting"),
 ]
