@@ -254,6 +254,52 @@ def create_survey_response(data, user):
         print("Error creating survey response: ", e)
         
                 
+                
+def utils_fix_organisation_interests(request):
+    interest_question = Question.object.get(question="Organisations of Interest")
+    responses = Response.objects.filter(question=interest_question)
+    errors = []
+    
+    try:
+    
+        for response in responses:
+            volunteer = Volunteer.objects.get(user=response.user)
+            orgs = response.response.split(",")
+            org_ids = [Options.objects.get(id=org) for org in orgs]
+            
+            for org_id in org_ids:
+                if interest == 'Blackburn Youth Zone':
+                    interest = 'Blackburn & Darwen Youth Zone'
+                elif interest == 'Blackburn Library Service':
+                    interest = 'Blackburn with Darwen Library Service'
+                elif interest == 'Festivals (Festival of light, National Festival of Making, British Textile Biennial)':
+                    festival_orgs = ['Festival of Light', 'National Festival of Making', 'British Textile Biennial']
+                    for festival in festival_orgs:
+                        org = fuzzy_return_org(festival)
+                        if org:
+                            create_follower_if_not_exists(volunteer, org)
+                        else:
+                            errors.append('Could not find organisation: ' + festival)
+
+                
+                org = fuzzy_return_org(org_id.option)
+                if org:
+                    create_follower_if_not_exists(volunteer, org)
+                else:
+                    errors.append('Could not find organisation: ' + org_id.option)
+                    
+    except Exception as e:
+        print(e)
+        return HttpResponse('An error occurred while fixing organisation interests {}'.format(e))
+
+
+def create_follower_if_not_exists(volunteer, org):
+    if not OrganisationInterest.objects.filter(volunteer=volunteer, organisation=org).exists():
+        org_interest = OrganisationInterest(
+            volunteer=volunteer,
+            organisation=org
+        )
+        org_interest.save()
 
 def fuzzy_return_closest_option(question, option):
     options = Options.objects.filter(question=question)

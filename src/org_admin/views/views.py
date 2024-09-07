@@ -26,6 +26,9 @@ from django.contrib.auth.password_validation import validate_password
 from .auth import sign_in
 from django.contrib.auth.models import User
 import random
+from forms.models import Form, Response, Question
+
+
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = "org_admin/password_reset.html"
     email_template_name = "org_admin/password_reset_email.html"
@@ -52,6 +55,9 @@ def password_reset_sent(request):
     )
     
 def utils_set_benefit_org(request):
+    if not request.user.is_superuser:
+        return HttpResponse("You do not have permission to run this script")
+    
     opp_benefits = OpportunityBenefit.objects.all()
     for opp_benefit in opp_benefits:
         benefit = opp_benefit.benefit #
@@ -65,6 +71,9 @@ def utils_set_benefit_org(request):
         
     
 def utils_set_random_password(request):
+    if not request.user.is_superuser:
+        return HttpResponse("You do not have permission to run this script")
+    
     users = User.objects.filter()
     for user in users:
         if user.has_usable_password():
@@ -77,6 +86,9 @@ def utils_set_random_password(request):
             
     
 def utils_set_emails_lower(request):
+    if not request.user.is_superuser:
+        return HttpResponse("You do not have permission to run this script")
+    
     users = User.objects.all()
     for user in users:
         user.email = user.email.lower()
@@ -84,6 +96,29 @@ def utils_set_emails_lower(request):
         user.save()
     return HttpResponse("Done")
 
+
+def utils_fix_festival_followers(request):
+    if not request.user.is_superuser:
+        return HttpResponse("You do not have permission to run this script")
+    
+    org = Organisation.objects.get(name="British Textile Biennial")
+    
+    festival_fom = Organisation.objects.get(name="National Festival of Making")
+    festival_light = Organisation.objects.get(name="Blackburn Festival of Light")
+    
+    followers = OrganisationInterest.objects.filter(organisation=org)
+    
+    for follower in followers:
+        #add followers if they dont exist
+        if not OrganisationInterest.objects.filter(organisation=festival_fom, volunteer=follower.volunteer).exists():
+            OrganisationInterest.objects.create(organisation=festival_fom, volunteer=follower.volunteer)
+            
+        if not OrganisationInterest.objects.filter(organisation=festival_light, volunteer=follower.volunteer).exists():
+            OrganisationInterest.objects.create(organisation=festival_light, volunteer=follower.volunteer)
+            
+    
+    return HttpResponse("Done")
+    
 # Create your views here.
 def volunteer_admin(request):
     #List of volunteers without repeating

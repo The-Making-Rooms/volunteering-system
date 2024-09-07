@@ -12,7 +12,7 @@
 <form>
 {% csrf_token %}
 
-<div class="flex justify-between">
+<div class="flex justify-between items-center">
     <div class="w-1/2">
         <p class="text-2xl font-bold mb-5">Benefits</p>
     </div>
@@ -34,7 +34,7 @@
 
 <div class="divider"></div>
 
-<div id="benefits-table">
+<div id="benefits-table" class="p-5 rounded-lg bg-base-200 mb-3 overflow-scroll">
 {% include "org_admin/partials/benefits_table.html" %}
 </div>
 </form>

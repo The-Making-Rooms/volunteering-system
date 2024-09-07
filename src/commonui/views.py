@@ -53,6 +53,9 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
         return context
 
 
+def privacy_policy(request):
+    return render(request, "commonui/privacy_policy.html", {"hx": check_if_hx(request)})
+
 def password_reset_sent(request):
     print("password reset sent")
     return render(

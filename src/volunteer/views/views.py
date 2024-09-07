@@ -24,7 +24,7 @@ from ..forms import (
     VolunteerConditionsForm,
 )
 
-from organisations.models import OrganisationInterest
+from organisations.models import OrganisationInterest, Organisation
 import random
 
 from django.core.mail import send_mail
@@ -277,6 +277,8 @@ def volunteer_form(request):
         context = {
             "hx": check_if_hx(request),
             "volunteer": get_volunteer_if_exists(request.user),
+            "organisations": Organisation.objects.all(),
+            "initial_onboarding": True,
         }
         return render(
             request, "volunteer/partials/volunteer_form.html", context=context
@@ -292,10 +294,11 @@ def volunteer_form(request):
         
         while User.objects.filter(username=temp_username).exists():
            temp_username = data["first_name"] + data["last_name"] + "".join(random.choices("0123456789", k=5))
-            
         user.username = temp_username
-        
         user.save()
+        
+        followed_organisations = data.getlist("followed_organisations")
+        
 
         try:
             volunteer = get_volunteer_if_exists(user)
@@ -311,8 +314,16 @@ def volunteer_form(request):
                     if age < min_age:
                         return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["You must be between 16 and 30 years old to volunteer."]})
                 
+                if user.first_name == "" or user.last_name == "":
+                    return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["First and last name are required"]})
+    
                 volunteer.user = user
                 volunteer.save()
+                
+                for organisation in followed_organisations:
+                    org = OrganisationInterest(volunteer=volunteer, organisation_id=organisation)
+                    org.save()
+                
                 return render(request, "volunteer/partials/redirect.html")
             else:
                 context = {

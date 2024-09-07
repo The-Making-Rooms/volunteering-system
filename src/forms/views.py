@@ -99,6 +99,8 @@ def submit_response(request, form_id, custom_redirect=None, override_respondee=N
     
     
     for question in form_questions:
+        
+        
         if question.question_type == "multi_choice" and question.allow_multiple and len(request.POST.getlist(str(question.pk))) > 1:
             
             csv = ",".join(request.POST.getlist(str(question.pk)))

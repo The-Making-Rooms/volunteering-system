@@ -91,7 +91,7 @@ def create_form(request):
         organisation = OrganisationAdmin.objects.get(user=request.user).organisation
     else:
         organisation = None
-    form = Form.objects.create(name='New Form', description='Loren Ipsum', organisation=organisation)
+    form = Form.objects.create(name='New Form', description='', organisation=organisation)
     return form_detail(request, form.id)
 
 def form_detail(request, form_id, success=None, error=None):
@@ -125,7 +125,6 @@ def add_multi_choice(request, form_id):
     check_form_ownership(request, form)
     
     question = Question.objects.create(form=form, index=Question.objects.filter(form=form).count(), question_type='multi_choice')
-    Options.objects.create(question=question, option='Option 1')
     return form_detail(request, form_id, success="Multi Choice Question Added")
 
 def add_question(request, form_id, boolean=False):
@@ -139,6 +138,20 @@ def add_question(request, form_id, boolean=False):
     else:
         question = Question.objects.create(form=form, index=Question.objects.filter(form=form).count(), question_type='boolean')
     return form_detail(request, form_id, success="Question Added")
+
+def duplicate_question(request, question_id):
+    question = Question.objects.get(pk=question_id)
+    form = question.form
+    
+    check_form_ownership(request, form)
+    
+    new_question = Question.objects.create(form=form, index=Question.objects.filter(form=form).count(), question=question.question, question_type=question.question_type, required=question.required, allow_multiple=question.allow_multiple)
+    
+    if question.question_type == 'multi_choice':
+        for option in Options.objects.filter(question=question):
+            Options.objects.create(question=new_question, option=option.option)
+    
+    return form_detail(request, form.id, success="Question Duplicated")
 
 def save_question(request, question_id):
     data = request.POST
