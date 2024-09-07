@@ -100,7 +100,7 @@ def index(request):
             if mentor_profile.exists():
                 mentor_profile = mentor_profile.first()
                 mentor_notes = MentorNotes.objects.filter(MentorRecord=mentor_profile)
-                mentor_sessions = MentorSession.objects.filter(MentorRecord=mentor_profile)
+                mentor_sessions = MentorSession.objects.filter(mentor_record=mentor_profile)
             else:
                 mentor_profile = None
                 mentor_notes = None
