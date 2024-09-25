@@ -30,7 +30,7 @@
     <form class="flex w-full">
         {% csrf_token %}
         <input type="text" placeholder="Type here" class="flex-grow input input-bordered w-full  mr-3" name="message"/>
-        <button class="btn btn-primary" hx-target="#chat_view" hx-swap="outerHTML" hx-post="/org_admin/communication/{{chat.id}}/" >Send</button>
+        <button class="btn btn-primary" hx-target="#chat_view" hx-swap="outerHTML" hx-disabled-elt="this" hx-post="/org_admin/communication/{{chat.id}}/" >Send</button>
     </form>
 
 </div>
