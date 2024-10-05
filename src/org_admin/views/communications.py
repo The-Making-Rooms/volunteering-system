@@ -105,12 +105,12 @@ def send_message(request, chat_id):
         return get_chat_content(request, chat_id, error="Message contains profanity")
        
     Message.objects.create(chat=chat, sender=user, content=message)
-    org_name = chat.organisation.name
-    payload = {
-        "head": org_name,
-        "body": message,
-        "url": "/communications/" + str(chat_id) + "/",
-    }
+    #org_name = chat.organisation.name
+    #payload = {
+    #    "head": org_name,
+    #    "body": message,
+    #    "url": "/communications/" + str(chat_id) + "/",
+    #}
 
     #for user in chat.participants.all():
     #    if user != request.user:
