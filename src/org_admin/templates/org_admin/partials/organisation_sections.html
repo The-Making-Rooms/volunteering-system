@@ -1,14 +1,14 @@
 <div class="rounded-lg  bg-base-200 mb-3">
     <div class="flex justify-between items-center">
       <p class="text-xl">Sections</p>
-      <a>
+
         <button
           class="btn btn-primary"
           hx-get="/org_admin/organisations/manage_section/new/{{ organisation.id }}/"
           hx-target="#sections_editor"
           hx-swap="outerHTML"
-          >Add Section</button
-        >
+          >Add Section
+        </button>
     </div>
 
     <div class="divider"></div>
