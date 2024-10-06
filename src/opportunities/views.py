@@ -9,6 +9,9 @@ from .forms import SuppInfoForm
 from datetime import datetime, date
 from django.forms import formset_factory
 from communications.models import Chat
+from django.core.mail import send_mail
+import threading
+from threading import Thread
 
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 
@@ -173,6 +176,7 @@ def register(request, opportunity_id):
                 )
                 volunteer_registration_status.save()
 
+                SendEmailToOrgAdminsThread(request, opportunity_id).start()
                 return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
 
             formset = SuppInfoFormSet(request.POST)
@@ -218,8 +222,12 @@ def register(request, opportunity_id):
                 )
                 print("Volunteer Registration Status: ", volunteer_registration_status)
                 volunteer_registration_status.save()
-
                 
+                #send email to the org_admins of the organisation
+                
+                        
+
+                SendEmailToOrgAdminsThread(request, opportunity_id).start()
                 return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
             else:
                 return HttpResponse('Form is not valid')
@@ -239,7 +247,29 @@ def register(request, opportunity_id):
         return HttpResponseRedirect('/volunteer')
 
 
+def send_email_to_org_admins(request, opportunity_id):
+    opportunity = Opportunity.objects.get(id=opportunity_id)
+    org_admins = OrganisationAdmin.objects.filter(organisation=opportunity.organisation)
+    subject = 'Chip in System - New Volunteer Registration'
+    message = """
+Hello {0},
 
-    
-            
-            
+A new volunteer has registered for the opportunity: {1}.
+Please login to the Chip In system to view the volunteer's information and approve or deny their registration.
+
+Regards,
+The Chip In Team
+""".format(opportunity.organisation.name, opportunity.name)
+    for admin in org_admins:
+        send_mail(subject, message, '', [admin.user.email], fail_silently=True)
+        
+
+
+class SendEmailToOrgAdminsThread(Thread):
+    def __init__(self, request, opportunity_id):
+        Thread.__init__(self)
+        self.request = request
+        self.opportunity_id = opportunity_id
+
+    def run(self):
+        send_email_to_org_admins(self.request, self.opportunity_id)
