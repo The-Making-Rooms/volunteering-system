@@ -4148,6 +4148,18 @@ html:has(.drawer-toggle:checked) {
   max-width: 20rem;
 }
 
+.max-w-64 {
+  max-width: 16rem;
+}
+
+.max-w-5xl {
+  max-width: 64rem;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
