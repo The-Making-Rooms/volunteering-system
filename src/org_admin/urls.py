@@ -20,6 +20,7 @@ urlpatterns = [
     
     path("links/", views.org_links, name="add_link"),
     path("communication/", views.get_org_chats, name="communication_admin"),
+    path("communication/preload/<int:preload_chat_id>/", views.get_org_chats, name="communication_admin"),
     path("communication/<int:chat_id>/", views.get_chat_content, name="communication_admin"),
     
     path("profile/", views.profile, name="profile"),
@@ -146,10 +147,9 @@ urlpatterns = [
     path("opportunities/gallery/<int:id>/", views.opportunity_gallery, name="opportunity_gallery"),
     
     path("volunteers/", views.volunteer_admin, name="volunteer_admin"),
+    path("volunteers/chat/<int:volunteer_id>/", views.create_volunteer_chat, name="volunteer_chat"),
     path("volunteers/<int:id>/", views.volunteer_details_admin, name="volunteer_details"),
     
-    path("communications/", views.chats, name="communication_admin"),
-    path("communications/<int:id>/", views.chat, name="communication_details"),
     
     path("create_new_organisation/", views.create_new_organisation, name="create_new_organisation"),
     

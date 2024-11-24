@@ -29,6 +29,8 @@ import random
 from forms.models import Form, Response, Question
 
 
+
+
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = "org_admin/password_reset.html"
     email_template_name = "org_admin/password_reset_email.html"
@@ -459,43 +461,8 @@ def volunteer_details_admin(request, id):
     }
     
     return render(request, "org_admin/volunteer_details_admin.html", context=context)
-    
-def chats(request):
-    organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-    chats = Chat.objects.filter(organisation=organisation)
-    context = {
-        "hx": check_if_hx(request),
-        "chats": chats,
-    }
-    return render(request, "org_admin/chats.html", context=context)
-    
-def chat(request, id):
-    chat = Chat.objects.get(id=id)
-    messages = Message.objects.filter(chat=chat)
-    if request.method == "POST":
-        data = request.POST
-        message = Message.objects.create(
-            chat=chat,
-            sender=request.user,
-            content=data["content"],
-        )
-        
-        for user in chat.users:
-            send_user_notification(user, {"message": message.content}) if user != request.user else None
-        
-        return chat(request, id)
-    else:
-        if chat.organisation != OrganisationAdmin.objects.get(user=request.user).organisation:
-            return chats(request, error="You do not have permission to view this chat")
-        
-        context = {
-            "hx": check_if_hx(request),
-            "chat": chat,
-            "messages": messages,
-        }
-        return render(request, "org_admin/chat.html", context=context)
-    
-    
+
+
 def manage_link(request, link_id=None, delete=False):
     if request.method == "GET":
         if link_id:
@@ -715,6 +682,66 @@ def manage_badge_opportunity(request, badge_id, opportunity_id, delete=False):
         
     
     
+    
+def create_volunteer_chat(request, volunteer_id):
+    #check if user is a volunteer for the org_admins org
+    if not request.user.is_superuser:
+        if not Registration.objects.filter(volunteer=Volunteer.objects.get(id=volunteer_id), opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exists():
+            return volunteer_admin(request, error="You do not have permission to create a chat with this volunteer")
+    
+    if request.user.is_superuser:
+        volunteer_user = Volunteer.objects.get(id=volunteer_id).user
+        try:
+            chat = Chat.objects.get(chip_in_admins_chat=True, participants=volunteer_user)
+            return HttpResponseRedirect('/org_admin/communication/preload/' + str(chat.id) + '/')
+        except Chat.DoesNotExist:
+            pass
+        
+
+        superusers = User.objects.filter(is_superuser=True)
+        users = []
+        for superuser in superusers:
+            users.append(superuser)
+        users.append(volunteer_user)
+        # participants = models.ManyToManyField(User, related_name='chats')
+        chat = Chat(
+            chip_in_admins_chat=True
+        )
+        
+        chat.save()
+        chat.participants.add(*users)
+        return HttpResponseRedirect('/org_admin/communication/preload/' + str(chat.id) + '/')
+    
+    else:
+        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+        volunteer_user = Volunteer.objects.get(id=volunteer_id).user
+        
+        try:
+            #participents is a many to many field
+            chat = Chat.objects.get(organisation=organisation, participants=volunteer_user)
+            return HttpResponseRedirect('/org_admin/communication/preload/' + str(chat.id) + '/')
+        except Chat.DoesNotExist:
+            pass
+        
+        chat = Chat(
+            organisation=organisation
+        )
+        
+        chat.save()
+        organisation_admins = OrganisationAdmin.objects.filter(organisation=organisation)
+        
+        users = []
+        for admin in organisation_admins:
+            users.append(admin.user)
+        users.append(volunteer_user)
+        
+        chat.participants.add(*users)
+        return HttpResponseRedirect('/org_admin/communication/preload/' + str(chat.id) + '/')
+    
+    
+        
+            
+        
     
 
 ##system transfer

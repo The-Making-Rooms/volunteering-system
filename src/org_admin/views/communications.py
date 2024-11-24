@@ -5,8 +5,10 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import send_user_notification
 from better_profanity import profanity
 from datetime import datetime
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
-def get_org_chats(request):
+def get_org_chats(request, preload_chat_id=None):
     if not request.user.is_superuser:
         org = OrganisationAdmin.objects.get(user=request.user).organisation
         chats = Chat.objects.filter(organisation=org)
@@ -38,12 +40,13 @@ def get_org_chats(request):
         
         chat_objs.append(chat_obj)
         
-    print(chat_objs)
+    #print(chat_objs)
     
     context = {
         "chats": chat_objs,
         "user": request.user,
         "admin": chat_admins,
+        "preload_chat_id": preload_chat_id,
         "hx": check_if_hx(request),
     }
     return render(request, "org_admin/chats.html", context)
@@ -53,7 +56,14 @@ def get_chat_content(request, chat_id, error=None):
         return send_message(request, chat_id)
     user = request.user
     chat = Chat.objects.get(id=chat_id)
-    org = OrganisationAdmin.objects.get(user=user).organisation
+    
+    try:
+        org = OrganisationAdmin.objects.get(user=user).organisation
+    except OrganisationAdmin.DoesNotExist:
+        org = None
+        
+    if not user.is_superuser and not org:
+        return HTTPResponseHXRedirect("/org_admin/communications")
 
     if user.is_superuser:
         pass
@@ -84,10 +94,15 @@ def send_message(request, chat_id):
     if request.POST["message"] == "":
         request.method = "GET"
         return get_chat_content(request, chat_id, error="Message cannot be empty")
+    
+    
+    
 
     user = request.user
     chat = Chat.objects.get(id=chat_id)
-    org = OrganisationAdmin.objects.get(user=user).organisation
+    
+     
+    if not user.is_superuser: org = OrganisationAdmin.objects.get(user=user).organisation
 
     if user.is_superuser:
         pass
@@ -97,15 +112,72 @@ def send_message(request, chat_id):
         chat.participants.add(user)
 
 
-    
     message = request.POST["message"]
     
     if profanity.contains_profanity(message):
         request.method = "GET"
         return get_chat_content(request, chat_id, error="Message contains profanity")
-       
+    
+    #check if its the first sent
+    existing_messages = Message.objects.filter(chat=chat).count()
+
     Message.objects.create(chat=chat, sender=user, content=message)
-    #org_name = chat.organisation.name
+    
+    if existing_messages == 0:
+        chat_notification(chat_id)
+    
+
+
+    request.method = "GET"
+    return get_chat_content(request, chat_id)
+
+
+def chat_notification(chat_id):
+    chat = Chat.objects.get(id=chat_id)
+    
+
+    
+    exclude_list = []
+    send_list = []
+    
+    superusers = User.objects.filter(is_superuser=True)
+    exclude_list.extend(superusers)
+    
+    if chat.organisation:
+        org_admins = OrganisationAdmin.objects.filter(organisation=chat.organisation)
+        print(org_admins)
+        admins_users = [admin.user for admin in org_admins]
+        exclude_list.extend(admins_users)
+        
+    for participant in chat.participants.all():
+        if participant not in exclude_list:
+            send_list.append(participant)
+            
+            
+    print(exclude_list)
+    print(send_list)
+    
+    from_string = "Chip in Team" if not chat.organisation else chat.organisation.name
+    
+    email = """
+Hi,
+
+You have a new chat from """ + from_string + """ on Chip In. Please log in to view it.
+
+Thanks,
+Chip In"""
+
+
+    send_mail(
+        "Chip In: New message from " + from_string,
+        email,
+        fail_silently=True,
+        recipient_list=[user.email for user in send_list],
+        from_email="no-reply@chipinbwd.co.uk",
+    )
+
+
+        #org_name = chat.organisation.name
     #payload = {
     #    "head": org_name,
     #    "body": message,
@@ -115,6 +187,8 @@ def send_message(request, chat_id):
     #for user in chat.participants.all():
     #    if user != request.user:
     #        send_user_notification(user=user, payload=payload, ttl=1000)
-
-    request.method = "GET"
-    return get_chat_content(request, chat_id)
+    
+    
+        
+    
+    

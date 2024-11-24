@@ -34,7 +34,11 @@
 
 
         <div id="chat_view" class="flex flex-grow border border-base-100 rounded-box justify-center items-center">
+            {% if preload_chat_id %}
+            <p hx-trigger="revealed" hx-get="/org_admin/communication/{{preload_chat_id}}/" hx-boost="true" hx-target="#chat_view" hx-swap="outerHTML">Loading chat...</p>
+            {% else %}
             <p>Select a chat to get started</p>
+            {% endif %}
         </div>
 
     </div>
