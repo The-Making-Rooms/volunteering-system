@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from django.shortcuts import render
 from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx

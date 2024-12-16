@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from django.shortcuts import render
 from organisations.models import thematicCategory, organisationnThematicLink, Organisation
 from organisations.models import Image as OrgImage

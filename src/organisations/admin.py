@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from typing import Any
 from django.contrib import admin
 from organisations.models import Link, Organisation, Image, Video, thematicCategory, organisationnThematicLink, Location, LinkType, Badge, BadgeOpporunity, VolunteerBadge
