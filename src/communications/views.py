@@ -182,11 +182,9 @@ def send_message(request, chat_id):
             organisation_admin_emails = OrganisationAdmin.objects.filter(organisation=chat.organisation).values_list('user__email', flat=True)
             emails = list(superuser_emails) + list(organisation_admin_emails)
             
-            for email in excluded_emails:
-                if email in emails:
-                    emails.remove(email
-                )
-                    
+            print ('excluded_emails:', excluded_emails)
+            
+            emails = [email for email in emails if email not in excluded_emails]
             
             for email in emails:
                 print ("Sending email to: " + email)
