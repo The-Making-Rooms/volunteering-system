@@ -3,7 +3,11 @@
 
 {% block page_content %}
 
+{% if opportunity %}
 <p class="text-2xl font-bol mb-5">Registrations for {{opportunity.name}}</p>
+{% else %}
+<p class="text-2xl font-bol mb-5">Registrations</p>
+{% endif %}
 
 {% if error %}
 {% include "commonui/error.html" %}
@@ -18,7 +22,7 @@
 <form>
 {% csrf_token %}
 
-<div class="p-5 rounded-lg bg-gray-700 mb-3">
+<div class="p-5 rounded-lg bg-base-200 mb-3">
     <div class="flex items-center">
     <input type="text" name="filter-by-name" placeholder="Search by Name" class="input input-bordered w-full max-w-xs" hx-trigger="input changed delay:500ms, search" hx-post="/org_admin/opportunities/registrations/get_registration_table/" hx-target="#reg-table"/>
     <div class="divider divider-horizontal"></div>
@@ -62,7 +66,7 @@
 
 </div>
 
-<div class="p-5 rounded-lg bg-gray-700 mb-3">
+<div class="p-5 rounded-lg bg-base-200 mb-3">
     <div class=" w-full flex items-center align-middle" id="reg-table" hx-trigger="revealed" hx-swap="outerHTML" hx-post="/org_admin/opportunities/registrations/get_registration_table/"><span class="loading loading-spinner loading-lg"></span></div>
 </div>
 </form>

@@ -19,7 +19,7 @@
 
     <div class="divider"></div>
 
-    <table class="table">
+    <table id="adTable">
         <thead>
             <tr>
                 <th>title</th>
@@ -36,7 +36,7 @@
                 <td>{% if info.organisation == None%}Chip In{%else%}{{ info.organisation }}{%endif%}</td>
                 <td>
                     <button class="btn btn-sm btn-primary" hx-get="/org_admin/additional_information/{{info.id}}/edit" hx-target=".htmx-navigator" hx-swap="outerHTML">Edit</button>
-                    <button class="btn btn-sm btn-error" hx-get="/org_admin/additional_information/{{info.id}}/delete" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                    <button class="btn btn-sm bg-red-600" hx-get="/org_admin/additional_information/{{info.id}}/delete" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
                 </td>
             </tr>
             {% endfor %}
@@ -44,5 +44,20 @@
     </table>
 
 </div>
+
+<script>
+    function hydrate_ad_tables(){
+      let ad_table = new DataTable('#adTable');
+    }
+  
+    document.addEventListener('DOMContentLoaded', function() {
+        hydrate_ad_tables();
+    });
+  
+    document.addEventListener('htmx:afterSettle', function(event) {
+        hydrate_ad_tables();
+    });
+    
+  </script>
 
 {% endblock %}

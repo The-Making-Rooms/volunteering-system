@@ -136,6 +136,25 @@ def volunteer_admin(request):
         #remove superusers from the list
         volunteers = volunteers.exclude(user__is_superuser=True)
         
+        
+        #check if the volunteer has been contacted
+        for volunteer in volunteers:
+            if Chat.objects.filter(participants=volunteer.user).exists():
+                #check if a message from superuser exists in the chat
+                print("found a chat for user: ", volunteer.user)
+                chat = Chat.objects.filter(participants=volunteer.user).last()
+                
+                for message in Message.objects.filter(chat=chat):
+                    print("message: ", message.sender)
+                
+                if Message.objects.filter(chat=chat, sender__is_superuser=True, automated=False).exists():
+                    print("found a message from superuser")
+                    volunteer.has_been_contacted = True
+                else:
+                    volunteer.has_been_contacted = False
+            else:
+                volunteer.has_been_contacted = False
+        
         context = {
             "hx": check_if_hx(request),
             "unique_volunteers": volunteers,
@@ -296,7 +315,25 @@ def details(request, error=None, success=None, organisation_id=None):
             org = Organisation.objects.get(id=organisation_id)
         elif request.user.is_superuser:
             request.method = "GET"
-            return render(request, "org_admin/superuser_organisation_admin.html", {"hx": check_if_hx(request), "organisations": Organisation.objects.all()})
+            
+            organisations = Organisation.objects.all()
+            
+            #ge number of opportunities and volunteers for each organisation
+            for organisation in organisations:
+                organisation.opportunities = Opportunity.objects.filter(organisation=organisation).count()
+                all_org_volunteers = Registration.objects.filter(opportunity__organisation=organisation).count()
+                for volunteer in all_org_volunteers:
+                    if volunteer.get_registration_status() == "active" or volunteer.get_registration_status() == "awaiting_approval":
+                        organisation.volunteers += 1
+                        
+                print(organisation.name,organisation.volunteers, organisation.opportunities)
+    
+            context = {
+                "hx": check_if_hx(request),
+                "organisations": organisations,
+            }
+            
+            return render(request, "org_admin/superuser_organisation_admin.html", context=context)
         else:
             org = OrganisationAdmin.objects.get(user=request.user).organisation
         
@@ -311,7 +348,25 @@ def details(request, error=None, success=None, organisation_id=None):
             if organisation_id and request.user.is_superuser:
                 organisation = Organisation.objects.get(id=organisation_id)
             elif request.user.is_superuser:
-                return render(request, "org_admin/superuser_organisation_admin.html", {"hx": check_if_hx(request), "organisations": Organisation.objects.all()})
+                organisations = Organisation.objects.all()
+                
+                #ge number of opportunities and volunteers for each organisation
+                for organisation in organisations:
+                    organisation.volunteers = 0
+                    organisation.opportunities = Opportunity.objects.filter(organisation=organisation).count()
+                    all_org_volunteers = Registration.objects.filter(opportunity__organisation=organisation)
+                    for volunteer in all_org_volunteers:
+                        if volunteer.get_registration_status() == "active" or volunteer.get_registration_status() == "awaiting_approval":
+                            organisation.volunteers += 1
+                            
+                    print(organisation.name,organisation.volunteers, organisation.opportunities)
+        
+                context = {
+                    "hx": check_if_hx(request),
+                    "organisations": organisations,
+                }
+                
+                return render(request, "org_admin/superuser_organisation_admin.html", context=context)
             else:
                 organisation = OrganisationAdmin.objects.get(user=request.user).organisation
         except OrganisationAdmin.DoesNotExist:
