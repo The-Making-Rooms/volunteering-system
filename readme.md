@@ -18,12 +18,14 @@ This project is distributed under the [CC BY-NC-SA](https://creativecommons.org/
 	`source venv/bin/activate`
 - Install pyhton dependancies:
 	`pip install -r requirements.txt`
+
 - Install npm dependancies:
+	`cd src`
 	`npm install` 
 
 ### Setup Django:
 ```
-cd src
+
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser

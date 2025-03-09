@@ -7,8 +7,8 @@
 </div>
   {% if error %}{% include "commonui/error.html" %} {% endif %}
 
-  <div class="p-5 rounded-lg bg-base-200 mb-3">
-    <table class="table table-auto border-spacing-2">
+  <div class="p-5 rounded-lg bg-base-200 mb-3" onload="hydrate_tables()">
+    <table class="" id="organisations_chip_in_admin">
     <thead>
       <tr>
         <th>Name</th>
@@ -23,12 +23,23 @@
         <td>{{ organisation.name }}</td>
         <td>{{ organisation.description|truncatewords:10 }}</td>
         <td>
-          <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-primary mb-3">View</a>
+          <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-sm">View</a>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
 </div>
+
+<script>
+  function hydrate_tables(){
+    let table = new DataTable('#organisations_chip_in_admin');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    hydrate_tables();
+  });
+  
+</script>
+
 {% endblock %}
