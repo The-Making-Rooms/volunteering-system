@@ -21,15 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ['localhost', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
+ALLOWED_HOSTS = ['127.0.0.1', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.gmail.com'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = True
 DATA_UPLOAD_MAX_NUMBER_FILES = 10
 # Application definition
 
 if os.environ.get('DJANGO_ENV') == 'production':
+    EMAIL_HOST = 'smtp-relay.gmail.com'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     #EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
@@ -57,10 +57,11 @@ if os.environ.get('DJANGO_ENV') == 'production':
     
     
 else:
+    EMAIL_HOST = 'smtp.gmail.com'
     SECRET_KEY = 'django-insecure-rd6@o^$_u7tniw&^#dg-0vr88$*r^b^4%3fkyr6c@r_i5^g!s8'
-    EMAIL_HOST_USER = 'no-reply@chipinbwd.co.uk'
-    DEFAULT_FROM_EMAIL = 'no-reply@chipinbwd.co.uk'
-    #EMAIL_HOST_PASSWORD = 'whrk uszz eebt mjvx'
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    EMAIL_HOST_PASSWORD = 'sllw gknj qngn hjtb '
     NOUN_PROJECT_API_KEY = "a5f9c58009584357b678c737e8cb871f"
     NOUN_PROJECT_SECRET_KEY = "7c76f3fa935445669bf4f2b8ac906d90"
     WEBPUSH_SETTINGS = {

@@ -10,3 +10,8 @@ from django.conf import settings
 class OrganisationAdmin(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
+    
+class NotificationPreference(models.Model):
+    email_on_message = models.BooleanField(default=True)
+    email_on_registration = models.BooleanField(default=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

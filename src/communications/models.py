@@ -45,6 +45,8 @@ class Message(models.Model):
             raise ValidationError(
                 "User is not an admin of the organisation. only admins can send group broadcasts."
             )
+            
+
 
 
 class AutomatedMessage(models.Model):

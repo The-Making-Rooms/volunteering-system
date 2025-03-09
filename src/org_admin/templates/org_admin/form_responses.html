@@ -15,7 +15,7 @@
 
     <p>Number of responses: {{ responses|length }}</p>
 
-    <table class="table">
+    <table id="responseTable">
         <thead>
             <tr>
                 <th>Response ID</th>
@@ -39,6 +39,20 @@
     </table>
 
 
+    <script>
+        function hydrate_response_tables(){
+          let response_table = new DataTable('#responseTable');
+        }
+      
+        document.addEventListener('DOMContentLoaded', function() {
+            hydrate_response_tables();
+        });
+      
+        document.addEventListener('htmx:afterSettle', function(event) {
+            hydrate_response_tables();
+        });
+        
+      </script>
 
 
 {% endblock %}

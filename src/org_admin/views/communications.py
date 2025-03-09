@@ -7,6 +7,8 @@ from better_profanity import profanity
 from datetime import datetime
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.conf import settings
+from threading import Thread
 
 def get_org_chats(request, preload_chat_id=None):
     if not request.user.is_superuser:
@@ -25,8 +27,7 @@ def get_org_chats(request, preload_chat_id=None):
         non_org_participants = chat.participants.exclude(id__in=chat_admins)
         non_org_participants = non_org_participants.exclude(id__in=superusers)
         has_messages = Message.objects.filter(chat=chat).exists()
-        if not has_messages:
-            continue
+        latest_read_by_org_admin = False
         latest_message = Message.objects.filter(chat=chat).order_by("-timestamp").first()
         if latest_message:
             latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=chat_admins).exists() if chat.organisation else MessageSeen.objects.filter(message=latest_message, user__in=superusers).exists()
@@ -73,6 +74,16 @@ def get_chat_content(request, chat_id, error=None):
     messages = Message.objects.filter(chat=chat)
     for message in messages:
         message.seen = MessageSeen.objects.filter(message=message, user=user).exists()
+        
+        non_org_participants = chat.participants.exclude(id__in=OrganisationAdmin.objects.filter().values_list("user", flat=True))
+        
+        non_org_participants = non_org_participants.exclude(id__in=OrganisationAdmin.objects.filter(user__is_superuser=True).values_list("user", flat=True))
+        
+        message_seen_by_non_org_participants = MessageSeen.objects.filter(message=message, user__in=non_org_participants).exists()
+        print(message_seen_by_non_org_participants)
+        message.seen_by_non_org_participants = message_seen_by_non_org_participants
+        
+        
 
     return render(
         request,
@@ -120,75 +131,83 @@ def send_message(request, chat_id):
     
     #check if its the first sent
     existing_messages = Message.objects.filter(chat=chat).count()
-
-    Message.objects.create(chat=chat, sender=user, content=message)
     
-    if existing_messages == 0:
-        chat_notification(chat_id)
+    
+    last_user_message = Message.objects.filter(chat=chat, sender=request.user).last()
+    sent_message = Message.objects.create(chat=chat, sender=user, content=message)
     
 
+    print("Sending notification")
+            
+    send_email = False        
+            
+    #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
+    
+    last_message = Message.objects.filter(chat=chat).last()
+    
+    if last_message:
+        if last_message.sender != request.user:
+            send_email = True
+    
+    if last_user_message:
+        time_difference = sent_message.timestamp - last_user_message.timestamp
+        print (time_difference)
+        if time_difference.seconds < 600:
+            print("Less than 10 minutes since last message")
+        else:
+            print("More than 10 minutes since last message")
+            send_email = True
+    else:
+        print ("No last message")
+        send_email = True
+            
+    if send_email:
+            
+        superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+        organisation_admin_emails = OrganisationAdmin.objects.filter(organisation=chat.organisation).values_list('user__email', flat=True)
+        emails = list(superuser_emails) + list(organisation_admin_emails)
+        
+        chat_user_emails = list(chat.participants.values_list('email', flat=True))
+        
+        if len(chat_user_emails) > 2:
+            request.method = "GET"
+            return get_chat_content(request, chat_id, error="Something went wrong calculating the emails")
+        
+        non_staff_emails = [email for email in chat_user_emails if email not in emails]
+        
+        for email in non_staff_emails:
+            print ("Sending email to: " + email)
+            if chat.chip_in_admins_chat:
+                SendChatEmailThread("Chip In", email, message).start()
+            else:
+                SendChatEmailThread(chat.organisation.name, email, message).start()
 
     request.method = "GET"
     return get_chat_content(request, chat_id)
 
 
-def chat_notification(chat_id):
-    chat = Chat.objects.get(id=chat_id)
-    
+def send_chat_email(organisation, recipient, message):
+    subject = "Chip In: New Message from " + organisation
+    message = f"""
+Hello,
 
+You have a new message from {organisation}.
+Please login to the Chip In system to view and respond to the message.
+
+Regards,
+The Chip In Team
+    """
+    send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient], fail_silently=False)
+    return
     
-    exclude_list = []
-    send_list = []
     
-    superusers = User.objects.filter(is_superuser=True)
-    exclude_list.extend(superusers)
-    
-    if chat.organisation:
-        org_admins = OrganisationAdmin.objects.filter(organisation=chat.organisation)
-        print(org_admins)
-        admins_users = [admin.user for admin in org_admins]
-        exclude_list.extend(admins_users)
+class SendChatEmailThread(Thread):
+    def __init__(self, organisation, recipient, message):
+        Thread.__init__(self)
+        self.organisation = organisation
+        self.recipient = recipient
+        self.message = message
         
-    for participant in chat.participants.all():
-        if participant not in exclude_list:
-            send_list.append(participant)
-            
-            
-    print(exclude_list)
-    print(send_list)
-    
-    from_string = "Chip in Team" if not chat.organisation else chat.organisation.name
-    
-    email = """
-Hi,
-
-You have a new chat from """ + from_string + """ on Chip In. Please log in to view it.
-
-Thanks,
-Chip In"""
-
-
-    send_mail(
-        "Chip In: New message from " + from_string,
-        email,
-        fail_silently=True,
-        recipient_list=[user.email for user in send_list],
-        from_email="no-reply@chipinbwd.co.uk",
-    )
-
-
-        #org_name = chat.organisation.name
-    #payload = {
-    #    "head": org_name,
-    #    "body": message,
-    #    "url": "/communications/" + str(chat_id) + "/",
-    #}
-
-    #for user in chat.participants.all():
-    #    if user != request.user:
-    #        send_user_notification(user=user, payload=payload, ttl=1000)
-    
-    
-        
-    
-    
+    def run(self):
+        send_chat_email(self.organisation, self.recipient, self.message)
+        return

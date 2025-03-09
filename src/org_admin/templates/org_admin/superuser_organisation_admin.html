@@ -8,27 +8,52 @@
   {% if error %}{% include "commonui/error.html" %} {% endif %}
 
   <div class="p-5 rounded-lg bg-base-200 mb-3">
-    <table class="table table-auto border-spacing-2">
+    <table class="" id="organisations_chip_in_admin">
     <thead>
       <tr>
+        <th>Logo</th>
         <th>Name</th>
+        <th>Volunteers</th>
+        <th>Opportunities</th>
         <th>Description</th>
         <th>Actions</th>
       </tr>
     </thead>
 
-    <tbody>
+    <tbody
+    hx-boost="true"
+      hx-target=".htmx-navigator"
+          hx-swap="outerHTML">
       {% for organisation in organisations %}
       <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
+        <td><img src="{{organisation.logo.url}}" class="rounded-md aspect-square w-16" /></td>
         <td>{{ organisation.name }}</td>
+        <td>{{ organisation.volunteers }}</td>
+        <td>{{ organisation.opportunities }}</td>
         <td>{{ organisation.description|truncatewords:10 }}</td>
         <td>
-          <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-primary mb-3">View</a>
+          <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-sm btn-primary">View</a>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
 </div>
+
+<script>
+  function hydrate_tables(){
+    let table = new DataTable('#organisations_chip_in_admin');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    hydrate_tables();
+  });
+
+  document.addEventListener('htmx:afterSettle', function(event) {
+    console.log('htmx:afterSwap');
+    hydrate_tables();
+  });
+  
+</script>
+
 {% endblock %}

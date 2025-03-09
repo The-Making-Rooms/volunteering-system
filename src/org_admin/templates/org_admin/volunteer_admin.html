@@ -5,13 +5,14 @@
 <p class="text-2xl text-slate-200">Volunteers</p>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3 overflow-scroll">
-  <table class="table border-seperate border-spacing-2 ">
+  <table id="volunteersTable">
     <thead>
       <tr>
         <th>First Name</th>
         <th>Last Name</th>
         <th>Email</th>
-
+        <th>Date of birth</th>
+        <th>Contacted</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -21,6 +22,8 @@
         <td>{{ volunteer.user.first_name }}</td>
         <td>{{ volunteer.user.last_name }}</td>
         <td>{{ volunteer.user.email }}</td>
+        <td>{{ volunteer.date_of_birth|date:"d/m/y" }}</td>
+        <td>{{ volunteer.has_been_contacted }}</td>
         <td>
           <a href="{{volunteer.id}}/" class="btn btn-primary">View</a>
           <a href="chat/{{volunteer.id}}/" class="btn btn-danger">Contact</a>
@@ -30,5 +33,22 @@
     </tbody>
   </table>
 </div>
+
+  
+  
+<script>
+  function hydrate_volunteer_tables(){
+    let volunteer_table = new DataTable('#volunteersTable');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    hydrate_volunteer_tables();
+  });
+
+  document.addEventListener('htmx:afterSettle', function(event) {
+    hydrate_volunteer_tables();
+  });
+  
+</script>
 
 {% endblock %}

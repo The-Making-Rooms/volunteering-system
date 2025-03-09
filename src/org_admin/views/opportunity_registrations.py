@@ -28,9 +28,11 @@ def opportunity_registrations(request, id=None, error=None, success=None):
     
     
     context = {
+        "superuser": request.user.is_superuser,
         "hx": check_if_hx(request),
         "opportunity": opportunity,
         "opportunities": opportunities,
+        "number_of_opportunities": len(opportunities),
         "registration_types": registration_types,
         "error": error,
         "success": success
@@ -116,7 +118,8 @@ def get_registration_table(request):
         registrations = [registration for registration in registrations if registration.get_registration_status() == status.status]
     
     context = {
-        "registrations": registrations
+        "registrations": registrations,
+        "count": len(registrations)
     }
     
     return render(request, "org_admin/partials/registration_table.html", context)
