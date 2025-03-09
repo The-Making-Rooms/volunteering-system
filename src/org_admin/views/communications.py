@@ -138,52 +138,61 @@ def send_message(request, chat_id):
     
 
     print("Sending notification")
-            
-    send_email = False        
-            
-    #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
     
-    last_message = Message.objects.filter(chat=chat).last()
-    
-    if last_message:
-        if last_message.sender != request.user:
-            send_email = True
-    
-    if last_user_message:
-        time_difference = sent_message.timestamp - last_user_message.timestamp
-        print (time_difference)
-        if time_difference.seconds < 600:
-            print("Less than 10 minutes since last message")
-        else:
-            print("More than 10 minutes since last message")
-            send_email = True
-    else:
-        print ("No last message")
-        send_email = True
+    try:
             
-    if send_email:
-            
-        superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
-        organisation_admin_emails = OrganisationAdmin.objects.filter(organisation=chat.organisation).values_list('user__email', flat=True)
-        emails = list(superuser_emails) + list(organisation_admin_emails)
+        send_email = False        
+                
+        #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
         
-        chat_user_emails = list(chat.participants.values_list('email', flat=True))
+        last_message = Message.objects.filter(chat=chat).last()
         
-        if len(chat_user_emails) > 2:
-            request.method = "GET"
-            return get_chat_content(request, chat_id, error="Something went wrong calculating the emails")
+        if last_message:
+            if last_message.sender != request.user:
+                send_email = True
         
-        non_staff_emails = [email for email in chat_user_emails if email not in emails]
-        
-        for email in non_staff_emails:
-            print ("Sending email to: " + email)
-            if chat.chip_in_admins_chat:
-                SendChatEmailThread("Chip In", email, message).start()
+        if last_user_message:
+            time_difference = sent_message.timestamp - last_user_message.timestamp
+            print (time_difference)
+            if time_difference.seconds < 600:
+                print("Less than 10 minutes since last message")
             else:
-                SendChatEmailThread(chat.organisation.name, email, message).start()
+                print("More than 10 minutes since last message")
+                send_email = True
+        else:
+            print ("No last message")
+            send_email = True
+                
+        if send_email:
+                
+            superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+            organisation_admin_emails = OrganisationAdmin.objects.filter(organisation=chat.organisation).values_list('user__email', flat=True)
+            emails = list(superuser_emails) + list(organisation_admin_emails)
+            
+            chat_user_emails = list(chat.participants.values_list('email', flat=True))
+            
+            #remove superusers and organisation admins
+            chat_user_emails = [email for email in chat_user_emails if email not in emails]
+            
+            if len(chat_user_emails) > 2:
+                request.method = "GET"
+                return get_chat_content(request, chat_id, error=f"Something went wrong calculating the emails {len}")
+            
+            non_staff_emails = [email for email in chat_user_emails if email not in emails]
+            
+            for email in non_staff_emails:
+                print ("Sending email to: " + email)
+                if chat.chip_in_admins_chat:
+                    SendChatEmailThread("Chip In", email, message).start()
+                else:
+                    SendChatEmailThread(chat.organisation.name, email, message).start()
 
-    request.method = "GET"
-    return get_chat_content(request, chat_id)
+        request.method = "GET"
+        return get_chat_content(request, chat_id)
+    except Exception as e:
+        print('Error in communications (Admin Side)', e)
+        request.method = "GET"
+        return get_chat_content(request, chat_id)
 
 
 def send_chat_email(organisation, recipient, message):
