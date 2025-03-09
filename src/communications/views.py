@@ -98,6 +98,8 @@ def send_message(request, chat_id):
     if profanity.contains_profanity(message):
         return get_chat_content(request, chat_id, error="Profanity is not allowed")
     
+    
+    last_message = Message.objects.filter(chat=chat, automated=False).last()
     last_user_message = Message.objects.filter(chat=chat, sender=request.user).last()
     sent_message = Message.objects.create(chat=chat, sender=user, content=message)#
     
@@ -111,12 +113,6 @@ def send_message(request, chat_id):
             "url": "/communications/" + str(chat_id) + "/",
             "icon": settings.STATIC_URL + "images/icons/icon-512x512.png"
         }
-        
-        superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
-        
-        for email in superuser_emails:
-            print ("Sending email to: " + email)
-            SendChatEmailThread("Chip In", email, message).start()
         
     else:
         org_name = chat.organisation.name
@@ -155,7 +151,7 @@ def send_message(request, chat_id):
         #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
         
         print(last_user_message)
-        last_message = Message.objects.filter(chat=chat, automated=False).last()
+
         
         if last_message:
             if last_message.sender != request.user:
@@ -185,6 +181,8 @@ def send_message(request, chat_id):
             print ('excluded_emails:', excluded_emails)
             
             emails = [email for email in emails if email not in excluded_emails]
+            
+            print ('filtered emails:', emails)
             
             for email in emails:
                 print ("Sending email to: " + email)
@@ -226,5 +224,5 @@ class SendChatEmailThread(Thread):
         self.message = message
         
     def run(self):
-        #send_chat_email(self.organisation, self.recipient, self.message)
+        send_chat_email(self.organisation, self.recipient, self.message)
         return
