@@ -134,6 +134,7 @@ def send_message(request, chat_id):
     
     
     last_user_message = Message.objects.filter(chat=chat, sender=request.user).last()
+    last_message = Message.objects.filter(chat=chat).last()
     sent_message = Message.objects.create(chat=chat, sender=user, content=message)
     
 
@@ -144,9 +145,6 @@ def send_message(request, chat_id):
         send_email = False        
                 
         #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
-        
-        last_message = Message.objects.filter(chat=chat).last()
-        
         if last_message:
             if last_message.sender != request.user:
                 send_email = True
