@@ -7,7 +7,7 @@ This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for d
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
-from organisations.models import Organisation, Link, Image, Video, Location, OrganisationInterest, OrganisationSection
+from organisations.models import Organisation, Link, Image, Video, Location, OrganisationInterest, OrganisationSection, OrganisationView
 from opportunities.models import Opportunity, Image as OpportunityImage
 from commonui.views import check_if_hx
 from googlemaps import Client as GoogleMaps
@@ -90,7 +90,10 @@ def detail(request, organisation_id):
     opps = Opportunity.objects.filter(organisation=org, active=True)
     location = Location.objects.filter(organisation=org)
     sections = OrganisationSection.objects.filter(organisation=org)
-
+    
+    view = OrganisationView(organisation=org)
+    view.save()
+    
     opp_objects = []
     for opp in opps:
         opp_object = {

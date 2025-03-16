@@ -118,3 +118,7 @@ class OrganisationInterest(models.Model):
     class Meta:
         unique_together = ('volunteer', 'organisation')
 
+class OrganisationView(models.Model):
+    organisation = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    time = models.DateTimeField(auto_now_add=True)
+    

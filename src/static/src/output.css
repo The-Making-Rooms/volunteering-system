@@ -3784,6 +3784,14 @@ html:has(.drawer-toggle:checked) {
   margin: 0.75rem;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
+.m-5 {
+  margin: 1.25rem;
+}
+
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -3997,6 +4005,14 @@ html:has(.drawer-toggle:checked) {
   height: 100%;
 }
 
+.h-64 {
+  height: 16rem;
+}
+
+.h-72 {
+  height: 18rem;
+}
+
 .min-h-full {
   min-height: 100%;
 }
@@ -4088,6 +4104,18 @@ html:has(.drawer-toggle:checked) {
 
 .w-full {
   width: 100%;
+}
+
+.w-32 {
+  width: 8rem;
+}
+
+.w-72 {
+  width: 18rem;
+}
+
+.w-64 {
+  width: 16rem;
 }
 
 .min-w-44 {
@@ -4307,6 +4335,10 @@ html:has(.drawer-toggle:checked) {
   border-radius: 0.75rem;
 }
 
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
 .rounded-t-xl {
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
@@ -4419,14 +4451,14 @@ html:has(.drawer-toggle:checked) {
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
 }
 
-.bg-red-400 {
+.bg-slate-600 {
   --tw-bg-opacity: 1;
-  background-color: rgb(248 113 113 / var(--tw-bg-opacity, 1));
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity, 1));
 }
 
-.bg-red-800 {
+.bg-gray-600 {
   --tw-bg-opacity: 1;
-  background-color: rgb(153 27 27 / var(--tw-bg-opacity, 1));
+  background-color: rgb(75 85 99 / var(--tw-bg-opacity, 1));
 }
 
 .bg-opacity-50 {
@@ -4623,6 +4655,21 @@ html:has(.drawer-toggle:checked) {
   line-height: 1rem;
 }
 
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.text-6xl {
+  font-size: 3.75rem;
+  line-height: 1;
+}
+
+.text-9xl {
+  font-size: 8rem;
+  line-height: 1;
+}
+
 .font-black {
   font-weight: 900;
 }
@@ -4755,27 +4802,6 @@ html:has(.drawer-toggle:checked) {
 }
 
 @media (min-width: 1024px) {
-  .lg\:btn-md {
-    height: 3rem;
-    min-height: 3rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    font-size: 0.875rem;
-  }
-
-  .btn-square:where(.lg\:btn-md) {
-    height: 3rem;
-    width: 3rem;
-    padding: 0px;
-  }
-
-  .btn-circle:where(.lg\:btn-md) {
-    height: 3rem;
-    width: 3rem;
-    border-radius: 9999px;
-    padding: 0px;
-  }
-
   .lg\:drawer-open > .drawer-toggle {
     display: none;
   }

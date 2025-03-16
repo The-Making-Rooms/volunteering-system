@@ -1,0 +1,40 @@
+{% extends "org_admin/navigation_template.html" %}
+
+{% block page_content %}
+
+<p class="font-bold text-3xl">Data Dashboard</p>
+<div class="divider"></div>
+
+
+
+{% for page_section, data in sections.items %}
+    <div class="bg-secondary p-5 rounded-lg m-5">
+        <p class="font-bold text-2xl">{{page_section}}</p>
+        <div class="divider"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for section in data %}
+                {% if section.type == 'numeric' %}
+                    {% include "org_admin/partials/dashboard/number.html" %}
+                {% endif %}
+
+                {% if section.type == 'bar' %}
+                    {% include "org_admin/partials/dashboard/bar.html" %}
+                {% endif %}
+
+                {% if section.type == 'pie' %}
+                    {% include "org_admin/partials/dashboard/pie.html" %}
+                {% endif %}
+            {%endfor%}
+        </div>
+    </div>
+
+
+
+{%endfor%}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    Chart.defaults.color = '#ffffff';
+</script>
+
+{% endblock %}
