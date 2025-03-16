@@ -43,7 +43,19 @@
 
 <div class="divider"></div>
 
+<div class="p-5 rounded-xl bg-secondary">
 
+    <p class="text-2xl mb-3">
+        Email Preferences
+    </p>
+
+
+    <p>You are currently {%if send_email_on_message%}getting{%else%}not getting{%endif%} emails for new messages.</p>
+    <button class="btn btn-primary mt-3" hx-target=".htmx-navigator" hx-get="/org_admin/toggle_message_on_email/" hx-swap="outerHTML">Toggle emails on messages</button>
+
+</div>
+
+<div class="divider"></div>
 
 <form class="p-5 rounded-xl bg-secondary">
 

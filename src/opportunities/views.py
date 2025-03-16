@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from opportunities.models import Opportunity, Benefit, Image, Video, SupplimentaryInfoRequirement, Registration, Location, RegistrationStatus, VolunteerRegistrationStatus, OpportunityView, LinkedTags, Tag, generate_random_pastel_hex, generate_darker_gradient_hex, Icon, OpportunitySection, OpportunityBenefit

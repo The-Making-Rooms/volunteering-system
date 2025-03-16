@@ -6,9 +6,9 @@
 
 <div class="flex p-5 rounded-lg bg-base-200 mb-3 h-[50rem]">
     <div class="flex  mr-3">
-        <ul class="menu bg-base-300 w-56 rounded-box">
+        <ul class="p-3 overflow-scroll bg-base-300 w-56 rounded-box">
             {% for chat in chats %}
-            <li class="bg-base-200 rounded-xl mb-3">
+            <li class="p-3 bg-base-200 rounded-xl mb-3">
             <a hx-push-url="false" hx-boost="true" href="/org_admin/communication/{{chat.id}}" class="flex flex-col items-start" hx-target="#chat_view" hx-swap="outerHTML">
         
                 {% if chat.broadcast %}
@@ -43,6 +43,6 @@
 
     </div>
 
-</div>
+
 
 {% endblock %}

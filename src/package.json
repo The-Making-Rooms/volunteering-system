@@ -1,8 +1,0 @@
-{
-  "devDependencies": {
-    "daisyui": "^4.7.2"
-  },
-  "dependencies": {
-    "daisyUI": "npm:daisyui@^4.7.2"
-  }
-}

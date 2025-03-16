@@ -1,4 +1,4 @@
-<table class="table  overflow-scroll">
+<table id="benefitsTablePartial">
     <thead>
         <tr>
             <th></th>
@@ -20,10 +20,26 @@
             <td>
                 {{ benefit.organisation.name}}
             <td>
-                <a hx-get="/org_admin/benefits/{{ benefit.id }}/" hx-target=".htmx-navigator" class="btn btn-primary">Edit</a>
-                <a href="/org_admin/benefits/{{ benefit.id }}/delete/" class="btn btn-danger">Delete</a>
+                <a hx-get="/org_admin/benefits/{{ benefit.id }}/" hx-target=".htmx-navigator" class="btn btn-sm btn-primary">Edit</a>
+                <a href="/org_admin/benefits/{{ benefit.id }}/delete/" class="btn btn-sm bg-red-600">Delete</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+
+<script>
+    function hydrate_benefits_tables(){
+      let benefits_table = new DataTable('#benefitsTablePartial');
+    }
+  
+    document.addEventListener('DOMContentLoaded', function() {
+        hydrate_benefits_tables();
+    });
+  
+    document.addEventListener('htmx:afterSettle', function(event) {
+        hydrate_benefits_tables();
+    });
+    
+  </script>

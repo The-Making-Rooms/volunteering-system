@@ -1,3 +1,10 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db import models
@@ -38,6 +45,8 @@ class Message(models.Model):
             raise ValidationError(
                 "User is not an admin of the organisation. only admins can send group broadcasts."
             )
+            
+
 
 
 class AutomatedMessage(models.Model):

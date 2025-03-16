@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
@@ -6,11 +12,12 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import send_user_notification
 from django.conf import settings
 from better_profanity import profanity
-from org_admin.models import OrganisationAdmin
+from org_admin.models import OrganisationAdmin, NotificationPreference
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from opportunities.models import Registration
 from volunteer.models import Volunteer
+from threading import Thread
 # Create your views here.
 
 
@@ -48,6 +55,7 @@ def get_chat_content(request, chat_id, error=None):
     messages = Message.objects.filter(chat=chat)
     for message in messages:
         message.seen = MessageSeen.objects.filter(message=message, user=user).exists()
+        print(message.seen)
 
     return render(
         request,
@@ -90,7 +98,12 @@ def send_message(request, chat_id):
     if profanity.contains_profanity(message):
         return get_chat_content(request, chat_id, error="Profanity is not allowed")
     
-    sent_message = Message.objects.create(chat=chat, sender=user, content=message)
+    
+    last_message = Message.objects.filter(chat=chat, automated=False).last()
+    last_user_message = Message.objects.filter(chat=chat, sender=request.user).last()
+    sent_message = Message.objects.create(chat=chat, sender=user, content=message)#
+    
+    print("Message object created")
     
     
     if chat.chip_in_admins_chat:
@@ -100,23 +113,7 @@ def send_message(request, chat_id):
             "url": "/communications/" + str(chat_id) + "/",
             "icon": settings.STATIC_URL + "images/icons/icon-512x512.png"
         }
-        #superusers = User.objects.filter(is_superuser=True)
-        #for superuser in superusers:
-            #if superuser != request.user:
-                #send_user_notification(user=superuser, payload=payload, ttl=1000)
-                
-                
-                #send_mail(
-                #    'Chip In - New Message from {} {} ({})'.format(request.user.first_name, request.user.last_name, request.user.email),
-                #    """
-                #    You have a new message from {} {} ({}) in the chat with {}.
-                #    Please log onto the Chip In app to view the message.
-                #    
-                #    """.format(request.user.first_name, request.user.last_name, request.user.email, org_name),
-                #    from_email=None,
-                #    recipient_list=[superuser.email],
-                #    fail_silently=True,
-                #)
+        
     else:
         org_name = chat.organisation.name
         payload = {
@@ -126,45 +123,106 @@ def send_message(request, chat_id):
             "icon": settings.STATIC_URL + "images/icons/icon-512x512.png"
         }
     
-        #for user in chat.participants.all():
-            #if user != request.user:
-                #send_user_notification(user=user, payload=payload, ttl=1000)
-                
-                #send_mail(
-                #    'Chip In - New Message from {} {} ({})'.format(request.user.first_name, request.user.last_name, request.user.email),
-                #    """
-                #    You have a new message from {} {} ({}) in the chat with {}.
-                #    Please log onto the Chip In app to view the message.
-                #    
-                #    """.format(request.user.first_name, request.user.last_name, request.user.email, org_name),
-                #    from_email=None,
-                #    recipient_list=[user.email],
-                #    fail_silently=True,
-                #)
-                    
-    #Send an automated message
-    
+        print("Automated message Check")
     
         automated_message = AutomatedMessage.objects.get(organisation=chat.organisation) if AutomatedMessage.objects.filter(organisation=chat.organisation).exists() else None
     
         if not automated_message:
             print("No automated message")
-            return get_chat_content(request, chat_id)
         else:
             #check if an automoted message exists in the chat on the day the mesage was sent
             automated_chat_message = Message.objects.filter(chat=chat, timestamp__date=sent_message.timestamp.date(), content=automated_message.content).exists()
             
             if automated_chat_message:
                 print("Automated message already exists")
-                return get_chat_content(request, chat_id)
-            
             message = automated_message.content
             #get superuser:
             try:
                 superuser = User.objects.filter(is_superuser=True)
                 Message.objects.create(chat=chat, sender=superuser[0], content=message, automated=True)
-                return get_chat_content(request, chat_id)
             except Exception as e:
                 print(e)
+                
+                
+    print("Sending notification")
+    try:        
+        send_email = False        
+                
+        #Check it has been 10 minutes since the last message was sent or if another message has been sent in the chat by another user
+        
+        print(last_user_message)
 
-    return get_chat_content(request, chat_id)
+        
+        if last_message:
+            if last_message.sender != request.user:
+                print("Last message was not sent by the user")
+                send_email = True
+        
+        if last_user_message:
+            time_difference = sent_message.timestamp - last_user_message.timestamp
+            print (time_difference, sent_message.timestamp, last_user_message.timestamp)
+            print(sent_message, last_user_message)
+            if time_difference.seconds < 600:
+                print("Less than 10 minutes since last message")
+            else:
+                print("More than 10 minutes since last message")
+                send_email = True
+        else:
+            print ("No last message")
+            send_email = True
+                
+        if send_email:
+            excluded_emails = NotificationPreference.objects.filter(email_on_message=False).values_list('user__email', flat=True)
+            
+            superuser_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+            organisation_admin_emails = OrganisationAdmin.objects.filter(organisation=chat.organisation).values_list('user__email', flat=True)
+            emails = list(superuser_emails) + list(organisation_admin_emails)
+            
+            print ('excluded_emails:', excluded_emails)
+            
+            emails = [email for email in emails if email not in excluded_emails]
+            
+            print ('filtered emails:', emails)
+            
+            for email in emails:
+                print ("Sending email to: " + email)
+                
+                if chat.chip_in_admins_chat:
+                    SendChatEmailThread("Chip In", email, message).start()
+                else:
+                    SendChatEmailThread(chat.organisation.name, email, message).start()
+
+        request.method = "GET"
+        return get_chat_content(request, chat_id)
+    except Exception as e:
+        print('Error in communications (User Side)', e)
+        return get_chat_content(request, chat_id)
+
+
+def send_chat_email(organisation, recipient, message):
+    subject = "Chip In: New Message for " + organisation
+    message = f"""
+Hello,
+
+You have a new message from a chip in user for {organisation}.
+Please login to the Chip In system to view and respond to the message.
+
+If you wish to stop receiving these emails, you can turn them off in the profile tab on the Chip In Admin.
+
+Regards,
+The Chip In Team
+    """
+    send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient], fail_silently=False)
+    return
+    
+    
+class SendChatEmailThread(Thread):
+    def __init__(self, organisation, recipient, message):
+        Thread.__init__(self)
+        self.organisation = organisation
+        self.recipient = recipient
+        self.message = message
+        
+    def run(self):
+        send_chat_email(self.organisation, self.recipient, self.message)
+        return

@@ -8,3 +8,5 @@ googlemaps
 requests_oauthlib
 opencv-python
 better_profanity
+fuzzywuzzy
+django-richtextfield

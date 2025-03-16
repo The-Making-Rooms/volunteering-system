@@ -14,22 +14,27 @@
       sizes="32x32"
       href="{% static 'images/icons/icon-72x72.png' %}"
     />
+
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
+  
+
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}" />
     {% endcompress %}
   </head>
 
   <body style="height: 100%">
-    <div class="drawer">
+    <div class="drawer lg:drawer-open">
       <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content flex flex-col">
+      <div class="drawer-content flex flex-col ">
         <!-- Navbar -->
-        <div class="w-full navbar bg-base-300">
-          <div class="flex-none lg:hidden">
+        <div class="w-full navbar bg-base-300 lg:hidden">
+          <div class="flex-none">
             <label
               for="my-drawer-3"
               aria-label="open sidebar"
-              class="btn btn-square btn-ghost"
+              class="btn btn-square btn-ghost lg:hidden"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -46,43 +51,19 @@
               </svg>
             </label>
           </div>
-          <div class="flex-1 px-2 mx-2">
+          <div class="flex-1 px-2 mx-2 lg:hidden">
             <img
               src="{% static 'images/chip_in_logo.svg' %}"
               alt="logo"
               class="flex-none ml-5 w-20"
             />
           </div>
-          <div class="flex-none hidden lg:block">
-            <ul
-              class="menu menu-horizontal"
-              hx-boost="true"
-              hx-target=".htmx-navigator"
-              hx-swap="outerHTML"
-            >
-              <!-- Navbar menu content here -->
-
-              <li><a href="/org_admin/details/#">Organisation Details</a></li>
-              <li><a href="/org_admin/benefits/#">Benefits</a></li>
-              <li><a href="/org_admin/additional_information/#">Additional Information</a></li>
-              <li><a href="/org_admin/opportunities/#">Opportunities</a></li>
-              <li><a href="/org_admin/registrations/#">Registrations</a></li>
-              <li><a href="/org_admin/volunteers/#">Volunteers</a></li>
-              <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
-              <li><a href="/org_admin/forms/#">Forms</a></li>
-              <li><a href="/org_admin/communication/#">Communication</a></li>
-              <li>
-                <a href="/org_admin/admin_management/#">Organisation Admins</a>
-              </li>
-              <li><a href="/org_admin/profile/#">Profile</a></li>
-              <li><a href="/org_admin/logout/#">Logout</a></li>
-            </ul>
-          </div>
+          
         </div>
 
         {% endif %}
         <div
-          class="htmx-navigator pb-20 mx-5 md:mx-20 xl:mx-40 2xl:mx-80 mt-3"
+          class="htmx-navigator pb-20 mx-5 md:mx-10 xl:mx-20 2xl:mx-40 mt-3 lg:pt-5"
           hx-ext="remove-me"
         >
           {% block page_content %} {% endblock %}
@@ -97,9 +78,10 @@
           class="drawer-overlay"
         ></label>
         <ul
-          class="menu p-4 w-80 min-h-full bg-base-200"
+          class="menu p-4 w-80 min-h-full bg-base-200 text-lg"
           hx-boost="true"
           hx-target=".htmx-navigator"
+          hx-swap="outerHTML"
         >
           <img
             src="{% static 'images/chip_in_logo.svg' %}"
@@ -109,7 +91,7 @@
           <div class="divider"></div>
           <!-- Sidebar content here -->
 
-          <li><a href="/org_admin/details/#">Organisation Details</a></li>
+              <li><a href="/org_admin/details/#">Organisation Details</a></li>
               <li><a href="/org_admin/benefits/#">Benefits</a></li>
               <li><a href="/org_admin/additional_information/#">Additional Information</a></li>
               <li><a href="/org_admin/opportunities/#">Opportunities</a></li>
@@ -127,12 +109,14 @@
       </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script
       src="https://unpkg.com/htmx.org@1.9.9"
       integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/remove-me.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
   </body>
 </html>
 {% endif %}

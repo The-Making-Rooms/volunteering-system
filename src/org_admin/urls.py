@@ -1,3 +1,9 @@
+"""
+VolunteeringSystem
+
+This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
+"""
+
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
@@ -25,6 +31,7 @@ urlpatterns = [
     
     path("profile/", views.profile, name="profile"),
     path("change_password/", views.change_password, name="reset_password"),
+    path("toggle_message_on_email/", views.toggle_message_on_email, name="toggle_message_on_email"),
     path("logout/", views.logout_view, name="logout"),
     
     path("upload_icons/", views.upload_icons, name="upload_icons"),

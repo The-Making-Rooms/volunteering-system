@@ -1,4 +1,6 @@
+
 <table class="table" id="reg-table">
+    
     <thead>
         <tr>
             <th></th>
@@ -19,15 +21,22 @@
             </td>
 
             <td>{{registration.volunteer.user.first_name}} {{registration.volunteer.user.last_name}}</td>
+            <td>{{registration.opportunity.organisation.name}}</td>
             <td>{{registration.opportunity.name}}</td>
             <td>{{registration.date_created}}</td>
             <td>{{registration.get_registration_status}}</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td colspan="6">
+                Showing {{registrations|length}} registrations
+            </td>
         {% else %}
         <tr>
             <td colspan="6" class="text-center">No registrations found</td>
         </tr>
         {% endif %}
     </tbody>
+
+    
 </table>

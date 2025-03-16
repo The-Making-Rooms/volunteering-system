@@ -1,5 +1,5 @@
 <div id="opportunity_results_table" class="p-5 rounded-lg bg-base-200 mb-3 overflow-scroll">
-    <table class="table table-auto border-spacing-2 overflow-scroll">
+    <table id="opportunitiesTable">
       <thead>
         <tr>
           {% if superuser %}<th>Logo</th>{% endif%}
@@ -16,7 +16,7 @@
         {% for opportunity in opportunities %}
         <tr class="my-2 rounded-lg odd:bg-base-100 even:bg-base-300">
           {% if superuser %}
-            <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md aspect-square w-24" /></td>
+            <td><img src="{{opportunity.organisation.logo.url}}" class="rounded-md aspect-square w-16" /></td>
           {% endif %}
           <td>{{ opportunity.name }}</td>
           <td>{{ opportunity.description|truncatewords:10 }}</td>
@@ -26,12 +26,12 @@
           <td>
             <a
               href="/org_admin/opportunities/{{opportunity.id}}"
-              class="btn bg-green-600 mb-3 "
+              class="btn btn-sm bg-green-600 mb-3 "
               >View</a
             >
             <a
               href="/org_admin/opportunities/registrations/{{opportunity.id}}"
-              class="btn btn-primary"
+              class="btn btn-sm btn-primary"
               >Registrations</a
             >
           </td>
@@ -40,3 +40,19 @@
       </tbody>
     </table>
   </div>
+
+
+  <script>
+    function hydrate_opportunities_tables(){
+      let opportunities_table = new DataTable('#opportunitiesTable');
+    }
+  
+    document.addEventListener('DOMContentLoaded', function() {
+      hydrate_opportunities_tables();
+    });
+  
+    document.addEventListener('htmx:afterSettle', function(event) {
+      hydrate_opportunities_tables();
+    });
+    
+  </script>
