@@ -1,0 +1,14 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<form class="rounded-xl p-5 bg-base-200">
+    {% csrf_token %}
+    <p class="text-2xl font-bol mb-5">Confirm Deletion!</p>
+    <p>You are deleting {{form_name}} with {{responses}} responses!!!</p>
+    <div class="flex justify-between mt-5">
+        <button class="btn bg-red-600" hx-target=".htmx-navigator" hx-swap="outerHTML" hx-confirm="Are you sure you would like to delete this form?" hx-post="/org_admin/forms/delete/{{form_id}}/">Delete</button>
+        <button class="btn btn-primary" hx-target=".htmx-navigator" hx-swap="outerHTML" hx-get="/org_admin/forms/">Cancel</button>
+    </div>
+</form>
+{% endblock %}
