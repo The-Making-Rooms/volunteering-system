@@ -116,6 +116,8 @@ def get_registration_table(request):
     if status != "all":
         status = RegistrationStatus.objects.get(id=status)
         registrations = [registration for registration in registrations if registration.get_registration_status() == status.status]
+        
+    registrations = registrations.order_by('date_created').reverse()
     
     context = {
         "registrations": registrations,

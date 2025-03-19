@@ -21,6 +21,9 @@
                     {% for participant in chat.participants %}
                         {{participant.first_name}} {{participant.last_name}}<br>
                     {% endfor %}
+                    <p class="text-sm text-gray-400">{{chat.last_message|date:"d/m/y H:i"}}</p>
+                    
+    
                 {% endif %}
                 </span>
             </a>

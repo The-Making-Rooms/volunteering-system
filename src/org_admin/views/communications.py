@@ -16,9 +16,10 @@ def get_org_chats(request, preload_chat_id=None):
         chats = Chat.objects.filter(organisation=org)
     elif request.user.is_superuser:
         chats = Chat.objects.all()
-        
+       
+     
     chat_admins = OrganisationAdmin.objects.filter().values_list("user", flat=True)
-    superusers = OrganisationAdmin.objects.filter(user__is_superuser=True).values_list("user", flat=True)
+    superusers = User.objects.filter(is_superuser=True).values_list("id", flat=True)
         
     print(chats)
     chat_objs = []
@@ -30,16 +31,30 @@ def get_org_chats(request, preload_chat_id=None):
         latest_read_by_org_admin = False
         latest_message = Message.objects.filter(chat=chat).order_by("-timestamp").first()
         if latest_message:
-            latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=chat_admins).exists() if chat.organisation else MessageSeen.objects.filter(message=latest_message, user__in=superusers).exists()
+            if chat.organisation:
+                if (len(chat_admins) > 0):
+                    latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=superusers).exists()
+                else:
+                    latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=chat_admins).exists()
+                    
+            else:
+                latest_read_by_org_admin = MessageSeen.objects.filter(message=latest_message, user__in=superusers).exists()
+
         chat_obj = {
             "id": chat.id,
             "participants": non_org_participants,
             "organisation": "Chip In" if chat.chip_in_admins_chat else chat.organisation.name,
             "broadcast": chat.broadcast,
             "latest_read_by_org_admin": latest_read_by_org_admin,
+            "last_message": latest_message.timestamp.replace(tzinfo=None) if latest_message else None,
         }
         
         chat_objs.append(chat_obj)
+        
+        # Order by latest message, None at top
+        chat_objs.sort(key=lambda x: x['last_message'] if x['last_message'] is not None else datetime.max, reverse=True)
+        
+        
         
     #print(chat_objs)
     
@@ -72,19 +87,23 @@ def get_chat_content(request, chat_id, error=None):
         return HTTPResponseHXRedirect("/org_admin/communication/")
 
     messages = Message.objects.filter(chat=chat)
+    chat_recipients = []
+    
+    non_org_participants = chat.participants.exclude(id__in=OrganisationAdmin.objects.filter().values_list("user", flat=True))
+    non_org_participants = non_org_participants.exclude(id__in=User.objects.filter(is_superuser=True).values_list("id", flat=True))
+    
+    
+    for participant in non_org_participants:
+        if participant not in chat_recipients:
+            chat_recipients.append(User.objects.get(id=participant.id).first_name + " " + User.objects.get(id=participant.id).last_name)
+
     for message in messages:
         message.seen = MessageSeen.objects.filter(message=message, user=user).exists()
-        
-        non_org_participants = chat.participants.exclude(id__in=OrganisationAdmin.objects.filter().values_list("user", flat=True))
-        
-        non_org_participants = non_org_participants.exclude(id__in=OrganisationAdmin.objects.filter(user__is_superuser=True).values_list("user", flat=True))
         
         message_seen_by_non_org_participants = MessageSeen.objects.filter(message=message, user__in=non_org_participants).exists()
         print(message_seen_by_non_org_participants)
         message.seen_by_non_org_participants = message_seen_by_non_org_participants
         
-        
-
     return render(
         request,
         "org_admin/chat.html",
@@ -95,6 +114,7 @@ def get_chat_content(request, chat_id, error=None):
             "user": request.user,
             "link_active": "communications",
             "error": error,
+            "chat_recipients": chat_recipients,
         },
     )
     
