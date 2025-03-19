@@ -9,10 +9,13 @@ from django.contrib import admin
 from .models import Chat, Message
 # Register your models here.
 
-@admin.register(Chat)
+#Show the chat model in the admin panel with message inline
+class MessageInline(admin.TabularInline):
+    model = Message
+    extra = 0
+    
 class ChatAdmin(admin.ModelAdmin):
-    pass
+    inlines = [MessageInline]
 
-@admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    pass
+
+admin.site.register(Chat, ChatAdmin)

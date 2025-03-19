@@ -3784,6 +3784,10 @@ html:has(.drawer-toggle:checked) {
   margin: 0.75rem;
 }
 
+.m-5 {
+  margin: 1.25rem;
+}
+
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -4419,6 +4423,13 @@ html:has(.drawer-toggle:checked) {
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
 }
 
+
+.bg-gray-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(75 85 99 / var(--tw-bg-opacity, 1));
+}
+
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -4611,6 +4622,11 @@ html:has(.drawer-toggle:checked) {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-9xl {
+  font-size: 8rem;
+  line-height: 1;
 }
 
 .font-black {
