@@ -2,8 +2,6 @@ from django.shortcuts import render
 from commonui.views import check_if_hx
 import random
 import string
-from django.contrib.auth.models import User
-from communications.models import Message, Chat
 from organisations.models import OrganisationView, OrganisationInterest, OrganisationAdmin, Organisation
 from opportunities.models import Registration, VolunteerRegistrationStatus, Opportunity, OpportunityView
 from volunteer.models import MentorRecord, MentorSession, Volunteer
@@ -64,7 +62,7 @@ def dashboard_index(request):
 
     context = {
         "hx": check_if_hx(request),
-        "sections": get_chipin_admin_data(request),
+        "sections": get_org_admin_data(request, 1005),
     }
     return render(
         request,
@@ -72,89 +70,48 @@ def dashboard_index(request):
         context=context,
     )
     
-def get_mentor_data(request, organisation_id=None):
-    if request.user.is_superuser and organisation_id:
+    
+def get_org_admin_data(request, organisation_id=None):
+    
+    if request.user.is_superuser:
         organisation = Organisation.objects.get(id=organisation_id)
-    elif not request.user.is_superuser:
+    else:
         organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-    else:
-        organisation = None
     
-    if organisation:
-        mentees = MentorRecord.objects.filter(organisation=organisation)
-    else:
-        mentees = MentorRecord.objects.all()
+    data_sections = []
     
-    try:
-        mentor_start_form = Form.objects.get(mentor_start_form=True)
-        mentor_end_form = Form.objects.get(mentor_end_form=True)
-    except Form.DoesNotExist:
-        mentor_start_form = None
-        mentor_end_form = None
+    key_data_sections = []
     
-    completed_start_form = 0
-    completed_end_form = 0
+    #key data - Organisation Views, Volunteer followers, Sign ups
+    org_views = OrganisationView.objects.filter(organisation=organisation).count()
     
-    if mentor_start_form and mentor_end_form:
-        for mentee in mentees:
-            if Response.objects.filter(form=mentor_start_form, user=mentee.volunteer.user):
-                completed_start_form += 1
-            if Response.objects.filter(form=mentor_end_form, user=mentee.volunteer.user):
-                completed_end_form += 1
-                
-        active_mentees = mentees.count() - completed_end_form
-        
-        mentor_data_sections.append({
-            "type": "numeric",
-            "title": "Active Mentees",
-            "value": active_mentees,
-        })
-            
-    mentor_data_sections = []
-    
-
-    
-    mentor_data_sections.append({
+    key_data_sections.append({
         "type": "numeric",
-        "title": "Total Mentees",
-        "value": len(mentees),
+        "title": "Organisation Views",
+        "value": org_views,
     })
     
-    mentor_data_sections.append({
+    org_followers = OrganisationInterest.objects.filter(organisation=organisation).count()
+    
+    key_data_sections.append({
         "type": "numeric",
-        "title": "Completed Initial Questionnaire",
-        "value": completed_start_form,
+        "title": "Organisation Followers",
+        "value": org_followers,
     })
     
-    mentor_data_sections.append({
+    org_sign_ups = Registration.objects.filter(opportunity__organisation=organisation).count()
+    
+    key_data_sections.append({
         "type": "numeric",
-        "title": "Completed Exit Questionnaire",
-        "value": completed_end_form,
+        "title": "Organisation Sign Ups",
+        "value": org_sign_ups,
     })
     
-    for section in mentor_data_sections:
-        section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
-        
-    return mentor_data_sections
     
-def get_volunteer_data(request, organisation_id=None):
-    if request.user.is_superuser and organisation_id:
-        organisation = Organisation.objects.get(id=organisation_id)
-    elif not request.user.is_superuser:
-        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-    else:
-        organisation = None
-    
-    
-     #Volunteer data - Volunteer age brackets, gender make up, ethnicity make up
+    #Volunteer data - Volunteer age brackets, gender make up, ethnicity make up
     volunteer_data_sections = []
     
-    if organisation:
-        volunteer_dobs = [reg.volunteer.date_of_birth for reg in Registration.objects.filter(opportunity__organisation=organisation)]
-    else:
-        volunteer_dobs = [volunteer.date_of_birth for volunteer in Volunteer.objects.all()]
-    
-    
+    volunteer_dobs = [reg.volunteer.date_of_birth for reg in Registration.objects.filter(opportunity__organisation=organisation)]
     volunteer_ages = [datetime.datetime.now().year - dob.year for dob in volunteer_dobs]
     volunteer_ages.sort()
     #sor into age brackets of 13-18, 19-25, 26-35, 36-45, 46-55, 56-65, 66-75, 76-85, 86-95, 96-105
@@ -198,11 +155,8 @@ def get_volunteer_data(request, organisation_id=None):
         "title": "Volunteer Age Brackets",
         "data": [{"label": key, "value": value} for key, value in age_brackets.items()]
     })
-        
-    try:    
-        sign_up_form = Form.objects.get(sign_up_form=True)
-    except Form.DoesNotExist:
-        sign_up_form = None
+            
+    sign_up_form = Form.objects.get(sign_up_form=True)
     
     if sign_up_form:
         
@@ -212,11 +166,7 @@ def get_volunteer_data(request, organisation_id=None):
             choices = Options.objects.filter(question=gender_question)
             for choice in choices:
                 gender_makeup[choice.option] = 0
-                
-            if organisation:
-                responses = Response.objects.filter(form=sign_up_form, user__in=[reg.volunteer.user for reg in Registration.objects.filter(opportunity__organisation=organisation)])
-            else:
-                responses = Response.objects.filter(form=sign_up_form)
+            responses = Response.objects.filter(form=sign_up_form, user__in=[reg.volunteer.user for reg in Registration.objects.filter(opportunity__organisation=organisation)])
             
             for response in responses:
                 answer = Answer.objects.get(response=response)
@@ -235,11 +185,7 @@ def get_volunteer_data(request, organisation_id=None):
             choices = Options.objects.filter
             for choice in choices:
                 ethnicity_makeup[choice.option] = 0
-                
-            if organisation:
-                responses = Response.objects.filter(form=sign_up_form, user__in=[reg.volunteer.user for reg in Registration.objects.filter(opportunity__organisation=organisation)])
-            else:
-                responses = Response.objects.filter(form=sign_up_form)
+            responses = Response.objects.filter(form=sign_up_form, user__in=[reg.volunteer.user for reg in Registration.objects.filter(opportunity__organisation=organisation)])
             
             for response in responses:
                 answer = Answer.objects.get(response=response)
@@ -251,33 +197,30 @@ def get_volunteer_data(request, organisation_id=None):
                 "data": [{"label": key, "value": value} for key, value in ethnicity_makeup.items()]  
             })
             
-    for section in volunteer_data_sections:
-        section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
             
-    print (volunteer_data_sections)
-    return volunteer_data_sections
-            
-def get_opportunity_data(request, organisation_id=None):
-    
-    if request.user.is_superuser and organisation_id:
-        organisation = Organisation.objects.get(id=organisation_id)
-    elif not request.user.is_superuser:
-        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-    else:
-        organisation = None
-        
+    #Opportunity data - Soon to expire, needs attention, views
     opportunity_data_sections = []
+    opportunities = Opportunity.objects.filter(organisation=organisation)
     
-    if organisation:
-        print (organisation)
-    else:
-        print ("No organisation")
+    expiring = []
+    
+    for opp in opportunities:
+        if opp.recurrences.dtend:
+            if opp.recurrences.dtend < datetime.datetime.now() + datetime.timedelta(days=30):
+                expiring.append(opp)
+
+    
+    opportunity_data_sections.append({
+        "type" : "list",
+        "title": "Opportunities soon to expire",
+        "data": [{"label": opp.name, 
+                  "value": opp.recurrences.dtend,
+                    "href": f"/org_admin/opportunities/{opp.id}/"
+                  } for opp in expiring]
+    })
     
     #Opportunities with sign up that are awaiting approval
-    if organisation:
-        awaiting_approval = VolunteerRegistrationStatus.objects.filter(registration__opportunity__organisation=organisation, registration_status__status="Awaiting Approval")
-    else:
-        awaiting_approval = VolunteerRegistrationStatus.objects.filter(registration_status__status="Awaiting Approval")
+    awaiting_approval = VolunteerRegistrationStatus.objects.filter(registration__opportunity__organisation=organisation, registration_status__status="Awaiting Approval")
     
     registrations = Registration.objects.filter(id__in=[reg.registration.id for reg in awaiting_approval])
     
@@ -295,10 +238,7 @@ def get_opportunity_data(request, organisation_id=None):
     })
         
     #Opportunity views
-    if organisation:
-        organisation_opportunities = Opportunity.objects.filter(organisation=organisation)
-    else:
-        organisation_opportunities = Opportunity.objects.all()
+    organisation_opportunities = Opportunity.objects.filter(organisation=organisation)
 
     
     current_month = datetime.datetime.now().month
@@ -321,176 +261,25 @@ def get_opportunity_data(request, organisation_id=None):
             "title": f"Views for {opp.name}",
             "data": [{"label": key, "value": value} for key, value in opportunity_views_per_month.items()]
         })
-        
-    expiring = []
-    
-    if organisation:
-        opportunities = Opportunity.objects.filter(organisation=organisation)
-    else:
-        opportunities = Opportunity.objects.all()
-    
-    for opp in opportunities:
-        if opp.recurrences.dtend:
-            if opp.recurrences.dtend < datetime.datetime.now() + datetime.timedelta(days=30):
-                expiring.append(opp)
-
-    
-    opportunity_data_sections.append({
-        "type" : "list",
-        "title": "Opportunities soon to expire",
-        "data": [{"label": opp.name, 
-                  "value": opp.recurrences.dtend,
-                    "href": f"/org_admin/opportunities/{opp.id}/"
-                  } for opp in expiring]
-    })
-    
-    
-    for section in opportunity_data_sections:
-        section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
-        
-    return opportunity_data_sections
-
-
-    
-
-def get_org_admin_data(request, organisation_id=None):
-    
-    if request.user.is_superuser:
-        organisation = Organisation.objects.get(id=organisation_id)
-    else:
-        organisation = OrganisationAdmin.objects.get(user=request.user).organisation
-    
-    
-    key_data_sections = []
-    
-    #key data - Organisation Views, Volunteer followers, Sign ups
-    org_views = OrganisationView.objects.filter(organisation=organisation).count()
-    
-    key_data_sections.append({
-        "type": "numeric",
-        "title": "Organisation Views",
-        "value": org_views,
-    })
-    
-    org_followers = OrganisationInterest.objects.filter(organisation=organisation).count()
-    
-    key_data_sections.append({
-        "type": "numeric",
-        "title": "Organisation Followers",
-        "value": org_followers,
-    })
-    
-    org_sign_ups = Registration.objects.filter(opportunity__organisation=organisation).count()
-    
-    key_data_sections.append({
-        "type": "numeric",
-        "title": "Organisation Sign Ups",
-        "value": org_sign_ups,
-    })
-    
-
     
     #add an random id to each section
     for section in key_data_sections:
         section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
         
-    
-    return {
-    "Key Data": key_data_sections,
-    "Volunteer Data": get_volunteer_data(request, organisation_id),
-    "Opportunity Data": get_opportunity_data(request, organisation_id),
-    "Mentor Data": get_mentor_data(request, organisation_id),
-    }
-    
-    
-def get_chipin_admin_data(request):
-    #Key data - Sign ups to platform, viewers of platform, active volunteers, active organisations, active opportunities, number of enquiries
-    key_data_sections = []
-    
-    try:
-        sign_up_form = Form.objects.get(sign_up_form=True)
-    except Form.DoesNotExist:
-        sign_up_form = None
-    
-    if sign_up_form:
-        sign_ups = Response.objects.filter(form=sign_up_form)
-        sign_up_count = sign_ups.count()
-        
-        #users that are not org admins or superusers or volunteers
-        viewers = User.objects.all().count()
-        org_admins = OrganisationAdmin.objects.all()
-        superusers = User.objects.filter(is_superuser=True)
-        
-        #deduplicate org admins and superusers
-        admins_count = org_admins.count() + superusers.count()
-        
-        #remover admins and superusers from sign up count
-        for sign in sign_ups:
-            if sign.user in superusers:
-                sign_up_count -= 1
-            if sign.user in org_admins:
-                sign_up_count -= 1
-            
-        
-        for admin in org_admins:
-            if admin.user in superusers:
-                admins_count -= 1
-                
-        print(
-             f"Viewers: {viewers}\n"
-            f"Sign ups: {sign_up_count}\n"
-            f"Admins: {admins_count}\n"
-            
-        )
-        
-        
-        
-        viewers = viewers - sign_up_count - admins_count 
-        
-
-        registrations = Registration.objects.filter()
-        active_registrations = [registration for registration in registrations if registration.get_registration_status() == "active"]
-        
-        active_volunteers = len(set([registration.volunteer for registration in active_registrations]))
-        active_organisations = Organisation.objects.filter().count()
-        active_opportunities = Opportunity.objects.filter(active=True).count()
-        
-        key_data_sections.append({
-            "type": "numeric",
-            "title": "Sign Ups",
-            "value": sign_up_count,
-        })
-        
-        key_data_sections.append({
-            "type": "numeric",
-            "title": "Viewers",
-            "value": viewers,
-        })
-        
-        key_data_sections.append({
-            "type": "numeric",
-            "title": "Active Volunteers",
-            "value": active_volunteers,
-        })
-        
-        key_data_sections.append({
-            "type": "numeric",
-            "title": "Active Organisations",
-            "value": active_organisations,
-        })
-        
-        key_data_sections.append({
-            "type": "numeric",
-            "title": "Active Opportunities",
-            "value": active_opportunities,
-        })
-        
-    for section in key_data_sections:
+    for section in volunteer_data_sections:
         section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
         
+    for section in opportunity_data_sections:
+        section["id"] = ''.join(random.choices(string.ascii_uppercase, k=10))
+    
     return {
         "Key Data": key_data_sections,
-        "Volunteer Data": get_volunteer_data(request),
-        "Opportunity Data": get_opportunity_data(request),
-        "Mentor Data": get_mentor_data(request),
-    }
+        "Volunteer Data": volunteer_data_sections,
+        "Opportunity Data": opportunity_data_sections,
+        }
+        
+    
+    
+    #mentoring - Active mentees, running total of mentees, completed inital questionnaires, completed exit questionnaires
+    
+    
