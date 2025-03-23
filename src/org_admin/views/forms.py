@@ -361,7 +361,7 @@ def download_responses_CSV(request, form_id):
             else:
                 response_dict[answer.question.question] = answer.answer
                 
-            response_dicts.append(response_dict)
+        response_dicts.append(response_dict)
             
     #create CSV from response_dicts
     bytes_file = io.StringIO()
