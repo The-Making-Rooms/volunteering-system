@@ -1,0 +1,49 @@
+<div class="flex flex-col items-center aspect-video rounded-lg bg-gray-600 m-3 p-5">
+    <canvas class="h-full" id="{{section.id}}"></canvas>
+</div>
+
+<script>
+
+    function hydrate_{{section.id}}_chart(){
+        
+        var {{section.id}} = document.getElementById('{{section.id}}').getContext('2d');
+        var myChart = new Chart({{section.id}}, {
+            type: 'bar',
+            color: '#ffffff',
+            
+            data: {
+                labels: [{% for section in section.data %}'{{section.label}}',{% endfor %}],
+                
+                datasets: [{
+                    label: '{{section.title}}',
+                    data: [{% for section in section.data %}{{section.value}},{% endfor %}],
+                    backgroundColor: [
+                        'rgb(116, 195, 233)',
+                    ],
+                    borderColor: [
+                        'rgba(255,255,255, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+
+
+                
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        hydrate_{{section.id}}_chart();
+    });
+
+    document.addEventListener('htmx:afterSettle', function(event) {
+        hydrate_{{section.id}}_chart();
+    });
+</script>

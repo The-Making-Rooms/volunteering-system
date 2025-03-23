@@ -34,7 +34,7 @@ from volunteer.models import MentorNotes, MentorRecord, MentorSession
 from forms.models import FormResponseRequirement, Form as FormModel, Question, Answer, Response
 
 from organisations.models import OrganisationAdmin
-
+import re
 
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
@@ -319,6 +319,47 @@ def volunteer_form(request):
     
                 volunteer.user = user
                 volunteer.save()
+                
+                #emergency contacts
+                
+                contact_first_name = data["emergency_contact_name"]
+                contact_last_relation = data["emergency_contact_relation"]
+                contact_phone = data["emergency_contact_phone_number"]
+                contact_email = data["emergency_contact_email"]
+                
+                #Check if either name, relation is empty
+                if contact_first_name == "" or contact_last_relation == "":
+                    return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["Emergency contact name and relation are required"]})
+                
+                if contact_phone == "" and contact_email == "":
+                    return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["Emergency contact phone number or email is required"]})
+                
+                conatact = EmergencyContacts(
+                    volunteer=volunteer,
+                    name=contact_first_name,
+                    relation=contact_last_relation,
+                    phone_number=contact_phone,
+                    email=contact_email,
+                )
+                
+                conatact.save()
+                
+                #Post code
+                postcode = data["post_code"]
+                regex = "([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\s?[0-9][A-Za-z]{2})"
+                
+                if postcode == "":
+                    return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["Postcode is required"]})
+                
+                if not re.match(regex, postcode):
+                    return render(request, "volunteer/partials/error.html", context={"hx": check_if_hx(request), "volunteer": get_volunteer_if_exists(request.user), "errors": ["Invalid postcode"]})
+                
+                address = VolunteerAddress.objects.filter(volunteer=volunteer, postcode=postcode)
+                if not address.exists():
+                    address = VolunteerAddress(volunteer=volunteer, postcode=postcode)
+                    address.save()
+                
+                
                 
                 for organisation in followed_organisations:
                     org = OrganisationInterest(volunteer=volunteer, organisation_id=organisation)

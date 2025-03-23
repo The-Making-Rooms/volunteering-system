@@ -17,12 +17,23 @@ class Form(models.Model):
     
     mentor_start_form = models.BooleanField(default=False)
     mentor_end_form = models.BooleanField(default=False)
+    sign_up_form = models.BooleanField(default=False)
     
     filled_by_organisation = models.BooleanField(default=False)
     visible_to_all = models.BooleanField(default=False)        
     
     def __str__(self):
         return self.name
+    
+    #enforce only one for for mentor start and end and sign up
+    def save(self, *args, **kwargs):
+        if Form.objects.filter(mentor_start_form=True).count() > 1:
+            raise Exception("Only one form can be the mentor start form")
+        if Form.objects.filter(mentor_end_form=True).count() > 1:
+            raise Exception("Only one form can be the mentor end form")
+        if Form.objects.filter(sign_up_form=True).count() > 1:
+            raise Exception("Only one form can be the sign up form")
+        super(Form, self).save(*args, **kwargs)
     
 class Question(models.Model):
     form = models.ForeignKey('Form', on_delete=models.CASCADE)
