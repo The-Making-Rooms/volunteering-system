@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from commonui.views import check_if_hx
+from ..views import sign_in
 import random
 import string
 from django.contrib.auth.models import User
@@ -60,6 +61,9 @@ List - Format:
 """
 
 def dashboard_index(request, organisation_id=None):
+    if not request.user.is_authenticated:
+        return sign_in(request)
+    
     if request.user.is_superuser and organisation_id:
         sections = get_org_admin_data(request, organisation_id)
     elif request.user.is_superuser:
