@@ -443,6 +443,7 @@ def volunteer_details_admin(request, id):
             return volunteer_admin(request, error="You do not have permission to view this volunteer")
     
     sign_up_form_exists = Form.objects.filter(sign_up_form=True).exists()
+    formatted_response = None
     
     if sign_up_form_exists:
         response = Response.objects.filter(user=volunteer.user, form__sign_up_form=True).last()
