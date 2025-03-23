@@ -26,7 +26,7 @@ from django.contrib.auth.password_validation import validate_password
 from .auth import sign_in
 from django.contrib.auth.models import User
 import random
-from forms.models import Form, Response, Question
+from forms.models import Form, Response, Question, Answer, Options
 
 
 
@@ -442,6 +442,40 @@ def volunteer_details_admin(request, id):
         if not volunteer_part_of_org:
             return volunteer_admin(request, error="You do not have permission to view this volunteer")
     
+    sign_up_form_exists = Form.objects.filter(sign_up_form=True).exists()
+    
+    if sign_up_form_exists:
+        response = Response.objects.filter(user=volunteer.user, form__sign_up_form=True).last()
+        if response:
+            answers = Answer.objects.filter(response=response)
+            
+            formatted_response = {
+                
+            }
+            
+            for answer in answers:
+                if answer.question.question_type == 'multi_choice' and answer.answer != "" and answer.answer != None:
+            
+                    if "," in answer.answer:
+                        print("multi")
+                        print(answer.answer)
+                        answer.answer = answer.answer.split(",")
+                        options = []
+                        try:
+                            for option in answer.answer:
+                                options.append(Options.objects.get(pk=option))
+                        except:
+                            pass
+                    
+                        formatted_response[answer.question.question] = "".join([str(option) + ", " for option in options])
+                    else:
+                        print("single")
+                        print(answer.answer)
+                        formatted_response[answer.question.question] = Options.objects.get(pk=answer.answer)
+                else:
+                    if answer.answer != "" and answer.answer != None:
+                        formatted_response[answer.question.question] = answer.answer
+            
     
     
     
@@ -513,6 +547,7 @@ def volunteer_details_admin(request, id):
         "contacts": emergency_contacts,
         "interests": interests,
         "superuser": request.user.is_superuser,
+        "sign_up_form_answers": formatted_response,
     }
     
     return render(request, "org_admin/volunteer_details_admin.html", context=context)

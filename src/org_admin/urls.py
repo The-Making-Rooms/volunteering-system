@@ -9,7 +9,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    path("", views.details, name="index"),
+    path("", views.dashboard_index, name="index"),
     path("details/", views.details, name="details"),
     path("upload_organisation_logo/", views.upload_organisation_logo, name="upload_organisation_logo"),
     path("sign_in/", views.sign_in, name="sign_in"),
@@ -177,6 +177,7 @@ urlpatterns = [
      path("additional_information/<int:id>/edit/", views.edit_additional_info, name="edit_additional_info"),
      
      path("dashboard/", views.dashboard_index, name="dashboard"),
+     path("dashboard/<int:organisation_id>/", views.dashboard_index, name="dashboard_organisation"),
     
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),

@@ -1,7 +1,15 @@
 <div id="redirect_div"></div>
-<form class="grid grid-cols-2 gap-2 p-2">
+
+<form class="p-2">
   {% csrf_token %}
+
     
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 p-5 rounded-xl bg-base-300">
+
+      <div class="md:col-span-2">
+        <p class="font-bold text-xl">Some information about you:</p>
+    <div class="divider"></div>
+      </div>
 
     <label class="form-control w-full max-w-xs">
       <div class="label">
@@ -17,7 +25,14 @@
       <input value="{{ user.last_name }}" name="last_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
     </label>
 
-    <label class="form-control w-full col-span-2">
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text">Post Code:</span>
+      </div>
+      <input name="post_code" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full md:col-span-2">
       <div class="label">
         <span class="label-text">Date of Birth</span>
       </div>
@@ -33,12 +48,50 @@
 
   
 
-    <label class="form-control w-full col-span-2">
+    <label class="form-control w-full md:col-span-2">
       <div class="label">
         <span class="label-text">Phone Number</span>
       </div>
       <input value="{{ volunteer.phone_number }}" name="phone_number" type="text" placeholder="Type here" class="input input-bordered w-full" />
     </label>
+
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2 p-5 rounded-xl bg-base-300 mt-5">
+
+    <div class="md:col-span-2 w-full">
+      <p class="font-bold text-xl">Add an emergency contact:</p>
+      <div class="divider"></div>
+    </div>
+
+    <label class="form-control w-full max-w-xs">
+      <div class="label">
+        <span class="label-text">Contact Full Name</span>
+      </div>
+      <input type="text"name="emergency_contact_name" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full max-w-xs">
+        <div class="label">
+          <span class="label-text">Relation</span>
+        </div>
+        <input type="text" name="emergency_contact_relation" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full max-w-xs">
+        <div class="label">
+          <span class="label-text">Phone Number</span>
+        </div>
+        <input type="text" name="emergency_contact_phone_number" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+
+    <label class="form-control w-full max-w-xs">
+        <div class="label">
+          <span class="label-text">Email</span>
+        </div>
+        <input type="text" name="emergency_contact_email" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    </label>
+  </div>
 
 
     <!--

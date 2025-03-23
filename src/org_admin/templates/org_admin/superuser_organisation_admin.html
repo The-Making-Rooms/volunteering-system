@@ -33,6 +33,7 @@
         <td>{{ organisation.description|truncatewords:10 }}</td>
         <td>
           <a href="/org_admin/organisations/{{organisation.id}}" class="btn btn-sm btn-primary">View</a>
+          <a href="/org_admin/dashboard/{{organisation.id}}/" class="btn btn-sm btn-primary">Dashbaord</a>
         </td>
       </tr>
       {% endfor %}

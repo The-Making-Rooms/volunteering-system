@@ -59,12 +59,17 @@ List - Format:
 
 """
 
-def dashboard_index(request):
-    
+def dashboard_index(request, organisation_id=None):
+    if request.user.is_superuser and organisation_id:
+        sections = get_org_admin_data(request, organisation_id)
+    elif request.user.is_superuser:
+        sections = get_chipin_admin_data(request)
+    elif not request.user.is_superuser:
+        sections = get_org_admin_data(request)
 
     context = {
         "hx": check_if_hx(request),
-        "sections": get_chipin_admin_data(request),
+        "sections": sections,
     }
     return render(
         request,
@@ -73,6 +78,9 @@ def dashboard_index(request):
     )
     
 def get_mentor_data(request, organisation_id=None):
+    
+    mentor_data_sections = []
+    
     if request.user.is_superuser and organisation_id:
         organisation = Organisation.objects.get(id=organisation_id)
     elif not request.user.is_superuser:
@@ -110,7 +118,7 @@ def get_mentor_data(request, organisation_id=None):
             "value": active_mentees,
         })
             
-    mentor_data_sections = []
+
     
 
     
@@ -196,7 +204,8 @@ def get_volunteer_data(request, organisation_id=None):
     volunteer_data_sections.append({
         "type": "pie",
         "title": "Volunteer Age Brackets",
-        "data": [{"label": key, "value": value} for key, value in age_brackets.items()]
+        "data": [{"label": key, "value": value} for key, value in age_brackets.items()],
+        "nodata": True if sum(age_brackets.values()) == 0 else False
     })
         
     try:    
@@ -205,10 +214,13 @@ def get_volunteer_data(request, organisation_id=None):
         sign_up_form = None
     
     if sign_up_form:
-        
+        print("Sign up form found")
         gender_makeup = {}
-        gender_question = Question.objects.filter(form=sign_up_form, question="Gender", question_type="radio")
+        gender_question = Question.objects.filter(form=sign_up_form, question="Gender", question_type="multi_choice").exists()
+        print(gender_question)
         if gender_question:
+            print("Gender Question Found")
+            gender_question = Question.objects.get(form=sign_up_form, question="Gender", question_type="multi_choice", allow_multiple=False)
             choices = Options.objects.filter(question=gender_question)
             for choice in choices:
                 gender_makeup[choice.option] = 0
@@ -219,20 +231,31 @@ def get_volunteer_data(request, organisation_id=None):
                 responses = Response.objects.filter(form=sign_up_form)
             
             for response in responses:
-                answer = Answer.objects.get(response=response)
-                gender_makeup[answer.answer] += 1
+                answer = Answer.objects.filter(response=response, question=gender_question)
+                if answer.exists():
+                    answer = answer.first()
+                    try:
+                        choice = Options.objects.get(id=answer.answer)
+                        gender_makeup[choice.option] += 1
+                    except Options.DoesNotExist:
+                        pass
+
+                    
+            no_data = True if sum(d for d in gender_makeup.values()) == 0 else False
             
             volunteer_data_sections.append({
                 "type": "pie",
                 "title": "Volunteer gender makeup",
-                "data": [{"label": key, "value": value} for key, value in gender_makeup.items()]
+                "data": [{"label": key, "value": value} for key, value in gender_makeup.items()],
+                "nodata": no_data
             })
             
             
         ethnicity_makeup = {}
-        ethnicity_question = Question.objects.filter(form=sign_up_form, question="Ethnic Origin", question_type="radio")
+        ethnicity_question = Question.objects.filter(form=sign_up_form, question="Ethnic Origin", question_type="multi_choice").exists()
         if ethnicity_question:
-            choices = Options.objects.filter
+            ethnicity_question = Question.objects.get(form=sign_up_form, question="Ethnic Origin", question_type="multi_choice")
+            choices = Options.objects.filter(question=ethnicity_question)
             for choice in choices:
                 ethnicity_makeup[choice.option] = 0
                 
@@ -242,13 +265,22 @@ def get_volunteer_data(request, organisation_id=None):
                 responses = Response.objects.filter(form=sign_up_form)
             
             for response in responses:
-                answer = Answer.objects.get(response=response)
-                ethnicity_makeup[answer.answer] += 1
+                answer = Answer.objects.filter(response=response, question=ethnicity_question)
+                if answer.exists():
+                    answer = answer.first()
+                    try:
+                        choice = Options.objects.get(id=answer.answer)
+                        ethnicity_makeup[choice.option] += 1
+                    except Options.DoesNotExist:
+                        pass
+                    
+            no_data = True if sum(d for d in ethnicity_makeup.values()) == 0 else False
                 
             volunteer_data_sections.append({
                 "type": "pie",
                 "title": "Volunteer ethnicity makeup",
-                "data": [{"label": key, "value": value} for key, value in ethnicity_makeup.items()]  
+                "data": [{"label": key, "value": value} for key, value in ethnicity_makeup.items()],
+                "nodata": no_data 
             })
             
     for section in volunteer_data_sections:
@@ -275,23 +307,51 @@ def get_opportunity_data(request, organisation_id=None):
     
     #Opportunities with sign up that are awaiting approval
     if organisation:
-        awaiting_approval = VolunteerRegistrationStatus.objects.filter(registration__opportunity__organisation=organisation, registration_status__status="Awaiting Approval")
+        registrations = Registration.objects.filter(opportunity__organisation=organisation)
     else:
-        awaiting_approval = VolunteerRegistrationStatus.objects.filter(registration_status__status="Awaiting Approval")
+        registrations = Registration.objects.all()
     
-    registrations = Registration.objects.filter(id__in=[reg.registration.id for reg in awaiting_approval])
     
     opportunities_needing_attention = {}
     
-    for reg in awaiting_approval:
-        if reg.opportunity not in opportunities_needing_attention:
-            opportunities_needing_attention[reg.opportunity] = 0
-        opportunities_needing_attention[reg.opportunity] += 1
+    for reg in registrations:
+        if reg.opportunity not in opportunities_needing_attention and reg.get_registration_status() == "awaiting_approval":
+            opportunities_needing_attention[reg.opportunity] = 1
+        elif reg.get_registration_status() == "awaiting_approval":
+            opportunities_needing_attention[reg.opportunity] += 1
         
     opportunity_data_sections.append({
         "type": "list",
+        "section_headers" : ["Name", "Organisation", "Number of sign ups"],
         "title": "Opportunities needing attention",
-        "data": [{"label": key.name, "value": value, "href": f"/org_admin/opportunities/{key.id}/"} for key, value in opportunities_needing_attention.items()]
+        "data": [{"label": key.name, "org":key.organisation.name, "value": value} for key, value in opportunities_needing_attention.items()],
+        "nodata": True if len(opportunities_needing_attention) == 0 else False
+    })
+    
+    expiring = []
+    
+    if organisation:
+        opportunities = Opportunity.objects.filter(organisation=organisation)
+    else:
+        opportunities = Opportunity.objects.all()
+    
+    for opp in opportunities:
+        if opp.recurrences.dtend:
+            if opp.recurrences.dtend < datetime.datetime.now() + datetime.timedelta(days=30):
+                expiring.append(opp)
+
+    
+    opportunity_data_sections.append({
+        "type" : "list",
+        "title": "Opportunities soon to expire",
+        "section_headers": ["Name", "Organisation", "Expiry Date", "Link"],
+        "nodata": True if len(expiring) == 0 else False,
+        "data": [{  
+                    "label": opp.name, 
+                    "org":opp.organisation.name,
+                    "value": opp.recurrences.dtend,
+                    "href": f"/org_admin/opportunities/{opp.id}/"
+                  } for opp in expiring]
     })
         
     #Opportunity views
@@ -322,27 +382,7 @@ def get_opportunity_data(request, organisation_id=None):
             "data": [{"label": key, "value": value} for key, value in opportunity_views_per_month.items()]
         })
         
-    expiring = []
-    
-    if organisation:
-        opportunities = Opportunity.objects.filter(organisation=organisation)
-    else:
-        opportunities = Opportunity.objects.all()
-    
-    for opp in opportunities:
-        if opp.recurrences.dtend:
-            if opp.recurrences.dtend < datetime.datetime.now() + datetime.timedelta(days=30):
-                expiring.append(opp)
 
-    
-    opportunity_data_sections.append({
-        "type" : "list",
-        "title": "Opportunities soon to expire",
-        "data": [{"label": opp.name, 
-                  "value": opp.recurrences.dtend,
-                    "href": f"/org_admin/opportunities/{opp.id}/"
-                  } for opp in expiring]
-    })
     
     
     for section in opportunity_data_sections:

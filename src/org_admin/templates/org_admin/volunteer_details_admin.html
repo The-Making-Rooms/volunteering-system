@@ -25,6 +25,26 @@
 </div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Sign up Details</p>
+  <div class="divider my-2"></div>
+  {% if sign_up_form_answers|length == 0 %}
+  <p>No data</p>
+  {% else %}
+
+  <table class="table">
+    {% for answer in sign_up_form_answers.items %}
+    <tr>
+      <th>{{ answer.0 }}</th>
+      <td>{{ answer.1 }}</td>
+    </tr>
+    {% endfor %}
+  
+  </table>
+  {% endif %}
+
+</div>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3">
   <p class="text-xl font-bold">Addresses</p>
   <div class="divider my-2"></div>
   {% if addresses|length == 0 %}
