@@ -74,7 +74,7 @@
                             <button class="mb-1 btn btn-primary btn-xs" hx-push-url="true" hx-get="/org_admin/forms/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Details</button>
                             <button class="mb-1 btn btn-primary btn-xs" hx-push-url="true" hx-get="/org_admin/forms/responses/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Responses</button>
                             <a class="mb-1 btn btn-primary btn-xs" href="/org_admin/forms/download/{{form.id}}/">Download CSV</a>
-                            <button class="mb-1 btn bg-red-600 btn-xs" hx-get="/org_admin/forms/delete/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Delete</button>
+                            <button class="mb-1 btn bg-red-600 btn-xs" hx-get="/org_admin/forms/delete/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" hx-confirm="Are you sure you would like to delete this form?">Delete</button>
                             {%endif%}
                         </td>
                     </tr>

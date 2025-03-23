@@ -79,12 +79,21 @@ def update_form(request, form_id):
     return form_detail(request, form_id, success="Form Updated")
     
 def delete_form(request, form_id):
-    form = Form.objects.get(pk=form_id)
-    
-    check_form_ownership(request, form)
-    
-    form.delete()
-    return forms(request, success="Form Deleted")
+    if request.method == "GET":
+        check_form_ownership(request, Form.objects.get(pk=form_id))
+        req_form = Form.objects.get(pk=form_id)
+        context = {
+            "form_name" : req_form.name,
+            "responses" : Response.objects.filter(form=req_form).count(),
+            "form_id" : form_id,
+            "hx" : check_if_hx(request),
+        }
+        return render(request, 'org_admin/form_delete_confirm.html', context=context)
+    else:    
+        form = Form.objects.get(pk=form_id)
+        check_form_ownership(request, form)
+        form.delete()
+        return forms(request, success="Form Deleted")
 
 def create_form(request):
     if not request.user.is_superuser:

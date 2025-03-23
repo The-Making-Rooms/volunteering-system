@@ -26,6 +26,7 @@ class Chat(models.Model):
         return user in self.participants.all()
 
 
+
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
