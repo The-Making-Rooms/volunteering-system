@@ -336,6 +336,8 @@ def download_responses_CSV(request, form_id):
         return forms(request, error="There are no responses to download")
     
     response_dicts = []
+    field_names = ["first_name", "last_name", "email", "response_date"]
+    field_names += [question.question for question in Question.objects.filter(form=form)]
     
     for res in response:
         answers = Answer.objects.filter(response=res)
@@ -350,8 +352,12 @@ def download_responses_CSV(request, form_id):
         for answer in answers:
             if answer.question.question_type == 'multi_choice':
                 response_dict[answer.question.question] = []
-                for option in answer.answer.split(","):
-                    response_dict[answer.question.question].append(Options.objects.get(pk=option).option)
+                if answer.answer != "" and answer.answer != None:
+                    for option in answer.answer.split(","):
+                        response_dict[answer.question.question].append(Options.objects.get(pk=option).option)
+                    response_dict[answer.question.question] = ", ".join(response_dict[answer.question.question])
+                else:
+                    response_dict[answer.question.question] = answer.answer
             else:
                 response_dict[answer.question.question] = answer.answer
                 
@@ -360,12 +366,16 @@ def download_responses_CSV(request, form_id):
     #create CSV from response_dicts
     bytes_file = io.StringIO()
     
-    writer = csv.DictWriter(bytes_file, fieldnames=response_dicts[0].keys())
+    print(response_dicts)
+    
+    writer = csv.DictWriter(bytes_file, fieldnames=field_names)
     writer.writeheader()
     for response in response_dicts:
         writer.writerow(response)
         
+        
     response = HttpResponse(bytes_file.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="responses.csv"'
     
     return response
     
