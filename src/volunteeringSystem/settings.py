@@ -61,7 +61,6 @@ else:
     SECRET_KEY = 'django-insecure-rd6@o^$_u7tniw&^#dg-0vr88$*r^b^4%3fkyr6c@r_i5^g!s8'
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    EMAIL_HOST_PASSWORD = 'sllw gknj qngn hjtb '
     NOUN_PROJECT_API_KEY = "a5f9c58009584357b678c737e8cb871f"
     NOUN_PROJECT_SECRET_KEY = "7c76f3fa935445669bf4f2b8ac906d90"
     WEBPUSH_SETTINGS = {
@@ -78,6 +77,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 
 INSTALLED_APPS = [
@@ -101,7 +101,6 @@ INSTALLED_APPS = [
      'org_admin', 
      'webpush',
      'communications',
-     
 ]
 
 

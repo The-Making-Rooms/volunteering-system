@@ -1,0 +1,16 @@
+
+{% extends 'org_admin/navigation_template.html' %}
+{% block page_content %}
+    <p class="text-2xl font-bold mb-5">Confirm you would like to send this email:</p>
+    <p class="text-2xl font-bold mb-5">It will be sent to {{draft.email_target_recipients}} ({{recipients|length}} people)</p>
+    <a href="/org_admin/email_portal/edit_draft/{{draft.id}}/" class="btn btn-primary">Edit</a>
+    <a href="/org_admin/email_portal/" class="btn btn-primary">Back</a>
+    <a href="/org_admin/email_portal/send_draft/{{draft.id}}/{{draft.send_confirmation_id}}" class="btn btn-primary">Send</a>
+    <div class="divider"></div>
+
+    <p>Subject: {{draft.subject}}</p>
+    <div class="divider"></div>
+    <div class="border border-base-200">
+    {{draft_render|safe}}
+    </div>
+{% endblock %}

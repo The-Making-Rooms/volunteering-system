@@ -1,0 +1,133 @@
+{% extends 'org_admin/navigation_template.html' %}
+{% block page_content %}
+<!-- Include stylesheet -->
+
+<!-- Invert button colours on toolbar-->
+<style>
+    .ql-toolbar > .ql-formats {
+        color: white;
+        filter: invert(1);
+    }
+
+    .ql-toolbar {
+        border-radius: 1rem 1rem 0 0;
+    }
+
+ #editor {
+    
+        border-radius: 0 0 1rem 1rem;
+    }
+
+    .ql-editor {
+        border-radius: 0 0 1rem 1rem;
+        height: 18rem;
+        overflow-y: scroll;
+    }
+</style>
+
+<div class="flex items-center gap-5">
+<button class="btn btn-sm btn-primary" hx-get="/org_admin/email_portal/" hx-push-url="true" hx-swap="outerHTML" hx-target=".htmx-navigator">
+    <i class="fa-solid fa-arrow-left"></i>
+    Back
+</button>
+<p class="text-2xl font-bold">Email Editor</p>
+</div>
+<div class="divider"></div>
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<form class="p-5 bg-base-200 rounded-xl" action="/org_admin/email_portal/save_draft/" method="post">
+    {% csrf_token %}
+
+    <input type="hidden" name="email_id" value="{{draft_id}}">
+
+    <label for="email_subject">Email Subject</label><br>
+    <input class="input input-bordered" value="{{subject}}" type="text" class="form-control" id="email_subject" name="email_subject" required>
+
+    <div class="divider"></div>
+
+    <label  for="email_recipients">Email Recipients:</label><br>
+
+    <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="volunteers" {% if not draft %}checked{% endif %} {%if draft.email_target_recipients == 'volunteers'%}checked{%endif%}>
+    <label for="all_users">All Volunteers</label>
+
+    <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="admins" {%if draft.email_target_recipients == 'admins'%}checked{%endif%}>
+    <label for="all_users">All Organisation Admins</label>
+
+    <div class="divider"></div>
+
+        <div id="editor"></div>
+
+    <div class="divider"></div>
+
+    <div class="flex justify-end gap-3">
+        <button type="submit" class="btn btn-primary mt-5" >Save</button>
+    </div>
+</form>
+
+
+
+
+<!-- Initialize Quill editor -->
+<script>
+
+
+    var initialData = {
+        data:{% if draft %}{{email_quill|safe}}{%else%}[]{%endif%}
+        ,
+      };
+
+
+    function formsetup() {
+
+
+    const quill = new Quill('#editor', {
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline'],
+            ['link', 'blockquote', 'code-block'],
+            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+            [{ 'font': [] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+
+          ],
+        },
+        theme: 'snow',
+      });
+
+      const resetForm = () => {
+        quill.setContents(initialData.data);
+      };
+      
+      resetForm();
+      
+      const form = document.querySelector('form');
+      form.addEventListener('formdata', (event) => {
+        // Append Quill content before submitting
+        event.formData.append('quill_delta', JSON.stringify(quill.getContents().ops));
+        event.formData.append('quill_html', quill.getSemanticHTML());
+      });
+    }
+
+    {% if hx %}
+    document.addEventListener('htmx:afterSettle', function(event) {
+        formsetup();
+    });
+    {% else %}
+      document.addEventListener('DOMContentLoaded', function() {
+        formsetup();
+    });
+    {% endif %}
+
+
+</script>
+
+
+
+{% endblock %}

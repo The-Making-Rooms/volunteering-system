@@ -1,0 +1,86 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+<p class="text-2xl font-bol mb-5">Email Portal</p>
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<div class="rounded-xl p-5 bg-base-200 mb-5">
+    <div class="flex justify-between items-center">
+        <p class="text-lg font-bold">Email Drafts</p>
+        <a href="/org_admin/email_portal/new_draft/" class="btn btn-primary">Create Draft</a>
+    </div>
+    <div class="divider"></div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Created Date</th>
+                <th>Last Modified</th>
+                <th>Recipients</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for draft in drafts %}
+            <tr>
+                <td>{{draft.subject}}</td>
+                <td>{{draft.created_date}}</td>
+                <td>{{draft.last_modified}}</td>
+                <td>{{draft.email_target_recipients}}</td>
+                <td>
+                    <a href="/org_admin/email_portal/edit_draft/{{draft.id}}/" class="btn btn-sm btn-primary"><i class="fa-solid fa-pencil"></i></a>
+                    <a href="/org_admin/email_portal/preview_draft/{{draft.id}}/" class="btn btn-sm btn-primary"><i class="fa-solid fa-eye"></i></a>
+                    <a href="/org_admin/email_portal/send_draft/{{draft.id}}/" class="btn btn-sm btn-primary"><i class="fa-solid fa-paper-plane"></i></a>
+
+                    <button class="btn btn-sm bg-red-600" hx-get="/org_admin/email_portal/delete_draft/{{draft.id}}/" hx-confirm="Are you sure you want to delete this draft?" hx-swap="outerHTML" hx-target=".htmx-navigator"><i class="fa-solid fa-dumpster"></i></button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+            
+</div>
+
+
+<div class="rounded-xl p-5 bg-base-200">
+    <div class="flex justify-between items-center">
+        <p class="text-lg font-bold">Email Drafts</p>
+    </div>
+    <div class="divider"></div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Sent Date</th>
+                <th>Sent to</th>
+                <th># Recipients</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for draft in sent_drafts %}
+            <tr>
+                <td>{{draft.subject}}</td>
+                <td>{{draft.sent_date}}</td>
+                <td>{{draft.email_target_recipients}}</td>
+                <td>{{draft.email_recipients | length}}</td>
+                <td>
+                    <a href="/org_admin/email_portal/duplicate_draft/{{draft.id}}/" class="btn btn-sm btn-primary"><i class="fa-solid fa-pencil"></i></a>
+                    <a href="/org_admin/email_portal/preview_draft/{{draft.id}}/" class="btn btn-sm btn-primary"><i class="fa-solid fa-eye"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

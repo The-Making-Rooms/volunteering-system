@@ -178,6 +178,19 @@ urlpatterns = [
      
      path("dashboard/", views.dashboard_index, name="dashboard"),
      path("dashboard/<int:organisation_id>/", views.dashboard_index, name="dashboard_organisation"),
+     
+     path("email_portal/", views.email_portal_index, name="email_portal_index"),
+     path("email_portal/save_draft/", views.save_email_draft, name="save_email_draft"),
+     path("email_portal/new_draft/", views.edit_email_draft, name="new_email_draft"),
+     path("email_portal/edit_draft/<int:draft_id>/", views.edit_email_draft, name="edit_email_draft"),
+     path("email_portal/preview_draft/<int:draft_id>/", views.preview_email, name="preview_email"),
+     path("email_portal/send_draft/<int:draft_id>/", views.send_email_draft, name="send_email_draft"),
+     path("email_portal/send_draft/<int:draft_id>/<str:confirm_id>/", views.send_email_draft, name="send_email_draft"),
+     path("email_portal/duplicate_draft/<int:draft_id>/", views.duplicate_email_draft, name="duplicate_email_draft"),
+     
+     path("email_portal/delete_draft/<int:draft_id>/", views.delete_email_draft, name="delete_email_draft"),
+     
+     path("email_portal/view_draft/<int:draft_id>/", views.view_email_detail, name="view_email_detail"),
     
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),

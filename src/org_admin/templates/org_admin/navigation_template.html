@@ -15,8 +15,18 @@
       href="{% static 'images/icons/icon-72x72.png' %}"
     />
 
+    <link
+    rel="stylesheet"
+    href="{% static 'fontawesome/css/fontawesome.min.css' %}">
+
+    <link
+    rel="stylesheet"
+    href="{% static 'fontawesome/css/solid.min.css' %}">
+
+
     
     <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
   
 
     {% compress css %}
@@ -100,9 +110,8 @@
               <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
               <li><a href="/org_admin/forms/#">Forms</a></li>
               <li><a href="/org_admin/communication/#">Communication</a></li>
-              <li>
-                <a href="/org_admin/admin_management/#">Organisation Admins</a>
-              </li>
+              <li><a href="/org_admin/email_portal/#">Emails</a></li>
+              <li><a href="/org_admin/admin_management/#">Organisation Admins</a></li>
               <li><a href="/org_admin/profile/#">Profile</a></li>
               <li><a href="/org_admin/logout/#">Logout</a></li>
         </ul>
@@ -110,6 +119,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script
       src="https://unpkg.com/htmx.org@1.9.9"
       integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"

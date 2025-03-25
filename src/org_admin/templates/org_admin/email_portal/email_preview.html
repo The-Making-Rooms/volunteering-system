@@ -1,0 +1,12 @@
+
+{% extends 'org_admin/navigation_template.html' %}
+{% block page_content %}
+    <p class="text-2xl font-bold mb-5">Email Preview</p>
+    <a href="/org_admin/email_portal/edit_draft/{{draft_id}}/" class="btn btn-primary">Edit</a>
+    <a href="/org_admin/email_portal/" class="btn btn-primary">Back</a>
+    <div class="divider"></div>
+
+    <p>Subject: {{subject}}</p>
+    <div class="divider"></div>
+    {{html|safe}}
+{% endblock %}

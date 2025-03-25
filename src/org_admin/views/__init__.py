@@ -21,3 +21,4 @@ from .additional_information import *
 from .organisations_sections import *
 from .data_import import *
 from .dashboard import *
+from .email_portal import *
