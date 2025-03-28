@@ -84,11 +84,14 @@ def add_benefit(request, opportunity_id=None):
 
     else:
         
+        opportunity = Opportunity.objects.get(id=opportunity_id) if opportunity_id else None
+        
         context = {
             "hx": check_if_hx(request),
             "organisations" : Organisation.objects.all() if request.user.is_superuser else [OrganisationAdmin.objects.get(user=request.user).organisation],
             "superuser": request.user.is_superuser,
-            "opportunity_id": opportunity_id
+            "opportunity_id": opportunity_id,
+            "organisation_id": opportunity.organisation.id if opportunity else None
         }
         
         
@@ -106,6 +109,8 @@ def benefit_crud(request, benefit_id=None, opportunity_id=None):
                 "opportunity_id": opportunity_id
             }
             return render(request, "org_admin/partials/add_benefit.html", context=context)
+        
+        
         return render(request, "org_admin/partials/add_benefit.html", context={"hx": check_if_hx(request)})
     
     if request.method == "POST":
