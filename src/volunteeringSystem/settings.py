@@ -101,6 +101,8 @@ INSTALLED_APPS = [
      'org_admin', 
      'webpush',
      'communications',
+     'django_celery_results',
+     'django_celery_beat',
 ]
 
 
@@ -116,6 +118,11 @@ MIDDLEWARE = [
 
 RECURRENCE_USE_TZ = False
 USE_TZ = False
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_BROKER_URL = 'pyamqp://guest@localhost//'
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,

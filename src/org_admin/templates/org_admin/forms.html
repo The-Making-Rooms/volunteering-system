@@ -14,7 +14,7 @@
     {% include "commonui/success.html" %}
     {% endif %}
 
-    {% if not superuser and staff_forms|length > 0%}
+    {% if assigned_forms %}
     <div class="rounded-xl p-5 bg-base-200 mb-3">
         <p class="text-xl" >Forms assigned to you</p>
         <table class="table w-full mt-5">
@@ -26,12 +26,12 @@
                 </tr>
             </thead>
             <tbody>
-                {% for form in staff_forms %}
+                {% for req in assigned_forms %}
                 <tr>
-                    <td>{{ form.name }}</td>
-                    <td>{{ form.description }}</td>
+                    <td>{{ req.form.name }}</td>
+                    <td>{{ req.form.description }}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" hx-push-url="true" hx-get="/forms/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Submit Response</button>
+                        <button class="btn btn-primary btn-sm" hx-push-url="true" hx-get="/forms/{{req.form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Submit Response</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -43,14 +43,21 @@
     <div class="rounded-xl p-5 bg-base-200">
         <div class="flex items-center justify-between w-full">
             
-            <p class="text-xl" >Your Forms</p>
+            <p class="text-xl">Your Forms</p>
 
             <div>
-                <a href="/org_admin/forms/create/" class="btn btn-primary mb-3"
+                <a href="/org_admin/forms/create/" class="btn btn-sm btn-primary mb-3"
                 >New Form</a>
         
-                <a href="/org_admin/forms/assign_form/" class="btn btn-primary mb-3"
+                <a href="/org_admin/forms/assign_form/" class="btn btn-sm btn-primary mb-3"
                 >Assign Form</a>
+
+                {% if user.is_superuser %}
+                <a href="/org_admin/forms/assign_form_org/" class="btn btn-sm btn-primary mb-3">
+                    Assign Form to Organisation
+                </a>
+                {% endif %}
+
             </div>
         
         </div>
@@ -74,6 +81,7 @@
                             <button class="mb-1 btn btn-primary btn-xs" hx-push-url="true" hx-get="/org_admin/forms/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Details</button>
                             <button class="mb-1 btn btn-primary btn-xs" hx-push-url="true" hx-get="/org_admin/forms/responses/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML">Responses</button>
                             <a class="mb-1 btn btn-primary btn-xs" href="/org_admin/forms/download/{{form.id}}/">Download CSV</a>
+                            <a class="mb-1 btn btn-primary btn-xs" href="/org_admin/forms/download_anonymous/{{form.id}}/">Download anonymous CSV</a>
                             <button class="mb-1 btn bg-red-600 btn-xs" hx-get="/org_admin/forms/delete/{{form.id}}/" hx-target=".htmx-navigator" hx-swap="outerHTML" hx-confirm="Are you sure you would like to delete this form?">Delete</button>
                             {%endif%}
                         </td>
@@ -81,6 +89,30 @@
                     {% endfor %}
                 </tbody>
             </table>
+    </div>
+
+    <div class="rounded-xl p-5 bg-base-200 mt-3">
+        <p class="text-xl">Outstainding Forms</p>
+
+        <table class="table w-full mt-5">
+            <thead>
+                <tr>
+                    <th>Form Name</th>
+                    <th>Assigned To</th>
+                    <th>Assigned Date</th>
+                <tr>
+            </thead>
+
+            <tbody>
+                {% for form in awaiting_response %}
+                <tr>
+                    <td>{{ form.form.name }}</td>
+                    <td>{{ form.organisation.name }}</td>
+                    <td>{{ form.assigned }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <script>

@@ -11,3 +11,5 @@ better_profanity
 fuzzywuzzy
 django-richtextfield
 celery
+django-celery-results
+django_celery_beat

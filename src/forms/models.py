@@ -69,3 +69,10 @@ class FormResponseRequirement(models.Model):
     form = models.ForeignKey('Form', on_delete=models.CASCADE)
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
+    assigned = models.DateTimeField(auto_now_add=True)
+
+class OrganisationFormResponseRequirement(models.Model):
+    form = models.ForeignKey('Form', on_delete=models.CASCADE)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    assigned = models.DateTimeField(auto_now_add=True)
