@@ -13,6 +13,9 @@ from datetime import datetime
 import random
 import string
 
+from opportunities.models import Opportunity, Registration
+from organisations.models import Organisation
+
 import threading
 
 def check_auth(request):
@@ -45,6 +48,17 @@ def save_email_draft(request):
     quill = data.get('quill_delta')
     subject = data.get('email_subject')
     target_recipients = data.get('email_target_recipients')
+    organisation = None
+    opportunity = None
+    
+    if target_recipients == 'all_org_volunteers':
+        organisation = data.get('org_id')
+        organisation = Organisation.objects.get(id=organisation)
+
+    if target_recipients == 'all_opp_volunteers':
+        opportunity = data.get('opp_id')
+        opportunity = Opportunity.objects.get(id=opportunity)
+    
     
     if data.get('email_id') != 'None':
         draft = EmailDraft.objects.get(id=data.get('email_id'))
@@ -52,10 +66,51 @@ def save_email_draft(request):
         draft.email_quill = quill
         draft.email_html = html
         draft.last_modified = datetime.now()
+        draft.save()
+        
+        if target_recipients == 'all_org_volunteers':
+            draft.organisation = organisation
+            draft.opportunity = None
+            
+        if target_recipients == 'all_opp_volunteers':
+            draft.opportunity = opportunity
+            draft.organisation = None
+            
         draft.email_target_recipients = target_recipients
+        
         draft.save()
         return redirect('edit_email_draft', draft.id)
     
+    if target_recipients == 'all_org_volunteers':
+        draft = EmailDraft.objects.create(
+            subject=subject,
+            email_quill=quill,
+            email_html=html,
+            email_target_recipients = target_recipients,
+            organisation = organisation,
+            sent=False,
+            sent_by=request.user
+        )
+        
+        draft.save()
+        
+        return redirect('edit_email_draft', draft.id)
+    
+    if target_recipients == 'all_opp_volunteers':
+        draft = EmailDraft.objects.create(
+            subject=subject,
+            email_quill=quill,
+            email_html=html,
+            email_target_recipients = target_recipients,
+            opportunity = opportunity,
+            sent=False,
+            sent_by=request.user
+        )
+        
+        draft.save()
+        
+        return redirect('edit_email_draft', draft.id)
+
     draft = EmailDraft.objects.create(
         subject=subject,
         email_quill=quill,
@@ -79,6 +134,8 @@ def edit_email_draft(request, draft_id=None):
         draft = None
     
     context = {
+        'orgs': Organisation.objects.all(),
+        'opps': Opportunity.objects.all(),
         'editor_id': "".join(random.choices(string.ascii_letters, k=10)),
         'draft_id': draft_id,
         'subject': draft.subject if draft else '',
@@ -105,8 +162,16 @@ def send_email_draft(request, draft_id, confirm_id=None):
         recipients = Volunteer.objects.all()
     elif draft.email_target_recipients == 'admins':
         recipients = OrganisationAdmin.objects.all()
+    elif draft.email_target_recipients == 'all_org_volunteers':
+        regs = Registration.objects.filter(opportunity__organisation=draft.organisation)
+        recipients = [reg.volunteer for reg in regs if reg.get_registration_status() not in ['stopped', 'completed']]
+    elif draft.email_target_recipients == 'all_opp_volunteers':
+        regs = Registration.objects.filter(opportunity=draft.opportunity)
+        recipients = [reg.volunteer for reg in regs if reg.get_registration_status() not in ['stopped', 'completed']]
     else:
         recipients = None
+        
+    print (recipients)
     
     if confirm_id and recipients:
         
@@ -182,6 +247,8 @@ def duplicate_email_draft(request, draft_id):
         email_quill=draft.email_quill,
         email_html=draft.email_html,
         email_target_recipients=draft.email_target_recipients,
+        organisation = draft.organisation,
+        opportunity = draft.opportunity,
         sent=False,
         sent_by=request.user
     )

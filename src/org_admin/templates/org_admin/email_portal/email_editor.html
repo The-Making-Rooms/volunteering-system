@@ -54,11 +54,47 @@
 
     <label  for="email_recipients">Email Recipients:</label><br>
 
-    <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="volunteers" {% if not draft %}checked{% endif %} {%if draft.email_target_recipients == 'volunteers'%}checked{%endif%}>
-    <label for="all_users">All Volunteers</label>
 
+    <div class="flex flex-col gap-2">
+
+     <div class="flex gap-2"> 
+      <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="volunteers" {% if not draft %}checked{% endif %} {%if draft.email_target_recipients == 'volunteers'%}checked{%endif%}>
+      <label for="all_users">All Volunteers</label>
+     </div>
+
+    <div class="flex gap-2">
     <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="admins" {%if draft.email_target_recipients == 'admins'%}checked{%endif%}>
     <label for="all_users">All Organisation Admins</label>
+    </div>
+
+    <div class="flex gap-2">
+      <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="all_org_volunteers" {%if draft.email_target_recipients == 'all_org_volunteers'%}checked{%endif%}>
+      <label for="all_users">All Organisation Volunteers</label>
+    </div>
+
+    <!-- dropdown for orgs -->
+     <select class="select select-bordered w-full" name="org_id" id="org_id">
+        <option value="" selected disabled>Select Organisation</option>
+        {% for org in orgs %}
+        <option value="{{org.id}}" {% if draft and draft.organisation == org %}selected{% endif %}>{{org.name}}</option>
+        {% endfor %}
+    </select>
+
+    <div class="flex gap-2">
+      <input class="radio" type="radio" id="email_target_recipients" name="email_target_recipients" value="all_opp_volunteers" {%if draft.email_target_recipients == 'all_opp_volunteers'%}checked{%endif%}>
+      <label for="all_users">All Opportunity Volunteers</label>
+    </div>
+
+    <select class="select select-bordered w-full" name="opp_id" id="opp_id">
+        <option value="" selected disabled>Select Opportunity</option>
+        {% for opp in opps %}
+        <option value="{{opp.id}}" {% if draft and draft.opportunity == opp %}selected{% endif %}>{{opp.organisation.name}} - {{opp.name}}</option>
+        {% endfor %}
+    </select>
+
+    
+
+  </div>
 
     <div class="divider"></div>
 
@@ -86,14 +122,32 @@
 
     function formsetup() {
 
+      //make select required based on radio button
+      const radioButtons = document.querySelectorAll('input[name="email_target_recipients"]');
+      const orgSelect = document.getElementById('org_id');
+      const oppSelect = document.getElementById('opp_id');
+
+      radioButtons.forEach((radio) => {
+        radio.addEventListener('change', (e) => {
+          if (e.target.value == 'all_org_volunteers') {
+            orgSelect.required = true;
+            oppSelect.required = false;
+          } else if (e.target.value == 'all_opp_volunteers') {
+            orgSelect.required = false;
+            oppSelect.required = true;
+          } else {
+            orgSelect.required = false;
+            oppSelect.required = false;
+          }
+        });
+      });
+
 
     const quill = new Quill('#editor', {
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline'],
             ['link', 'blockquote', 'code-block'],
-            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-            [{ 'font': [] }],
             [{ list: 'ordered' }, { list: 'bullet' }],
 
           ],

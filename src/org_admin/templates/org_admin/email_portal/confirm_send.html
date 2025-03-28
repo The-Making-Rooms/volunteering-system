@@ -2,7 +2,15 @@
 {% extends 'org_admin/navigation_template.html' %}
 {% block page_content %}
     <p class="text-2xl font-bold mb-5">Confirm you would like to send this email:</p>
-    <p class="text-2xl font-bold mb-5">It will be sent to {{draft.email_target_recipients}} ({{recipients|length}} people)</p>
+
+    {% if draft.organisation %}
+        <p class="text-2xl font-bold mb-5">It will be sent to all volunteers for {{draft.organisation.name}} ({{recipients|length}} recipients)</p>
+    {% elif draft.opportunity %}
+        <p class="text-2xl font-bold mb-5">It will be sent to all volunteers in {{draft.opportunity.name}} ({{recipients|length}} recipients)</p>
+    {% else %}
+    <p class="text-2xl font-bold mb-5">It will be sent to {{draft.email_target_recipients}} ({{recipients|length}} recipients)</p>
+
+    {% endif %}
     <a href="/org_admin/email_portal/edit_draft/{{draft.id}}/" class="btn btn-primary">Edit</a>
     <a href="/org_admin/email_portal/" class="btn btn-primary">Back</a>
     <a href="/org_admin/email_portal/send_draft/{{draft.id}}/{{draft.send_confirmation_id}}" class="btn btn-primary">Send</a>
