@@ -1,6 +1,6 @@
 import io
 from django.shortcuts import render
-from forms.models import Form, Question, Options, Answer, Response, FormResponseRequirement
+from forms.models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement
 from django.contrib.auth.models import User
 from commonui.views import check_if_hx
 from org_admin.views import check_ownership
@@ -9,6 +9,7 @@ import csv
 from django.http import HttpResponse
 from volunteer.models import Volunteer
 from opportunities.models import Registration, RegistrationStatus, VolunteerRegistrationStatus, Opportunity
+from organisations.models import Organisation
 
 def check_form_ownership(request, form):
     if not request.user.is_superuser:
@@ -18,23 +19,36 @@ def check_form_ownership(request, form):
 def forms(request, error=None, success=None):
     if request.user.is_superuser:
         forms = Form.objects.all()
-        fill_forms = None
         assignable_forms = None
-        
+        incomplete_reqs = None
+        awaiting_response = OrganisationFormResponseRequirement.objects.filter(completed=False)
     else:
-        forms = Form.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
-        fill_forms = Form.objects.filter(filled_by_organisation=True)
-        assignable_forms = Form.objects.filter(visible_to_all=True)
-        
-        forms = forms | assignable_forms
+        awaiting_response = None
+    #Check for organisation form rsponse requirements
     
-    for form in forms:
-        responses = Response.objects.filter(form=form)
-        form.responses = responses.count()    
+        incomplete_reqs = None
+    
+        try:
+            organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+            incomplete_reqs = OrganisationFormResponseRequirement.objects.filter(organisation=organisation, completed=False)
+        
+        except:
+            pass
+            
+            
+        else:
+            forms = Form.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
+            assignable_forms = Form.objects.filter(visible_to_all=True)
+            forms = forms | assignable_forms
+        
+        for form in forms:
+            responses = Response.objects.filter(form=form)
+            form.responses = responses.count()    
     
     context = {
+        "awaiting_response": awaiting_response,
+        "assigned_forms": incomplete_reqs,
         "forms": forms,
-        "staff_forms": fill_forms,
         "assignable_forms": assignable_forms,
         "hx": check_if_hx(request),
         "superuser": request.user.is_superuser,
@@ -326,7 +340,7 @@ def move_question_down(request, question_id):
         questions[index + 1].save()
     return form_detail(request, form.id)
 
-def download_responses_CSV(request, form_id):
+def download_responses_CSV(request, form_id, anonymous=False):
     form = Form.objects.get(pk=form_id)
     check_form_ownership(request, form)
     
@@ -336,7 +350,12 @@ def download_responses_CSV(request, form_id):
         return forms(request, error="There are no responses to download")
     
     response_dicts = []
-    field_names = ["first_name", "last_name", "email", "response_date"]
+    
+    if anonymous:
+        field_names = ["response_date"]
+    else:
+        field_names = ["first_name", "last_name", "email", "response_date"]
+        
     field_names += [question.question for question in Question.objects.filter(form=form)]
     
     for res in response:
@@ -344,9 +363,11 @@ def download_responses_CSV(request, form_id):
         
         response_dict = {}
         
-        response_dict["first_name"] = res.user.first_name
-        response_dict["last_name"] = res.user.last_name
-        response_dict["email"] = res.user.email
+        if not anonymous:
+            response_dict["first_name"] = res.user.first_name
+            response_dict["last_name"] = res.user.last_name
+            response_dict["email"] = res.user.email
+            
         response_dict["response_date"] = res.response_date
         
         for answer in answers:
@@ -378,6 +399,69 @@ def download_responses_CSV(request, form_id):
     response['Content-Disposition'] = 'attachment; filename="responses.csv"'
     
     return response
+
+def assign_form_org(request):
+    if request.method == "GET":
+        organisations = Organisation.objects.all()
+        org_forms = Form.objects.filter(filled_by_organisation=True)
+        context = {
+            "orgs": organisations,
+            "forms": org_forms,
+            "hx": check_if_hx(request),
+        }
+        return render(request, 'org_admin/assign_form_org.html', context=context)
+    elif request.method == "POST":
+        data = request.POST
+        
+        if not data['org_id'] == "all":  
+            try:
+                org = Organisation.objects.get(pk=data['org_id'])
+            except:
+                return forms(request, error="Organisation not found")
+        
+        try:
+            form = Form.objects.get(pk=data['form_id'])
+        
+            if not form.filled_by_organisation:
+                return forms(request, error="Form cannot be filled by organisation")
+        except:
+            return forms(request, error="Form not found")
+        
+        if not data['org_id'] == "all":
+        
+            if not form.allow_multiple:
+                response = OrganisationFormResponseRequirement.objects.filter(organisation=org, form=form)
+                if response.count() > 0:
+                    return forms(request, error="Form already assigned to organisation. Multiple submissions not allowed")
+
+            response = OrganisationFormResponseRequirement.objects.filter(organisation=org, form=form, completed=False)
+            if response.count() > 0:
+                return forms(request, error="Incomplete Form already assigned to organisation")
+            
+        else:
+            organisations = Organisation.objects.all()
+            success_count = 0
+            error_count = 0
+            
+            for org in organisations:
+                if not form.allow_multiple:
+                    response = OrganisationFormResponseRequirement.objects.filter(organisation=org, form=form)
+                    if response.count() > 0:
+                        error_count += 1
+                        continue
+            
+                response = OrganisationFormResponseRequirement.objects.filter(organisation=org, form=form, completed=False)
+                if response.count() > 0:
+                    error_count += 1
+                    continue
+                
+                OrganisationFormResponseRequirement.objects.create(organisation=org, form=form)
+                success_count += 1
+                
+            return forms(request, success=f"Form Assigned to {success_count} Organisations. {error_count} Errors")
+        
+        OrganisationFormResponseRequirement.objects.create(organisation=org, form=form)
+        return forms(request, success="Form Assigned to Organisation")
     
 def assign_form(request):
     if request.method == "GET":

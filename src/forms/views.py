@@ -7,7 +7,7 @@ This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for d
 from django.shortcuts import render
 from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
-from .models import Form, Question, Options, Answer, Response, FormResponseRequirement
+from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement
 from volunteer.views import index
 
 from volunteer.models import Volunteer
@@ -22,11 +22,19 @@ def fill_form(request, form_id, custom_respondee=False):
     
     if not form.filled_by_organisation:
         allowed_to_fill = FormResponseRequirement.objects.get(form=form, user=request.user, completed=False) if FormResponseRequirement.objects.filter(form=form, user=request.user, completed=False).exists() else None
+        responses = Response.objects.filter(form=form, user=request.user)
     else:
-        allowed_to_fill = len(OrganisationAdmin.objects.filter(user=request.user)) > 0
-    
-    responses = Response.objects.filter(form=form, user=request.user)
-    
+        try:
+            organisation = OrganisationAdmin.objects.get(user=request.user).organisation
+            
+            allowed_to_fill = OrganisationFormResponseRequirement.objects.get(form=form, organisation=organisation, completed=False) if OrganisationFormResponseRequirement.objects.filter(form=form, organisation=organisation, completed=False).exists() else None
+            
+            organisation_admin_users = OrganisationAdmin.objects.filter(organisation=organisation).values_list('user', flat=True)
+            responses = Response.objects.filter(form=form, user__in=organisation_admin_users)
+        except:
+            allowed_to_fill = None
+
+
     if not form.allow_multiple and responses.exists() and allowed_to_fill:
         
         if custom_respondee:
@@ -92,15 +100,21 @@ def submit_response(request, form_id, custom_redirect=None, override_respondee=N
         except FormResponseRequirement.DoesNotExist:
             return render(request, 'forms/redirect_profile.html')
     else:
-        if len(OrganisationAdmin.objects.filter(user=request.user)) == 0:
+        if not OrganisationAdmin.objects.filter(user=request.user).exists():
             return render(request, 'forms/redirect_profile.html')
-    
+        
+        
+        requirement = OrganisationFormResponseRequirement.objects.get(form=Form.objects.get(pk=form_id), organisation=OrganisationAdmin.objects.get(user=request.user).organisation, completed=False) if OrganisationFormResponseRequirement.objects.filter(form=Form.objects.get(pk=form_id), organisation=OrganisationAdmin.objects.get(user=request.user).organisation, completed=False).exists() else None
+        
+        if not requirement.exists():
+            return render(request, 'forms/redirect_profile.html')
+            
     response = None
     
     if override_respondee:
         user = User.objects.get(id=override_respondee)
         response = Response.objects.create(user=user, form=Form.objects.get(pk=form_id))
-    else:    
+    else:
         response = Response.objects.create(user=request.user, form=Form.objects.get(pk=form_id))
     
     
@@ -123,9 +137,9 @@ def submit_response(request, form_id, custom_redirect=None, override_respondee=N
                 response=response,
             )
     
-    if not Form.objects.get(pk=form_id).filled_by_organisation:        
-        requirement.completed = True
-        requirement.save()
+
+    requirement.completed = True
+    requirement.save()
 
     if custom_redirect:
         return

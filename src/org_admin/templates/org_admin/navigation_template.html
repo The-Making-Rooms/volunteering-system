@@ -88,7 +88,7 @@
           class="drawer-overlay"
         ></label>
         <ul
-          class="menu p-4 w-80 min-h-full bg-base-200 text-lg"
+          class="menu p-4 w-80 bg-base-200 text-lg min-h-full"
           hx-boost="true"
           hx-target=".htmx-navigator"
           hx-swap="outerHTML"
@@ -100,6 +100,7 @@
           />
           <div class="divider"></div>
           <!-- Sidebar content here -->
+           
           <li><a href="/org_admin/dashboard/#">Dashboard</a></li>
               <li><a href="/org_admin/details/#">Organisation Details</a></li>
               <li><a href="/org_admin/benefits/#">Benefits</a></li>
@@ -110,11 +111,20 @@
               <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
               <li><a href="/org_admin/forms/#">Forms</a></li>
               <li><a href="/org_admin/communication/#">Communication</a></li>
-              <li><a href="/org_admin/email_portal/#">Emails</a></li>
+              {% if user.is_superuser %}<li><a href="/org_admin/email_portal/#">Emails</a></li>{% endif %}
               <li><a href="/org_admin/admin_management/#">Organisation Admins</a></li>
               <li><a href="/org_admin/profile/#">Profile</a></li>
-              <li><a href="/org_admin/logout/#">Logout</a></li>
+
+            
+        <div class="flex flex-col justify-self-end mt-auto p-3 m-2 bg-base-300 rounded-lg gap-2">
+          <p class="text-sm">Logged in as:</p>
+          <p class="text-sm font-bold">{{ user.email }}</p>
+
+          <a class="btn btn-sm btn-primary btn-outline" href="/org_admin/logout/#">Logout</a>
+        </div>
         </ul>
+
+
       </div>
     </div>
 
