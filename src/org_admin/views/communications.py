@@ -114,6 +114,7 @@ def get_chat_content(request, chat_id, error=None):
             "user": request.user,
             "link_active": "communications",
             "error": error,
+            "non_org_participants": non_org_participants,
             "chat_recipients": chat_recipients,
         },
     )

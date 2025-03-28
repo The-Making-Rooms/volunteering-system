@@ -6,9 +6,10 @@
         
         <div class='flex flex-col'>
             {% for message in messages %}
-            {% if message.sender.id == user.id or message.automated %}
-                <div class="p-3 rounded-2xl bg-blue-500 my-2 max-w-52 text-white self-end" {% if not message.seen %} hx-get="/communications/mark_seen/{{message.id}}/" hx-trigger="revealed" hx-swap="none" {% endif %}>
-                    {% if message.automated %}<p class="text-xs text-gray-200">Automated Reply</p>{%endif%}
+            {% if message.sender not in non_org_participants or message.automated %}
+                <div class="p-3 rounded-2xl {% if message.sender == user%}bg-blue-500{% else %}bg-blue-800{%endif%} my-2 max-w-52 text-white self-end" {% if not message.seen %} hx-get="/communications/mark_seen/{{message.id}}/" hx-trigger="revealed" hx-swap="none" {% endif %}>
+                    {% if message.automated %}<p class="text-xs text-gray-200">Automated Reply</p>{% elif not message.sender == user %}<p class="text-xs text-gray-200">{{message.sender.first_name}}</p>{%endif%}
+                    
                     <p class="">{{ message.content }}</p>
                     <p class="text-xs text-gray-200">{{ message.timestamp }}</p>
                     <p class="text-xs text-gray-200">{% if message.seen_by_non_org_participants %}Seen{%else%}Not Seen{%endif%}</p>
