@@ -84,7 +84,7 @@ class SuperForm(models.Model):
     active = models.BooleanField(default=True)
     
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=500)
+    description = models.TextField(blank=True, null=True)
     photo = models.ImageField(upload_to='superforms/', blank=True, null=True)
     submitted_message = models.TextField(blank=True, null=True)
     

@@ -48,7 +48,9 @@ class FormResponseRequirementAdmin(admin.ModelAdmin):
 class OrganisationFormResponseRequirementAdmin(admin.ModelAdmin):
     pass
 
-
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(SuperForm)
 class SuperFormAdmin(admin.ModelAdmin):
