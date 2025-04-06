@@ -195,6 +195,8 @@ urlpatterns = [
      
      path("superforms/", views.superforms, name="superforms"),
      path("superforms/new/", views.new_superform, name="new_superform"),
+     path("superforms/edit/<str:superform_id>/", views.edit_superform, name="new_superform"),
+     
     
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),
