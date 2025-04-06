@@ -713,6 +713,39 @@ html {
   --b1: 1 0 0;
 }
 
+[data-theme=corporate] {
+  color-scheme: light;
+  --b2: 0.93 0 0;
+  --b3: 0.86 0 0;
+  --in: 0.7206 0.191 231.6;
+  --su: 64.8% 0.150 160;
+  --wa: 0.8471 0.199 83.87;
+  --er: 0.7176 0.221 22.18;
+  --pc: 0.12078 0.0456 269.1;
+  --sc: 0.130739 0.010951 256.688055;
+  --ac: 0.153934 0.022799 163.57888;
+  --inc: 0 0 0;
+  --suc: 0 0 0;
+  --wac: 0 0 0;
+  --erc: 0 0 0;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --p: 0.6039 0.228 269.1;
+  --s: 0.653694 0.054756 256.688055;
+  --a: 0.769669 0.113994 163.57888;
+  --n: 0.223899 0.031305 278.07229;
+  --nc: 0.958796 0.008588 247.915135;
+  --b1: 1 0 0;
+  --bc: 0.223899 0.031305 278.07229;
+  --rounded-box: 0.25rem;
+  --rounded-btn: .125rem;
+  --rounded-badge: .125rem;
+  --tab-radius: 0.25rem;
+  --animation-btn: 0;
+  --animation-input: 0;
+  --btn-focus-scale: 1;
+}
+
 .container {
   width: 100%;
 }
@@ -4046,6 +4079,11 @@ html:has(.drawer-toggle:checked) {
   margin-bottom: 0.5rem;
 }
 
+.my-20 {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
 .my-3 {
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
@@ -4059,11 +4097,6 @@ html:has(.drawer-toggle:checked) {
 .my-8 {
   margin-top: 2rem;
   margin-bottom: 2rem;
-}
-
-.my-20 {
-  margin-top: 5rem;
-  margin-bottom: 5rem;
 }
 
 .mb-1 {
@@ -4132,10 +4165,6 @@ html:has(.drawer-toggle:checked) {
 
 .mt-auto {
   margin-top: auto;
-}
-
-.mt-20 {
-  margin-top: 5rem;
 }
 
 .block {
@@ -4560,6 +4589,10 @@ html:has(.drawer-toggle:checked) {
   border-radius: 0.75rem;
 }
 
+.rounded-none {
+  border-radius: 0px;
+}
+
 .rounded-t-xl {
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
@@ -4569,8 +4602,16 @@ html:has(.drawer-toggle:checked) {
   border-width: 1px;
 }
 
+.border-2 {
+  border-width: 2px;
+}
+
 .border-b {
   border-bottom-width: 1px;
+}
+
+.border-t-8 {
+  border-top-width: 8px;
 }
 
 .border-none {
@@ -4595,6 +4636,51 @@ html:has(.drawer-toggle:checked) {
 .border-gray-600 {
   --tw-border-opacity: 1;
   border-color: rgb(75 85 99 / var(--tw-border-opacity, 1));
+}
+
+.border-base-300 {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity, 1)));
+}
+
+.border-gray-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
+}
+
+.border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
+}
+
+.border-gray-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
+}
+
+.border-t-blue-800 {
+  --tw-border-opacity: 1;
+  border-top-color: rgb(30 64 175 / var(--tw-border-opacity, 1));
+}
+
+.border-t-\[\#627fbb\] {
+  --tw-border-opacity: 1;
+  border-top-color: rgb(98 127 187 / var(--tw-border-opacity, 1));
+}
+
+.border-b-gray-500 {
+  --tw-border-opacity: 1;
+  border-bottom-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
+}
+
+.border-b-gray-200 {
+  --tw-border-opacity: 1;
+  border-bottom-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
+}
+
+.border-b-gray-300 {
+  --tw-border-opacity: 1;
+  border-bottom-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
 }
 
 .bg-base-100 {
@@ -4685,6 +4771,21 @@ html:has(.drawer-toggle:checked) {
 .bg-slate-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#e7ecf5\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(231 236 245 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#5576b6\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(85 118 182 / var(--tw-bg-opacity, 1));
 }
 
 .bg-opacity-50 {
@@ -4886,6 +4987,11 @@ html:has(.drawer-toggle:checked) {
   line-height: 1rem;
 }
 
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
 .font-black {
   font-weight: 900;
 }
@@ -4974,6 +5080,16 @@ html:has(.drawer-toggle:checked) {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.text-red-900 {
+  --tw-text-opacity: 1;
+  color: rgb(127 29 29 / var(--tw-text-opacity, 1));
+}
+
+.text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -5127,6 +5243,10 @@ html:has(.drawer-toggle:checked) {
 
   .md\:w-96 {
     width: 24rem;
+  }
+
+  .md\:w-1\/2 {
+    width: 50%;
   }
 
   .md\:grid-cols-2 {
