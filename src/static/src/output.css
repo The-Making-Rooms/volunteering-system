@@ -860,6 +860,11 @@ html {
     color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
   }
 
+  .radio-primary:hover {
+    --tw-border-opacity: 1;
+    border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  }
+
   .tab:hover {
     --tw-text-opacity: 1;
   }
@@ -3100,6 +3105,26 @@ details.collapse summary::-webkit-details-marker {
       0 0 0 4px var(--fallback-b1,oklch(var(--b1)/1)) inset;
 }
 
+.radio-primary {
+  --chkbg: var(--p);
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
+.radio-primary:focus-visible {
+  outline-color: var(--fallback-p,oklch(var(--p)/1));
+}
+
+.radio-primary:checked,
+    .radio-primary[aria-checked="true"] {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
+  --tw-text-opacity: 1;
+  color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity)));
+}
+
 .radio:disabled {
   cursor: not-allowed;
   opacity: 0.2;
@@ -3565,6 +3590,10 @@ details.collapse summary::-webkit-details-marker {
   border-bottom-color: var(--fallback-bc,oklch(var(--bc)/0.2));
 }
 
+.artboard.phone {
+  width: 320px;
+}
+
 .badge-lg {
   height: 1.5rem;
   font-size: 1rem;
@@ -3975,16 +4004,16 @@ html:has(.drawer-toggle:checked) {
   margin: 0.25rem;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
 .m-3 {
   margin: 0.75rem;
 }
 
 .m-5 {
   margin: 1.25rem;
-}
-
-.m-2 {
-  margin: 0.5rem;
 }
 
 .mx-1 {
@@ -4030,6 +4059,11 @@ html:has(.drawer-toggle:checked) {
 .my-8 {
   margin-top: 2rem;
   margin-bottom: 2rem;
+}
+
+.my-20 {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
 }
 
 .mb-1 {
@@ -4098,6 +4132,10 @@ html:has(.drawer-toggle:checked) {
 
 .mt-auto {
   margin-top: auto;
+}
+
+.mt-20 {
+  margin-top: 5rem;
 }
 
 .block {
@@ -4589,6 +4627,11 @@ html:has(.drawer-toggle:checked) {
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
 }
 
+.bg-blue-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 64 175 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gray-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(107 114 128 / var(--tw-bg-opacity, 1));
@@ -4642,11 +4685,6 @@ html:has(.drawer-toggle:checked) {
 .bg-slate-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
-}
-
-.bg-blue-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(30 64 175 / var(--tw-bg-opacity, 1));
 }
 
 .bg-opacity-50 {
