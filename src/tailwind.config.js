@@ -29,6 +29,10 @@ module.exports = {
 
         },
 
+        corporate: {
+          ...require("daisyui/src/theming/themes")["corporate"],
+        },
+
         
 
       },
