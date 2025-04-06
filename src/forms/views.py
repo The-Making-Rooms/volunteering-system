@@ -7,13 +7,61 @@ This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for d
 from django.shortcuts import render
 from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
-from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement
+from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement, SuperForm
 from volunteer.views import index
 
 from volunteer.models import Volunteer
 from opportunities.models import Opportunity, Registration
 from org_admin.models import OrganisationAdmin
 from django.contrib.auth.models import User
+
+
+def superform(request, id):
+    """Superforms allow users to create an account, register for an opportunity, and fill out a form all at once. This allows incremental onboarding of users.
+    """
+    
+    try:
+        superform = SuperForm.objects.get(pk=id)
+    except SuperForm.DoesNotExist:
+        return HTTPResponse("Superform not found")
+    
+    forms_to_complete = superform.forms_to_complete.all()
+    forms = Form.objects.filter(id__in=forms_to_complete)
+    
+    formsets = []
+    
+    for form in forms:
+        question_objects = Question.objects.filter(form=form).order_by('index')
+        
+        questions = []
+        for question in question_objects:
+            questions.append({
+                "question": question,
+                "options": Options.objects.filter(question=question),
+            })
+            
+        formsets.append({
+            "form": form,
+            "questions": questions,
+        })
+        
+    context = {
+        "superform": superform,
+        "forms": formsets,
+        "hx": check_if_hx(request),
+    }
+    
+    return render(request, 'forms/superform/form.html', context=context) 
+
+    
+    #get email and create user if not exists
+    
+    #Create and update formResponseRequirements and formResponses
+    
+    
+
+    
+
 # Create your views here.
 def fill_form(request, form_id, custom_respondee=False):
     print("custom_user_respondee",custom_respondee)

@@ -5,7 +5,7 @@ This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for d
 """
 
 from django.contrib import admin
-from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement
+from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement, SuperForm
 # Register your models here.
 
 
@@ -47,3 +47,9 @@ class FormResponseRequirementAdmin(admin.ModelAdmin):
 @admin.register(OrganisationFormResponseRequirement)
 class OrganisationFormResponseRequirementAdmin(admin.ModelAdmin):
     pass
+
+
+
+@admin.register(SuperForm)
+class SuperFormAdmin(admin.ModelAdmin):
+    list_display = ('name', 'active')
