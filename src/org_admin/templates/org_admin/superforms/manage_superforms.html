@@ -27,7 +27,7 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Description</th>
+
                 <th>Active</th>
                 <th>Actions</th>
             </tr>
@@ -36,12 +36,13 @@
             {% for superform in superforms %}
             <tr>
                 <td>{{ superform.name }}</td>
-                <td>{{ superform.description }}</td>
-                <td>{% if superform.is_active %}Yes{% else %}No{% endif %}</td>
+                <td>{% if superform.active %}Yes{% else %}No{% endif %}</td>
                 <td>
                     <a href="/org_admin/superforms/edit/{{ superform.id }}/" class="btn btn-primary">Edit</a>
+                    <!--
                     <a href="/org_admin/superforms/view/{{ superform.id }}/" class="btn btn-primary">See Registrations</a>
                     <a href="/org_admin/superforms/delete/{{ superform.id }}/" class="btn btn-error">Delete</a>
+                    -->
                 </td>
             </tr>
             {% endfor %}

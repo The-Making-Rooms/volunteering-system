@@ -19,13 +19,26 @@
 <div class="rounded-xl p-5 bg-base-200 mb-5">
     <p>Link Details</p>
     <div class="divider"></div>
-        <input type="hidden" name="id" value="{{ superform.id }}">
         <input type="text" name="name" value="{{ superform.name }}" class="input input-bordered w-full mb-5" placeholder="Name of the superform" required>
-        <input type="text" name="description" value="{{ superform.description }}" class="input input-bordered w-full mb-5" placeholder="Description of the superform" required>
+        <textarea name="description" class="textarea textarea-bordered w-full mb-5" placeholder="Description of the superform">{{ superform.description }}</textarea>
+
+
+        <textarea name="submitted_message" class="textarea textarea-bordered w-full mb-5" placeholder="Message shown on submit">{{ superform.submitted_message }}</textarea>
+
         <label class="label cursor-pointer">
             <span class="label-text">Is Active</span>
         </label>
-        <input type="checkbox" name="is_active" value="true" {% if superform.is_active %}checked{% endif %} class="checkbox checkbox-primary mb-5">
+        <input type="checkbox" name="is_active" value="true" {% if not superform.active %}{%else%}checked{% endif %} class="checkbox checkbox-primary mb-5">
+
+        <label class="label cursor-pointer">
+            <span class="label-text">Show individual form titles</span>
+        </label>
+        <input type="checkbox" name="show_form_titles" value="{%if superform.show_form_titles%}true{%else%}false{%endif%}" {% if not superform.show_form_titles %}{%else%}checked{% endif %} class="checkbox checkbox-primary mb-5">
+
+        <label class="label cursor-pointer">
+            <span class="label-text">Show individual form descriptions</span>
+        </label>
+        <input type="checkbox" name="show_form_descriptions" value="true" {% if not superform.show_form_descriptions %}{%else%}checked{% endif %} class="checkbox checkbox-primary mb-5">
     </div>
 
 <div class="rounded-xl p-5 bg-base-200 mb-5">
@@ -35,7 +48,7 @@
         <div class="form-control">
             <select name="opportunity" class="select select-bordered w-full mb-5">
                 {% for opportunity in opportunities %}
-                <option value="{{ opportunity.id }}" {% if opportunity.id == superform.opportunity %}selected{% endif %}>{{ opportunity.name }} - {{opportunity.organisation.name}}</option>
+                <option value="{{ opportunity.id }}" {% if opportunity == superform.opportunity_to_register %}selected{% endif %}>{{ opportunity.name }} - {{opportunity.organisation.name}}</option>
                 {% endfor %}
             </select>
         </div>
@@ -48,11 +61,13 @@
         <div class="form-control">
             <select name="required_forms" class="select select-bordered w-full mb-5" multiple>
                 {% for form in forms %}
-                <option value="{{ form.id }}" {% if form.id in superform.required_forms %}selected{% endif %}>{{ form.name }}</option>
+                <option value="{{ form.id }}" {% if form in superform.forms_to_complete.all %}selected{% endif %}>{{ form.name }}</option>
                 {% endfor %}
             </select>
+            <p>Hold down “Control”, or “Command” on a Mac, to select more than one.</p>
         </div>
     </div>
+
 
         <div class="flex justify-end">
             <button type="submit" class="btn btn-primary">Save</button>
