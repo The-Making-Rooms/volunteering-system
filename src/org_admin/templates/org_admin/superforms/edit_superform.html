@@ -1,0 +1,63 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+<p class="text-2xl font-bol mb-5">Edit Superform Link</p>
+
+<div class="divider"></div>
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<form action={%if superform%}"/org_admin/superforms/edit/{{ superform.id }}/"{%else%}"/org_admin/superforms/new/"{%endif%} method="POST" class="mb-5">
+    {% csrf_token %}
+
+<div class="rounded-xl p-5 bg-base-200 mb-5">
+    <p>Link Details</p>
+    <div class="divider"></div>
+        <input type="hidden" name="id" value="{{ superform.id }}">
+        <input type="text" name="name" value="{{ superform.name }}" class="input input-bordered w-full mb-5" placeholder="Name of the superform" required>
+        <input type="text" name="description" value="{{ superform.description }}" class="input input-bordered w-full mb-5" placeholder="Description of the superform" required>
+        <label class="label cursor-pointer">
+            <span class="label-text">Is Active</span>
+        </label>
+        <input type="checkbox" name="is_active" value="true" {% if superform.is_active %}checked{% endif %} class="checkbox checkbox-primary mb-5">
+    </div>
+
+<div class="rounded-xl p-5 bg-base-200 mb-5">
+
+        <p>Opportunity</p>
+        <div class="divider"></div>
+        <div class="form-control">
+            <select name="opportunity" class="select select-bordered w-full mb-5">
+                {% for opportunity in opportunities %}
+                <option value="{{ opportunity.id }}" {% if opportunity.id == superform.opportunity %}selected{% endif %}>{{ opportunity.name }} - {{opportunity.organisation.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+<div class="rounded-xl p-5 bg-base-200 mb-5">
+
+        <p>Required forms</p>
+        <div class="divider"></div>
+        <div class="form-control">
+            <select name="required_forms" class="select select-bordered w-full mb-5" multiple>
+                {% for form in forms %}
+                <option value="{{ form.id }}" {% if form.id in superform.required_forms %}selected{% endif %}>{{ form.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+
+</form>
+{% endblock %}

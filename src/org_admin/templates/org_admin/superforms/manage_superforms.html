@@ -1,0 +1,52 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+<p class="text-2xl font-bol mb-5">Superforms</p>
+<p>Superforms allow you to create custom sign up links which onboard users in a single form. This is useful for outreach events where users can quicly be added to the syste without needing to access the system.</p>
+<div class="divider"></div>
+
+
+
+{% if error %}
+{% include "commonui/error.html" %}
+{% endif %}
+
+{% if success %}
+{% include "commonui/success.html" %}
+{% endif %}
+
+<div class="rounded-xl p-5 bg-base-200 mb-5">
+    <div class="flex justify-between items-center">
+        <p class="text-lg font-bold">Links</p>
+        <a href="/org_admin/superforms/new/" class="btn btn-primary">Create link</a>
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="table w-full mt-5">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for superform in superforms %}
+            <tr>
+                <td>{{ superform.name }}</td>
+                <td>{{ superform.description }}</td>
+                <td>{% if superform.is_active %}Yes{% else %}No{% endif %}</td>
+                <td>
+                    <a href="/org_admin/superforms/edit/{{ superform.id }}/" class="btn btn-primary">Edit</a>
+                    <a href="/org_admin/superforms/view/{{ superform.id }}/" class="btn btn-primary">See Registrations</a>
+                    <a href="/org_admin/superforms/delete/{{ superform.id }}/" class="btn btn-error">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
