@@ -21,13 +21,13 @@ class NotificationPreference(models.Model):
 
 class EmailDraft(models.Model):
     
-    RECIPIENT_CHOICES = {
-        ('all', 'All users'),
+    RECIPIENT_CHOICES = (
+        ('all_opp_volunteers', 'All opportunity volunteers'),
+        ('all_org_volunteers', 'All organisation volunteers'),
         ('volunteers', 'Volunteers'),
         ('organisations', 'Organisations'),
-        ('all_org_volunteers', 'All organisation volunteers'),
-        ('all_opp_volunteers', 'All opportunity volunteers'),
-    }
+        ('all', 'All users'),
+    )
     
     subject = models.CharField(max_length=100)
     

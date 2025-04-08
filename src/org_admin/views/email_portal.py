@@ -18,15 +18,12 @@ from organisations.models import Organisation
 
 import threading
 
-def check_auth(request):
-    if request.user.is_anonymous:
-        return redirect('login')
-    if not request.user.is_superuser:
-        return redirect('volunteer')
-    return None
+
+
 
 def email_portal_index(request, error=None, success=None):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
+
 
     context = {
         'drafts': EmailDraft.objects.filter(sent=False),
@@ -39,7 +36,7 @@ def email_portal_index(request, error=None, success=None):
     return render(request, 'org_admin/email_portal/index.html', context)
 
 def save_email_draft(request):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
         
     data = request.POST
     
@@ -126,7 +123,7 @@ def save_email_draft(request):
     
 
 def edit_email_draft(request, draft_id=None):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     if draft_id:
         draft = EmailDraft.objects.get(id=draft_id)
@@ -147,14 +144,14 @@ def edit_email_draft(request, draft_id=None):
     return render(request, 'org_admin/email_portal/email_editor.html', context)
 
 def delete_email_draft(request, draft_id):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     EmailDraft.objects.get(id=draft_id).delete()
     
     return redirect('email_portal_index')
 
 def send_email_draft(request, draft_id, confirm_id=None):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     draft = EmailDraft.objects.get(id=draft_id)
     
@@ -216,7 +213,7 @@ def send_email_draft(request, draft_id, confirm_id=None):
     return render(request, 'org_admin/email_portal/confirm_send.html', context)
 
 def preview_email(request, draft_id):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     context = {
         'html': EmailDraft.objects.get(id=draft_id).email_html,
@@ -228,7 +225,7 @@ def preview_email(request, draft_id):
     return render(request, 'org_admin/email_portal/email_preview.html', context)
 
 def view_email_detail(request, draft_id):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     context = {
         'draft': EmailDraft.objects.get(id=draft_id),
@@ -238,7 +235,7 @@ def view_email_detail(request, draft_id):
     return render(request, 'org_admin/email_portal/view_email_detail.html', context)
 
 def duplicate_email_draft(request, draft_id):
-    check_auth(request)
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     draft = EmailDraft.objects.get(id=draft_id)
     

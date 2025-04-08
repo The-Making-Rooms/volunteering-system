@@ -11,6 +11,7 @@ from datetime import timedelta
 # Create your models here.
 class Volunteer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    preferred_name = models.CharField(max_length=200, blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True)
     date_of_birth = models.DateField()
     phone_number = models.CharField(max_length=11)

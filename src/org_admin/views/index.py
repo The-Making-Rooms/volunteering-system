@@ -12,7 +12,11 @@ def index(request, error=None):
         return sign_in(request)
     try:
         if not request.user.is_superuser:
-            orgnaisation = OrganisationAdmin.objects.get(user=request.user)
+            try:
+                orgnaisation = OrganisationAdmin.objects.get(user=request.user)
+            except OrganisationAdmin.DoesNotExist:
+                return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+            
             total_volunteers = Registration.objects.filter(opportunity__organisation=orgnaisation.organisation).count()
             #past 24 hours views
             total_views = OpportunityView.objects.filter(opportunity__organisation=orgnaisation.organisation, time__gte=datetime.datetime.now()-datetime.timedelta(days=1)).count()

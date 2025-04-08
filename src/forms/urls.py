@@ -12,5 +12,7 @@ urlpatterns = [
     #path("", views.index, name="index"),
     path("<int:form_id>/", views.fill_form, name="form_detail"),
     path("<int:form_id>/submit/", views.submit_response, name="submit_response"),
-    path("<int:form_id>/submit/<int:custom_respondee>/", views.submit_response, name="submit_response")
+    path("<int:form_id>/submit/<int:custom_respondee>/", views.submit_response, name="submit_response"),
+    path("register/<str:id>/", views.superform, name="register"),
+    path("register/<str:id>/submit/", views.submit_superform, name="superform"),
 ]

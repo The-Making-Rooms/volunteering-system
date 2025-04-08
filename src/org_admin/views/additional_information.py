@@ -6,16 +6,18 @@ from .common import check_ownership
 from organisations.models import Organisation, OrganisationAdmin
 
 def additional_information(request, error=None, success=None):
-    if not request.user.is_superuser:
-        return HttpResponseRedirect("/volunteer")
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/org_admin")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html")
+    
     
     if request.user.is_superuser:
         additional_information = SupplementaryInfo.objects.all()
     else:
         additional_information = SupplementaryInfo.objects.filter(organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
     
-    
-    
+
     if request.method == "GET":
         context = {
             "error": error,
@@ -27,19 +29,28 @@ def additional_information(request, error=None, success=None):
         return render(request, "org_admin/manage_additional_information.html", context=context)
 
 def delete_additional_info(request, id):
-    if not request.user.is_superuser:
-        return HttpResponseRedirect("/volunteer")
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect("/org_admin")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html")
     
     try:
         additional_info = SupplementaryInfo.objects.get(id=id)
-        additional_info.delete()
+        
+        if not check_ownership(request, additional_info):
+            request.method = "GET"
+            return additional_information(request, error="You do not have permission to delete this additional information")
+        else:
+            additional_info.delete()
         return additional_information(request, success="Additional information deleted")
     except SupplementaryInfo.DoesNotExist:
         return additional_information(request, error="Additional information does not exist")
     
 def add_additional_info(request):
-    if not request.user.is_superuser:
+    if not request.user.is_authenticated:
         return HttpResponseRedirect("/org_admin")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html")
     
     if request.method == "POST":
         data = request.POST
@@ -67,8 +78,10 @@ def add_additional_info(request):
         return render(request, "org_admin/additional_information.html", context=context)
     
 def edit_additional_info(request, id):
-    if not request.user.is_superuser:
+    if not request.user.is_authenticated:
         return HttpResponseRedirect("/org_admin")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html")
     
     try:
         additional_info = SupplementaryInfo.objects.get(id=id)

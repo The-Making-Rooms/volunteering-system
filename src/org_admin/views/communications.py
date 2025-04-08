@@ -11,9 +11,20 @@ from django.conf import settings
 from threading import Thread
 
 def get_org_chats(request, preload_chat_id=None):
+    
+    if not request.user.is_authenticated:
+        return HTTPResponseHXRedirect("/org_admin/sign_in")
+    
+    
+    
     if not request.user.is_superuser:
-        org = OrganisationAdmin.objects.get(user=request.user).organisation
-        chats = Chat.objects.filter(organisation=org)
+        try:
+            org = OrganisationAdmin.objects.get(user=request.user).organisation
+            chats = Chat.objects.filter(organisation=org)
+        except OrganisationAdmin.DoesNotExist:
+            return render (request, "org_admin/no_admin.html")
+        
+        
     elif request.user.is_superuser:
         chats = Chat.objects.all()
        
@@ -68,6 +79,11 @@ def get_org_chats(request, preload_chat_id=None):
     return render(request, "org_admin/chats.html", context)
 
 def get_chat_content(request, chat_id, error=None):
+    
+    if not request.user.is_authenticated:
+        return HTTPResponseHXRedirect("/org_admin/sign_in")
+    
+    
     if request.method == "POST":
         return send_message(request, chat_id)
     user = request.user
@@ -120,6 +136,15 @@ def get_chat_content(request, chat_id, error=None):
     )
     
 def send_message(request, chat_id):
+    
+    if not request.user.is_authenticated:
+        return HTTPResponseHXRedirect("/org_admin/sign_in")
+    if not request.user.is_superuser:
+        try:
+            org = OrganisationAdmin.objects.get(user=request.user).organisation
+        except OrganisationAdmin.DoesNotExist:
+            return render(request, "org_admin/no_admin.html")
+    
     if request.method != "POST":
         return HTTPResponseHXRedirect("/org_admin/communications")
 
@@ -129,12 +154,12 @@ def send_message(request, chat_id):
     
     
     
-
     user = request.user
     chat = Chat.objects.get(id=chat_id)
     
      
-    if not user.is_superuser: org = OrganisationAdmin.objects.get(user=user).organisation
+    if not user.is_superuser: 
+        org = OrganisationAdmin.objects.get(user=user).organisation
 
     if user.is_superuser:
         pass

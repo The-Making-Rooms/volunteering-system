@@ -1,0 +1,11 @@
+<p class="text-2xl mb-5">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</p>{% endif %}</p>
+<div class="flex justify-center flex-col">
+    <div class="flex items-center mb-3">
+        <input class="radio mr-2" type="radio" id="yes" name="sup_{{form.form.id}}_{{question.question.id}}" value="yes"  {% if question.question.required %}required{% endif %}>
+        <label for="yes">Yes</label>
+    </div>
+    <div class="flex items-center mb-3">
+        <input class="radio mr-2" type="radio" id="no" name="sup_{{form.form.id}}_{{question.question.id}}" value="no"  {% if question.question.required %}required{% endif %}>
+        <label for="no">No</label>
+    </div>
+</div>
