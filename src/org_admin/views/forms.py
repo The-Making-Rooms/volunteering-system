@@ -58,39 +58,45 @@ def forms(request, error=None, success=None):
     return render(request, 'org_admin/forms.html', context=context)
 
 def update_form(request, form_id):
-    data = request.POST
-    form = Form.objects.get(pk=form_id)
     
-    check_form_ownership(request, form)
+    try:
+        data = request.POST
+        form = Form.objects.get(pk=form_id)
+        
+        check_form_ownership(request, form)
+        
+        if request.user.is_superuser:
+            form.visible_to_all = True if "visible_to_all" in data.keys() else False
+            form.filled_by_organisation = True if "filled_by_organisations" in data.keys() else False
+        
+        form.name = data["name"]
+        form.description = data["description"]
+        form.allow_multiple = True if "allow_multiple" in data.keys() else False
+        
+        form.required_on_signup = True if "required_on_signup" in data.keys() else False
+        
+        if request.user.is_superuser:
+        
+            if "mentor_start_form" in data.keys():
+                forms = Form.objects.filter()
+                for uform in forms: uform.mentor_start_form = False
+                form.mentor_start_form = True
+            else:
+                form.mentor_start_form = False
+                    
+            if "mentor_end_form" in data.keys():
+                forms = Form.objects.filter()
+                for uform in forms: uform.mentor_end_form = False
+                form.mentor_end_form = True
+            else:
+                form.mentor_end_form = False
+        
+        form.save()
+        return form_detail(request, form_id, success="Form Updated")
     
-    if request.user.is_superuser:
-        form.visible_to_all = True if "visible_to_all" in data.keys() else False
-        form.filled_by_organisation = True if "filled_by_organisations" in data.keys() else False
-    
-    form.name = data["name"]
-    form.description = data["description"]
-    form.allow_multiple = True if "allow_multiple" in data.keys() else False
-    
-    form.required_on_signup = True if "required_on_signup" in data.keys() else False
-    
-    if request.user.is_superuser:
-    
-        if "mentor_start_form" in data.keys():
-            forms = Form.objects.filter()
-            for uform in forms: uform.mentor_start_form = False
-            form.mentor_start_form = True
-        else:
-            form.mentor_start_form = False
-                
-        if "mentor_end_form" in data.keys():
-            forms = Form.objects.filter()
-            for uform in forms: uform.mentor_end_form = False
-            form.mentor_end_form = True
-        else:
-            form.mentor_end_form = False
-    
-    form.save()
-    return form_detail(request, form_id, success="Form Updated")
+    except Exception as e:
+        print(e)
+        return form_detail(request, form_id, error="Error updating form")
     
 def delete_form(request, form_id):
     if request.method == "GET":
