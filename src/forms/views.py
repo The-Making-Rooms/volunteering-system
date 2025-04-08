@@ -9,7 +9,7 @@ from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
 from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement, SuperForm, SuperFormRegistration
 from volunteer.views import index
-
+import datetime
 from volunteer.models import Volunteer, VolunteerAddress
 from opportunities.models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus
 from org_admin.models import OrganisationAdmin
@@ -86,7 +86,7 @@ def submit_superform(request, id):
         """
         
         post_data = request.POST
-        print("Post data", post_data)
+        #print("Post data", post_data)
         #each form data key is in the format sup_(form_id)_(question_id)
         for key in post_data.keys():
             if key.startswith('sup_'):
@@ -115,8 +115,19 @@ def submit_superform(request, id):
             "phone": request.POST.get('phone_number'),
         }
         
-        pretty_print_dict(userdata)
-        pretty_print_dict(form_data)
+        #check odb is larger than or equal to 13
+        if userdata["date_of_birth"]:
+            dob = datetime.datetime.strptime(userdata["date_of_birth"], '%Y-%m-%d')
+            today = datetime.datetime.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            
+            if age < 13:
+                return render(request, 'forms/superform/age_req.html', context={})
+        else:
+            return render(request, 'forms/superform/age_req.html', context={})
+        
+        #pretty_print_dict(userdata)
+        #pretty_print_dict(form_data)
         
         
         #try to find user by email
@@ -195,6 +206,8 @@ def submit_superform(request, id):
                 user = User.objects.create_user(
                     username=email,
                     email=email,
+                    first_name=userdata["first_name"],
+                    last_name=userdata["last_name"],
                 )
                 
                 user.set_unusable_password()

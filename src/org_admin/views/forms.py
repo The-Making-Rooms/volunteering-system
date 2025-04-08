@@ -360,7 +360,7 @@ def download_responses_CSV(request, form_id, anonymous=False):
     if anonymous:
         field_names = ["response_date"]
     else:
-        field_names = ["first_name", "last_name", "email", "response_date"]
+        field_names = ["first_name", "last_name", "email", "phone_number", "response_date"]
         
     field_names += [question.question for question in Question.objects.filter(form=form)]
     
@@ -373,6 +373,7 @@ def download_responses_CSV(request, form_id, anonymous=False):
             response_dict["first_name"] = res.user.first_name
             response_dict["last_name"] = res.user.last_name
             response_dict["email"] = res.user.email
+            response_dict["phone_number"] = Volunteer.objects.get(user=res.user).phone_number
             
         response_dict["response_date"] = res.response_date
         
