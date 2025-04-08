@@ -4246,16 +4246,12 @@ html:has(.drawer-toggle:checked) {
   height: 100%;
 }
 
-.min-h-full {
-  min-height: 100%;
-}
-
-.min-h-32 {
-  min-height: 8rem;
-}
-
 .min-h-96 {
   min-height: 24rem;
+}
+
+.min-h-full {
+  min-height: 100%;
 }
 
 .w-1\/2 {

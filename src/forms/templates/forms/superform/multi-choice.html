@@ -10,7 +10,7 @@
             <input class="radio mr-2" type="radio" name="sup_{{form.form.id}}_{{question.question.id}}" value="{{option.id}}" {% if question.question.required %}required{% endif %}>
             {% endif %}
             
-            <label for="{{option.id}}">{{option.option}} {{question.question.required}}</label>
+            <label for="{{option.id}}">{{option.option}}</label>
         </div>
         {% endfor %}
     </div>
