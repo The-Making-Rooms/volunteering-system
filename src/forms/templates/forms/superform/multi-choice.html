@@ -5,7 +5,7 @@
         <div class="flex items-center mb-3">
 
             {% if question.question.allow_multiple %}
-            <input class="checkbox mr-2" type="checkbox" name="sup_{{form.form.id}}_{{question.question.id}}" value="{{option.id}}" {% if question.question.required %}required{% endif %}>
+            <input class="checkbox mr-2" type="checkbox" name="sup_{{form.form.id}}_{{question.question.id}}" value="{{option.id}}">
             {% else %}
             <input class="radio mr-2" type="radio" name="sup_{{form.form.id}}_{{question.question.id}}" value="{{option.id}}" {% if question.question.required %}required{% endif %}>
             {% endif %}
