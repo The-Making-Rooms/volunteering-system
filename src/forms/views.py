@@ -10,7 +10,7 @@ from commonui.views import check_if_hx
 from .models import Form, Question, Options, Answer, Response, FormResponseRequirement, OrganisationFormResponseRequirement, SuperForm, SuperFormRegistration
 from volunteer.views import index
 import datetime
-from volunteer.models import Volunteer, VolunteerAddress
+from volunteer.models import Volunteer, VolunteerAddress, VolunteerContactPreferences
 from opportunities.models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus
 from org_admin.models import OrganisationAdmin
 from django.contrib.auth.models import User
@@ -179,6 +179,28 @@ def submit_superform(request, id):
                         )
                         address.save()
                         print("Address saved")
+                        
+                    # Check if the volunteer contact preferences exist
+                    try:
+                        contact_preferences = VolunteerContactPreferences.objects.get(volunteer=volunteer)
+                        print("Contact preferences exist")
+                        # Update contact preferences
+                        contact_preferences.whatsapp = True if "whatsapp" in userdata["preferred_contact_method"] else False
+                        contact_preferences.email = True if "email" in userdata["preferred_contact_method"] else False
+                        contact_preferences.phone = True if "phone" in userdata["preferred_contact_method"] else False
+                        contact_preferences.save()
+                        print("Contact preferences saved")
+                    except VolunteerContactPreferences.DoesNotExist:
+                        # Create a new contact preferences if not exists
+                        print("Contact preferences do not exist")
+                        contact_preferences = VolunteerContactPreferences.objects.create(
+                            volunteer=volunteer,
+                            whatsapp=True if "whatsapp" in userdata["preferred_contact_method"] else False,
+                            email=True if "email" in userdata["preferred_contact_method"] else False,
+                            phone=True if "phone" in userdata["preferred_contact_method"] else False,
+                        )
+                        contact_preferences.save()
+                        print("Contact preferences saved")
                     
                 except Volunteer.DoesNotExist:
                     # Create a new volunteer if not exists
@@ -190,13 +212,21 @@ def submit_superform(request, id):
                         phone_number=userdata["phone"],
                     )
                     
+                    contact_preferences = VolunteerContactPreferences.objects.create(
+                        volunteer=volunteer,
+                        whatsapp=True if "whatsapp" in userdata["preferred_contact_method"] else False,
+                        email=True if "email" in userdata["preferred_contact_method"] else False,
+                        phone=True if "phone" in userdata["preferred_contact_method"] else False,
+                    )
+                        
+                    
                     address = VolunteerAddress.objects.create(
                         postcode=userdata["post_code"],
                         volunteer=volunteer,
                     )
-                    address.save()
-                    
                     volunteer.save()
+                    address.save()
+                    contact_preferences.save()
                     print("Volunteer saved")
                 
 

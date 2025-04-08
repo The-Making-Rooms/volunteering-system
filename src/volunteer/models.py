@@ -82,3 +82,9 @@ class SupplementaryInfoGrantee(models.Model):
     org = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
     info = models.ForeignKey('VolunteerSupplementaryInfo', on_delete=models.CASCADE)
     volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)
+
+class VolunteerContactPreferences(models.Model):
+    email = models.BooleanField(default=True)
+    whatsapp = models.BooleanField(default=True)
+    phone = models.BooleanField(default=True)
+    volunteer = models.ForeignKey('Volunteer', on_delete=models.CASCADE)

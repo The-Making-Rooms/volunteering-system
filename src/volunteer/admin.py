@@ -5,7 +5,7 @@ This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for d
 """
 
 from django.contrib import admin
-from volunteer.models import Volunteer, VolunteerAddress, VolunteerConditions, VolunteerInterest, EmergencyContacts, SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, MentorRecord, MentorSession, MentorNotes
+from volunteer.models import Volunteer, VolunteerAddress, VolunteerConditions, VolunteerInterest, EmergencyContacts, SupplementaryInfo, SupplementaryInfoGrantee, VolunteerSupplementaryInfo, MentorRecord, MentorSession, MentorNotes, VolunteerContactPreferences
 # Register your models here.
 class VolunteerAddressInline(admin.TabularInline):
     model = VolunteerAddress
@@ -17,6 +17,10 @@ class VolunteerConditionsInline(admin.TabularInline):
 
 class VolunteerInterestInline(admin.TabularInline):
     model = VolunteerInterest
+    extra = 1
+    
+class VolunteerContactPreferencesInline(admin.TabularInline):
+    model = VolunteerContactPreferences
     extra = 1
 
 class EmergencyContactInline(admin.TabularInline):
@@ -37,7 +41,7 @@ class MentorRecordAdmin(admin.ModelAdmin):
 
 @admin.register(Volunteer)
 class VolunteerAdmin(admin.ModelAdmin):
-    inlines = [VolunteerAddressInline, VolunteerConditionsInline, VolunteerInterestInline, EmergencyContactInline]
+    inlines = [VolunteerAddressInline, VolunteerConditionsInline, VolunteerContactPreferencesInline, VolunteerInterestInline, EmergencyContactInline]
 
 @admin.register(SupplementaryInfo)
 class SupplementaryInfoAdmin(admin.ModelAdmin):
