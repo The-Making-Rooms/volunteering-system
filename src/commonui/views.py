@@ -89,7 +89,7 @@ def index(request):
             return HttpResponseRedirect("/org_admin")
     
     template = loader.get_template("commonui/index.html")
-    orgs = Organisation.objects.filter(featured=True, active=True)
+    orgs = Organisation.objects.filter(featured=True)
     opps = Opportunity.objects.filter(featured=True, active=True)
     org_objects = []
 
