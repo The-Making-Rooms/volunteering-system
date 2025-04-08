@@ -8,7 +8,7 @@ from commonui.views import check_if_hx
 
 def superforms(request, error=None, success=None):
     
-    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     context = {
         "hx": check_if_hx(request),
@@ -20,7 +20,7 @@ def superforms(request, error=None, success=None):
 
 def new_superform(request):
     
-    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     if request.method == 'POST':
         # Handle form submission
@@ -68,7 +68,7 @@ def new_superform(request):
 
 def edit_superform(request, superform_id=None):
     
-    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
+    if request.user.is_anonymous or not request.user.is_superuser: return redirect('sign_in')
     
     if request.method == "POST":
         # Handle form submission
