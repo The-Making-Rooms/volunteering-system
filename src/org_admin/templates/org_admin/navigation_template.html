@@ -112,6 +112,8 @@
               <li><a href="/org_admin/forms/#">Forms</a></li>
               <li><a href="/org_admin/communication/#">Communication</a></li>
               {% if user.is_superuser %}<li><a href="/org_admin/email_portal/#">Emails</a></li>{% endif %}
+              {% if user.is_superuser %}<li><a href="/org_admin/superforms/#">Superforms</a></li>{% endif %}
+
               <li><a href="/org_admin/admin_management/#">Organisation Admins</a></li>
               <li><a href="/org_admin/profile/#">Profile</a></li>
 
@@ -136,6 +138,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/remove-me.js"></script>
+    <script>htmx.config.getCacheBusterParam = true</script>
     <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
   </body>
 </html>

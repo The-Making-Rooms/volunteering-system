@@ -1,0 +1,43 @@
+{% load compress %}
+{% load static %}
+{% load pwa %}
+{% load webpush_notifications %}
+
+<!DOCTYPE html>
+{% if not hx or hx == False %}
+<html lang="en" class="bg-[#e7ecf5]" style="height: 100%" data-theme="bumblebee">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Chip In</title>
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}" />
+    {% endcompress %}
+    {% progressive_web_app_meta %}
+  </head>
+
+  <body class="h-full " data-loading-class="hidden">
+    <div class="d-flex flex-column">
+      <div class="relative">
+
+      {% endif %}
+
+        <div
+          class="z-0 relative htmx-navigator mx-5 md:mx-20 xl:mx-40 2xl:mx-80 my-20"
+          hx-ext="remove-me"
+        >
+          {% block page_content %} {% endblock %}
+        </div>
+      
+
+      {% if not hx or hx == False %} 
+    </div>
+    
+    </div>
+    
+  </body>
+</html>
+{% endif %}

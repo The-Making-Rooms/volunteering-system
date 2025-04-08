@@ -1,5 +1,5 @@
-<p class="text-lg md:text-xl lg:text-2xl">{{question.question}}</p>
-{% if question.question.required %}<p class="text-red-500">(Required)</p>{% endif %}
+<p class="text-lg md:text-xl lg:text-2xl">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</p>{% endif %}</p>
+
 <div class="divider"></div>
 <div class="flex justify-center flex-col">
     <div class="flex items-center mb-3">

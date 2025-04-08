@@ -27,7 +27,7 @@ from .auth import sign_in
 from django.contrib.auth.models import User
 import random
 from forms.models import Form, Response, Question, Answer, Options
-
+from django.shortcuts import redirect
 
 
 
@@ -123,6 +123,12 @@ def utils_fix_festival_followers(request):
     
 # Create your views here.
 def volunteer_admin(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     #List of volunteers without repeating
     if request.user.is_superuser:
         volunteers = Volunteer.objects.all()
@@ -185,6 +191,11 @@ def volunteer_admin(request):
 
 def opportunity_admin(request, error=None, success=None):
     
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.user.is_superuser:
         opportunities = Opportunity.objects.all()
 
@@ -212,6 +223,12 @@ def opportunity_admin(request, error=None, success=None):
     )
     
 def get_filtered_opportunities(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "POST":
         data = request.POST
         search_term = data["search"]
@@ -258,6 +275,12 @@ def get_filtered_opportunities(request):
             
 
 def upload_organisation_logo(request, organisation_id=None):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "GET":
         if request.user.is_superuser:
             return render(request, "org_admin/partials/file_upload.html", {"hx": check_if_hx(request), "upload_url": "/org_admin/upload_organisation_logo/{}/".format(organisation_id)})
@@ -279,6 +302,12 @@ def upload_organisation_logo(request, organisation_id=None):
             return HTTPResponseHXRedirect("/org_admin/details/")
 
 def delete_opportunity(request, id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     opportunity = Opportunity.objects.get(id=id)
     if check_ownership(request, opportunity):
         opportunity.delete()
@@ -288,6 +317,12 @@ def delete_opportunity(request, id):
 
 
 def create_new_organisation(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.user.is_superuser:
         if request.method == "POST":
             print(request.FILES, request.POST)
@@ -307,9 +342,13 @@ def create_new_organisation(request):
         return opportunity_admin(request, error="You do not have permission to create an organisation")
 
 def details(request, error=None, success=None, organisation_id=None):
+    
     if not request.user.is_authenticated:
-        return sign_in(request)
-    print(request.user.is_superuser)
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
+
     if request.method == "POST":
         if organisation_id and request.user.is_superuser:
             org = Organisation.objects.get(id=organisation_id)
@@ -409,7 +448,13 @@ def details(request, error=None, success=None, organisation_id=None):
 
         return render(request, "org_admin/organisation_details_admin.html", context)
 
-def supplementary_info(request, org_id=None):        
+def supplementary_info(request, org_id=None):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+       
     if request.method == "POST":
         data = request.POST
         if org_id and request.user.is_superuser:
@@ -435,6 +480,12 @@ def delete_supplementary_info(request, id):
 
 
 def volunteer_details_admin(request, id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     volunteer = Volunteer.objects.get(id=id)
 
     if not request.user.is_superuser:
@@ -555,6 +606,12 @@ def volunteer_details_admin(request, id):
 
 
 def manage_link(request, link_id=None, delete=False):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "GET":
         if link_id:
             if delete:
@@ -588,6 +645,12 @@ def manage_link(request, link_id=None, delete=False):
         return details(request)
 
 def upload_icons(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "POST":
         files = request.FILES.getlist('file')
         
@@ -610,28 +673,40 @@ def upload_icons(request):
         })
         
 def icons(request):
-        auth = OAuth1(settings.NOUN_PROJECT_API_KEY, settings.NOUN_PROJECT_SECRET_KEY)
-        endpoint = "https://api.thenounproject.com/v2/icon/"
-        params = {
-            "limit": 10,
-            "query": request.POST["search"]
-        }
-        
-        response = requests.get(endpoint, auth=auth, params=params)
-        resp = json.loads(response.text)
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
+    auth = OAuth1(settings.NOUN_PROJECT_API_KEY, settings.NOUN_PROJECT_SECRET_KEY)
+    endpoint = "https://api.thenounproject.com/v2/icon/"
+    params = {
+        "limit": 10,
+        "query": request.POST["search"]
+    }
+    
+    response = requests.get(endpoint, auth=auth, params=params)
+    resp = json.loads(response.text)
 
-        if len(json.loads(response.text)["icons"]) == 0:
-            return HttpResponse("No icons found")
-        
-        icons = [json.loads(response.text)["icons"][i] for i in range(10)]
+    if len(json.loads(response.text)["icons"]) == 0:
+        return HttpResponse("No icons found")
+    
+    icons = [json.loads(response.text)["icons"][i] for i in range(10)]
 
-        context = {
-            "results" : icons,
-        }
-        return render(request, "org_admin/partials/icon_results.html", context=context)
-        
+    context = {
+        "results" : icons,
+    }
+    return render(request, "org_admin/partials/icon_results.html", context=context)
+    
         
 def automated_messages(request, id=None):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "POST":
         data = request.POST
         if request.user.is_superuser:
@@ -655,6 +730,12 @@ def automated_messages(request, id=None):
     
         
 def manage_badge(request, badge_id=None, organisation_id=None, delete=False):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     if request.method == "POST":
         try:
             data = request.POST
@@ -714,6 +795,11 @@ def manage_badge(request, badge_id=None, organisation_id=None, delete=False):
         
         
 def add_icon(badge, icon_id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
 
     auth = OAuth1(settings.NOUN_PROJECT_API_KEY, settings.NOUN_PROJECT_SECRET_KEY)
     endpoint = "https://static.thenounproject.com/png/{}-200.png"
@@ -725,6 +811,12 @@ def add_icon(badge, icon_id):
 
 
 def assign_badge_to_volunteer(request, volunteer_id, badge_id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     badge = Badge.objects.get(id=badge_id)
     if not check_ownership(request, badge):
         return volunteer_admin(request, error="You do not have permission to assign this badge")
@@ -746,6 +838,12 @@ def assign_badge_to_volunteer(request, volunteer_id, badge_id):
     return volunteer_admin(request, success="Badge assigned to volunteer")
 
 def remove_badge_from_volunteer(request, volunteer_id, badge_id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     badge = Badge.objects.get(id=badge_id)
     if not check_ownership(request, badge):
         return volunteer_admin(request, error="You do not have permission to remove this badge")
@@ -754,6 +852,12 @@ def remove_badge_from_volunteer(request, volunteer_id, badge_id):
     return volunteer_admin(request, success="Badge removed from volunteer")
 
 def manage_badge_opportunity(request, badge_id, opportunity_id, delete=False):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     badge = Badge.objects.get(id=badge_id)
     opportunity = Opportunity.objects.get(id=opportunity_id)
     if not check_ownership(request, badge):
@@ -775,6 +879,12 @@ def manage_badge_opportunity(request, badge_id, opportunity_id, delete=False):
     
     
 def create_volunteer_chat(request, volunteer_id):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     #check if user is a volunteer for the org_admins org
     if not request.user.is_superuser:
         if not Registration.objects.filter(volunteer=Volunteer.objects.get(id=volunteer_id), opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exists():
@@ -838,6 +948,12 @@ def create_volunteer_chat(request, volunteer_id):
 ##system transfer
 
 def export_all_orgs_zip(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("/org_admin/sign_in/")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+    
     #create a zip file, with folder for each org
     #each folder will have the media ascociated with it and a csv of the data
     

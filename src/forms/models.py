@@ -4,6 +4,7 @@ VolunteeringSystem
 This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
 """
 
+import uuid
 from django.db import models
 
 # Create your models here.
@@ -76,3 +77,32 @@ class OrganisationFormResponseRequirement(models.Model):
     organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
     assigned = models.DateTimeField(auto_now_add=True)
+
+class SuperForm(models.Model):
+    #override id to use UUID
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    active = models.BooleanField(default=True)
+    
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    photo = models.ImageField(upload_to='superforms/', blank=True, null=True)
+    submitted_message = models.TextField(blank=True, null=True)
+    
+    background_colour = models.CharField(max_length=7, default="#FFFFFF")
+    card_background_colour = models.CharField(max_length=7, default="#FFFFFF")
+    card_text_colour = models.CharField(max_length=7, default="#000000")
+    
+    show_form_titles = models.BooleanField(default=True)
+    show_form_descriptions = models.BooleanField(default=True)
+    
+    forms_to_complete = models.ManyToManyField('Form', blank=True)
+    opportunity_to_register = models.ForeignKey('opportunities.Opportunity', on_delete=models.CASCADE, blank=True, null=True)
+    
+class SuperFormRegistration(models.Model):
+    """Model to keep track of superform registrations"""
+    
+    #override id to use UUID
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    submitted = models.DateTimeField(auto_now_add=True)
+    superform = models.ForeignKey('SuperForm', on_delete=models.CASCADE)

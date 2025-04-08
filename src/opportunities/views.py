@@ -33,10 +33,16 @@ def detail(request, opportunity_id):
             return HttpResponseRedirect("/org_admin")
         elif OrganisationAdmin.objects.filter(user=request.user).exists():
             return HttpResponseRedirect("/org_admin")
+        
+    
     
     #print(opportunity_id)
     template = loader.get_template("opportunities/opportunity-details.html")
     opportunity = Opportunity.objects.get(id=opportunity_id)
+    
+    if opportunity.active == False:
+        return HttpResponse('This opportunity is no longer active')
+    
     benefits = [benefit.benefit for benefit in OpportunityBenefit.objects.filter(opportunity=opportunity)]
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
@@ -125,6 +131,10 @@ def register(request, opportunity_id):
         current_user = request.user
         #check opportunity supplementary Inforequirements
         opportunity = Opportunity.objects.get(id=opportunity_id)
+        
+        if opportunity.active == False:
+            return HttpResponse('You cannot register for this opportunity as it is no longer active') 
+        
         try:
             check_1 = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).exists()
             latest_registration = Registration.objects.filter(volunteer=Volunteer.objects.get(user=request.user), opportunity=opportunity).order_by('-date_created').first()
