@@ -1,19 +1,14 @@
 from forms.models import SuperForm, Form
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from opportunities.models import Opportunity
 from commonui.views import check_if_hx
 
-def check_superuser(request):
-    if request.user:
-        if request.user.is_superuser:
-            return True
-        else:
-            return HttpResponseRedirect('/org_admin/login/')
+
 
 def superforms(request, error=None, success=None):
     
-    check_superuser(request)
+    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
     
     context = {
         "hx": check_if_hx(request),
@@ -25,7 +20,7 @@ def superforms(request, error=None, success=None):
 
 def new_superform(request):
     
-    check_superuser(request)
+    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
     
     if request.method == 'POST':
         # Handle form submission
@@ -73,7 +68,7 @@ def new_superform(request):
 
 def edit_superform(request, superform_id=None):
     
-    check_superuser(request)
+    if request.user.is_anonymous or request.user.is_superuser: return redirect('sign_in')
     
     if request.method == "POST":
         # Handle form submission

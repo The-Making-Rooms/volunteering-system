@@ -1,6 +1,6 @@
 from org_admin.models import OrganisationAdmin
 from organisations.models import Organisation
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from commonui.views import check_if_hx
 from django.contrib.auth.forms import PasswordResetForm
@@ -10,6 +10,14 @@ import random
 
 
 def get_admins(request, error=None, success=None):
+    
+    if not request.user.is_authenticated:
+        return redirect("sign_in")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        print("User is not an admin")
+        return render(request, "org_admin/no_admin.html")
+    
+    
     if request.method == "GET":
         if request.user.is_superuser:
             admins = OrganisationAdmin.objects.all()
@@ -90,6 +98,12 @@ def get_admins(request, error=None, success=None):
                 
 def delete_admin(request, admin_id):
     
+    if not request.user.is_authenticated:
+        return redirect("sign_in")
+    elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
+        return render(request, "org_admin/no_admin.html")
+
+    
     admin = OrganisationAdmin.objects.get(id=admin_id)
     number_of_admins = OrganisationAdmin.objects.filter(organisation=admin.organisation).count()
     
@@ -107,6 +121,12 @@ def delete_admin(request, admin_id):
     
 
 def add_super_user(request):
+    
+    if not request.user.is_authenticated:
+        return redirect("sign_in")
+    elif not request.user.is_superuser:
+        return render(request, "org_admin/no_admin.html")
+    
     if request.method == "POST":
         if request.user.is_superuser:
             data = request.POST
