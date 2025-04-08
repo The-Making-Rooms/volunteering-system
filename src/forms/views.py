@@ -25,11 +25,12 @@ def pretty_print_dict(d):
 def superform(request, id):
     """Superforms allow users to create an account, register for an opportunity, and fill out a form all at once. This allows incremental onboarding of users.
     """
-    
     try:
         superform = SuperForm.objects.get(pk=id)
-    except SuperForm.DoesNotExist:
-        return HTTPResponse("Superform not found")
+    except:
+        return render (request, 'forms/superform/404.html', context={})
+    if superform.active == False:
+        return render (request, 'forms/superform/form_closed.html', context={})
     
     forms_to_complete = superform.forms_to_complete.all()
     forms = Form.objects.filter(id__in=forms_to_complete)
