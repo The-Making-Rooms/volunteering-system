@@ -36,6 +36,8 @@ from forms.models import FormResponseRequirement, Form as FormModel, Question, A
 from organisations.models import OrganisationAdmin
 import re
 
+from threading import Thread
+
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
@@ -174,6 +176,7 @@ def stop_volunteering(request, id):
             stopped_vol_status.save()
             
             #Send confirmation email
+            """
             send_m = send_mail(
                 'Chip in - Volunteer Event Confirmation',
                 'You have stopped volunteering for the event: ' + registration.opportunity.name,
@@ -181,6 +184,14 @@ def stop_volunteering(request, id):
                 [current_user.email],
                 fail_silently=True,
             )
+            """
+            
+            subject = "Chip in - Volunteer Event Confirmation"
+            message = "You have stopped volunteering for the event: " + registration.opportunity.name
+            email = current_user.email
+            # Create a thread to send the email
+            email_thread = Thread(target=send_confirmation_email_thread, args=(email, subject, message))
+            email_thread.start()
             
             return HTTPResponseHXRedirect("/volunteer/your-opportunities")
         else:
@@ -194,6 +205,15 @@ def stop_volunteering(request, id):
                 "link_active": "your-opportunities",
             }
             return render(request, "volunteer/partials/stop_volunteering.html", context=context)
+        
+def send_confirmation_email_thread(email, subject, message):
+    send_mail(
+        subject,
+        message,
+        None,
+        [email],
+        fail_silently=True,
+    )
 
 def your_opportunities(request):
     if request.user.is_authenticated == False:
