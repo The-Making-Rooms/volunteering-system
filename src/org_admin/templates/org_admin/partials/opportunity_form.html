@@ -1,0 +1,23 @@
+<div class="p-5 rounded-lg bg-base-200 mb-3">
+    <div class="flex justify-between items-center">
+        <p class="text-xl">Form</p>
+        <p>You can create and manage forms at: <span class="underline text-blue-500"><a href="/org_admin/forms/">Forms</a></span></p>
+    </div>
+    <div class="divider"></div>
+    {{ opportunity.form}}
+    <form  class="flex flex-col">
+        {% csrf_token %}
+        <select name="form" id="form" class="select select-bordered w-full max-w-xs">
+            <option value="none">No form</option>
+            {% for form in forms %}
+                <option value="{{ form.id }}" {% if opportunity.form == form %}selected{%endif%}>{{ form.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary mt-4" hx-target=".htmx-navigator" hx-post="/org_admin/opportunities/form/{{opportunity.id}}/" hx-swap="outerHTML">Submit</button>
+    </form>
+</div>
+
+{% with active_link="form" %}
+{% include "org_admin/partials/tabs.html" %}
+{% endwith %}

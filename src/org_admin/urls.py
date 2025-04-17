@@ -102,6 +102,8 @@ urlpatterns = [
     path("opportunities/details/<int:id>/", views.opportunity_details, name="opportunity_details"),
     path("opportunities/sections/<int:id>/", views.opportunity_sections, name="opportunity_details"),
     path("opportunities/benefits/<int:id>/", views.opportunity_benefits, name="opportunity_benefits"),
+    path("opportunities/form/<int:id>/", views.opportunity_form, name="opportunity_form"),
+    
     
     path("opportunities/tags/<int:opportunity_id>/", views.tag_details, name="manage_benefit"),
     path("opportunities/manage_tag/<int:opportunity_id>/", views.add_tag, name="manage_benefit"),
