@@ -151,7 +151,7 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
         if key.startswith("sup_"):
             supplementary_info_id = key.split("_")[1]
             supplimentary_form_data[supplementary_info_id] = value
-        elif key is not "csrfmiddlewaretoken":
+        elif key != "csrfmiddlewaretoken":
             question_id = key
             form_question_responses[question_id] = value
     
