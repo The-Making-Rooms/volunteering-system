@@ -92,6 +92,10 @@
                     <label class="label cursor-pointer">Required</label>
                     <input type="checkbox" class="checkbox" name="required" {% if question.question.required %}checked{%endif%}>
                 </div>
+                <div class="w-24">
+                    <label class="label cursor-pointer">Hidden</label>
+                    <input type="checkbox" class="checkbox" name="hidden" {% if not question.question.enabled %}checked{%endif%}>
+                </div>
 
                 {% if question.question.question_type == "multi_choice"%}
                 <div class="w-24">

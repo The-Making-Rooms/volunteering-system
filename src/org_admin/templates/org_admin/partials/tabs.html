@@ -1,6 +1,7 @@
 <div hx-swap-oob="true" hx-target="#tab-contents" role="tablist" class="tabs tabs-boxed my-3" id="tab_container">
     <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/details/{{ opportunity.id }}/"   class="tab {% if active_link == "details" %}tab-active{% endif %}">Details</a>
     <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/tags/{{ opportunity.id }}/"   class="tab {% if active_link == "tags" %}tab-active{% endif %}">Tags</a>
+    <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/form/{{ opportunity.id }}/"   class="tab {% if active_link == "form" %}tab-active{% endif %}">Form</a>
     <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/supp_info/{{ opportunity.id }}/"   class="tab {% if active_link == "additional_info" %}tab-active{% endif %}">Additional Info</a>
     <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/sections/{{ opportunity.id }}/"   class="tab {% if active_link == "sections" %}tab-active{% endif %}">Sections</a>
     <a role="tab" role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/org_admin/opportunities/benefits/{{ opportunity.id }}/"  class="tab {% if active_link == "benefits" %}tab-active{% endif %}">Benefits</a>

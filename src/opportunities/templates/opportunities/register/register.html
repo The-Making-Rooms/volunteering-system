@@ -1,0 +1,58 @@
+{% extends "commonui/navigation-template.html" %}
+
+{% block page_content %}
+
+<p class="text-2xl font-bold">Register for {{opportunity.name}}</p>
+
+{% if error %}
+<p class="text-red-600 font-bold text-xl mb-5">There was an error with your submission. Please check the form and try again.</p>
+{% endif %}
+
+{% if success %}
+<p class="text-green-600 font-bold text-xl mb-5">Your registration was successful! You will receive a confirmation email shortly.</p>
+{% endif %}
+
+<div class="divider"></div>
+
+<form action="/opportunities/{{opportunity.id}}/register/" method="POST" class="mb-5">
+    {% csrf_token %}
+
+{% if form %}
+
+{% for question in questions %}
+    <div class="p-5 bg-secondary rounded-xl mb-3">
+        {% if question.question.question_type == "text" %}
+        {% include "forms/form_elements/text.html" %}
+        {% elif question.question.question_type == "multi_choice" %}
+        {% include "forms/form_elements/multi-choice.html" %}
+        {% elif question.question.question_type == "boolean" %}
+        {% include "forms/form_elements/boolean.html" %}
+        {% endif %}
+    </div>
+{% endfor %}
+
+<div class="divider"></div>
+{% endif %}
+
+{% if supplementary_info %}
+
+{% for info in supplementary_info %}
+<div class="p-5 bg-secondary rounded-xl mb-3">
+<p class="text-2xl mb-1">{{info.info.title}}<span class="text-red-600 font-bold">*</span></p>
+{% if info.response %}<p class="mb-3 text-gray-400">This field has been populated with your previous response.</p>{% endif %}
+    <input type="text" name="sup_{{info.info.id}}" value="{% if info.response %}{{info.response.data}}{%endif%}" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
+</div>
+    
+{% endfor %}    
+
+<div class="divider"></div>
+{% endif %}
+
+
+<p class="mb-3 text-slate-500">By continuing, you agree for Chip In to store the information you have provided, and share this with the organisation that is hosting this opportunity. For more information on how Chip In stores and manages your data, please refer to our <a class="text-blue-400 underline" href="/privacy_policy">Privacy Policy</a></p>
+<div class="divider"></div>
+<button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+
+{% endblock %}

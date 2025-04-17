@@ -189,7 +189,9 @@ def save_question(request, question_id):
     form = question.form
     
     check_form_ownership(request, form)
+
     
+    question.enabled = True if not "hidden" in data.keys() else False
     question.question = data["question"]
     question.required = True if "required" in data.keys() else False
     question.allow_multiple = True if "allow_multiple" in data.keys() else False

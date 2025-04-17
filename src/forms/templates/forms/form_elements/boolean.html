@@ -3,7 +3,7 @@
 <div class="divider"></div>
 <div class="flex justify-center flex-col">
     <div class="flex items-center mb-3">
-        <input class="radio mr-2" type="radio" id="yes" name="{{question.question.id}}" value="yes">
+        <input class="radio mr-2" type="radio" id="yes" name="{{question.question.id}}" value="yes" {% if question.question.required %}required{% endif %}>
         <label for="yes">Yes</label>
     </div>
     <div class="flex items-center mb-3">
