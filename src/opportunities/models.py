@@ -74,9 +74,11 @@ class Opportunity(models.Model):
     recurrences = RecurrenceField(null=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
+    form = models.ForeignKey('forms.Form', on_delete=models.CASCADE, null=True, blank=True)
     organisation = models.ForeignKey('organisations.organisation', on_delete=models.CASCADE)
     active = models.BooleanField(default=False)
     featured = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name

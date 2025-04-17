@@ -11,7 +11,7 @@ from volunteer.models import SupplementaryInfo, SupplementaryInfoGrantee, Volunt
 from organisations.models import Location as OrgLocation, Image as OrgImage, Video as OrgVideo
 from django.template import loader
 from googlemaps import Client as GoogleMaps
-from .forms import SuppInfoForm
+from ..forms import SuppInfoForm
 from datetime import datetime, date
 from django.forms import formset_factory
 from communications.models import Chat
@@ -117,7 +117,7 @@ def detail(request, opportunity_id):
     return HttpResponse(template.render(context, request))
 
 
-def register(request, opportunity_id):
+def register_old(request, opportunity_id):
     #The registration process is as follows:
     #1. Check if the user is logged in
     #2. Check if the user has a volunteer profile
