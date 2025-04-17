@@ -43,8 +43,16 @@ class Question(models.Model):
     question_type = models.CharField(max_length=200)
     required = models.BooleanField(default=False)
     allow_multiple = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
     def __str__(self):
         return self.question
+    
+    #On save check if question is enabled and if not, set required to false
+    def save(self, *args, **kwargs):
+        if not self.enabled:
+            self.required = False
+        super(Question, self).save(*args, **kwargs)
+        
     
 class Options(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
