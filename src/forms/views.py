@@ -38,7 +38,7 @@ def superform(request, id):
     formsets = []
     
     for form in forms:
-        question_objects = Question.objects.filter(form=form).order_by('index')
+        question_objects = Question.objects.filter(form=form, enabled=True).order_by('index')
         
         questions = []
         for question in question_objects:
@@ -388,7 +388,7 @@ def submit_superform(request, id):
 def fill_form(request, form_id, custom_respondee=False):
     print("custom_user_respondee",custom_respondee)
     form = Form.objects.get(pk=form_id)
-    question_objects = Question.objects.filter(form=form).order_by('index')
+    question_objects = Question.objects.filter(form=form, enabled=True).order_by('index')
     
     if not form.filled_by_organisation:
         allowed_to_fill = FormResponseRequirement.objects.get(form=form, user=request.user, completed=False) if FormResponseRequirement.objects.filter(form=form, user=request.user, completed=False).exists() else None
