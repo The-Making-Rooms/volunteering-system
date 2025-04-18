@@ -33,7 +33,7 @@ def superform(request, id):
         return render (request, 'forms/superform/form_closed.html', context={})
     
     forms_to_complete = superform.forms_to_complete.all()
-    forms = Form.objects.filter(id__in=forms_to_complete)
+    forms = Form.objects.filter(id__in=forms_to_complete).order_by('name')
     
     formsets = []
     

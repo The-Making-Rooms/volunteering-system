@@ -4142,14 +4142,6 @@ html:has(.drawer-toggle:checked) {
   margin-top: auto;
 }
 
-.ml-10 {
-  margin-left: 2.5rem;
-}
-
-.mr-10 {
-  margin-right: 2.5rem;
-}
-
 .block {
   display: block;
 }
@@ -4252,10 +4244,6 @@ html:has(.drawer-toggle:checked) {
 
 .h-full {
   height: 100%;
-}
-
-.max-h-32 {
-  max-height: 8rem;
 }
 
 .max-h-96 {
@@ -4500,10 +4488,6 @@ html:has(.drawer-toggle:checked) {
 
 .justify-between {
   justify-content: space-between;
-}
-
-.gap-10 {
-  gap: 2.5rem;
 }
 
 .gap-2 {
@@ -4869,10 +4853,6 @@ html:has(.drawer-toggle:checked) {
   padding: 1.25rem;
 }
 
-.p-10 {
-  padding: 2.5rem;
-}
-
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -4897,10 +4877,6 @@ html:has(.drawer-toggle:checked) {
 
 .pl-3 {
   padding-left: 0.75rem;
-}
-
-.pr-10 {
-  padding-right: 2.5rem;
 }
 
 .text-center {

@@ -2,6 +2,13 @@
 
 {% block page_content %}
 
+{% if superform.opportunity_to_register.organisation.name == "National Festival of Making" %}
+<div class="flex flex-col md:flex-row rounded-xl p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
+    <img src="/static/images/NFM_Black.png" alt="Festival of Making Logo" class="w-full md:w-1/2 object-contain p-3 md:p-10 max-h-96">
+    <div class="divider md:divider-horizontal"></div>
+    <img src="/static/images/ChipIn_Black.jpg" alt="Chip In Logo" class="object-contain w-full md:w-1/2 p-3 md:p-10 max-h-96">
+</div>
+{% endif %}
 
 <div class="p-5 bg-white border border-t-8 border-t-[#627fbb] border-gray-300 rounded-lg mb-3">
 <p class="text-4xl mb-3">{{ superform.name }}</p>
@@ -16,13 +23,7 @@
     <div class="">
         <input type="hidden" name="superform_id" value="{{ superform.id }}">
 
-        {% if superform.opportunity_to_register.organisation.name == "National Festival of Making" %}
-        <div class="flex flex-col md:flex-row rounded-xl p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
-            <img src="/static/images/NFM_Black.png" alt="Festival of Making Logo" class="w-full md:w-1/2 object-contain p-3 md:p-10 max-h-96">
-            <div class="divider md:divider-horizontal"></div>
-            <img src="/static/images/ChipIn_Black.jpg" alt="Chip In Logo" class="object-contain w-full md:w-1/2 p-3 md:p-10 max-h-96">
-        </div>
-        {% endif %}
+
 
         <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
             <label class="text-xl mb-3" for="first_name" class="mr-3">First Name <span class="text-red-600 font-bold">*</span></label>
