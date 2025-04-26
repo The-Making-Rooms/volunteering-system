@@ -3982,18 +3982,6 @@ html:has(.drawer-toggle:checked) {
   border-bottom-left-radius: 0px;
 }
 
-.table-xs :not(thead):not(tfoot) tr {
-  font-size: 0.75rem;
-  line-height: 1rem;
-}
-
-.table-xs :where(th, td) {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
 .table-sm :not(thead):not(tfoot) tr {
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -4404,6 +4392,10 @@ html:has(.drawer-toggle:checked) {
   width: 24rem;
 }
 
+.w-\[640px\] {
+  width: 640px;
+}
+
 .w-auto {
   width: auto;
 }
@@ -4415,10 +4407,6 @@ html:has(.drawer-toggle:checked) {
 
 .w-full {
   width: 100%;
-}
-
-.w-\[640px\] {
-  width: 640px;
 }
 
 .min-w-44 {
@@ -4449,12 +4437,12 @@ html:has(.drawer-toggle:checked) {
   max-width: 24rem;
 }
 
-.max-w-xs {
-  max-width: 20rem;
-}
-
 .max-w-\[90vw\] {
   max-width: 90vw;
+}
+
+.max-w-xs {
+  max-width: 20rem;
 }
 
 .flex-1 {
@@ -4630,6 +4618,10 @@ html:has(.drawer-toggle:checked) {
   border-radius: 1rem;
 }
 
+.rounded-\[8px\] {
+  border-radius: 8px;
+}
+
 .rounded-box {
   border-radius: var(--rounded-box, 1rem);
 }
@@ -4652,10 +4644,6 @@ html:has(.drawer-toggle:checked) {
 
 .rounded-xl {
   border-radius: 0.75rem;
-}
-
-.rounded-\[8px\] {
-  border-radius: 8px;
 }
 
 .rounded-t-xl {
@@ -5002,6 +4990,22 @@ html:has(.drawer-toggle:checked) {
   line-height: 1;
 }
 
+.text-\[11pt\] {
+  font-size: 11pt;
+}
+
+.text-\[12pt\] {
+  font-size: 12pt;
+}
+
+.text-\[14px\] {
+  font-size: 14px;
+}
+
+.text-\[24pt\] {
+  font-size: 24pt;
+}
+
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -5025,22 +5029,6 @@ html:has(.drawer-toggle:checked) {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.text-\[12pt\] {
-  font-size: 12pt;
-}
-
-.text-\[11pt\] {
-  font-size: 11pt;
-}
-
-.text-\[24pt\] {
-  font-size: 24pt;
-}
-
-.text-\[14px\] {
-  font-size: 14px;
 }
 
 .font-black {
