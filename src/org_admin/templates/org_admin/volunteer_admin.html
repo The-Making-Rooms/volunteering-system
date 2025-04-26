@@ -3,9 +3,10 @@
 {% block page_content %}
 
 <p class="text-2xl text-slate-200">Volunteers</p>
+<div class="divider"></div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3 overflow-scroll">
-  <table id="volunteersTable">
+  <table class="table table-sm" id="volunteersTable">
     <thead>
       <tr>
         <th>First Name</th>
@@ -27,8 +28,8 @@
         <td>{{ volunteer.date_of_birth|date:"d/m/y" }}</td>
         <td>{{ volunteer.has_been_contacted }}</td>
         <td>
-          <a href="{{volunteer.id}}/" class="btn btn-primary">View</a>
-          <a href="chat/{{volunteer.id}}/" class="btn btn-danger">Contact</a>
+          <a href="{{volunteer.id}}/" class="btn btn-xs btn-primary">View</a>
+          <a href="chat/{{volunteer.id}}/" class="btn btn-xs btn-danger">Contact</a>
         </td>
       </tr>
       {% endfor %}
@@ -39,20 +40,7 @@
   
   
 <script>
-  function hydrate_volunteer_tables(){
 
-    let volunteer_table = new DataTable('#volunteersTable');
-    volunteer_table.order([3, 'desc']).draw();
-
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    hydrate_volunteer_tables();
-  });
-
-  document.addEventListener('htmx:afterSettle', function(event) {
-    hydrate_volunteer_tables();
-  });
   
 </script>
 

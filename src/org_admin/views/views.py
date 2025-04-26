@@ -131,7 +131,7 @@ def volunteer_admin(request):
     
     #List of volunteers without repeating
     if request.user.is_superuser:
-        volunteers = Volunteer.objects.all()
+        volunteers = Volunteer.objects.all().order_by('user__date_joined').reverse()
         
         organisation_admins = OrganisationAdmin.objects.all()
         
@@ -168,7 +168,7 @@ def volunteer_admin(request):
         
     else:
         registrations = Registration.objects.filter(opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
-        unique_volunteers = Volunteer.objects.filter(id__in=registrations.values_list('volunteer', flat=True)).distinct()
+        unique_volunteers = Volunteer.objects.filter(id__in=registrations.values_list('volunteer', flat=True)).distinct().order_by('user__date_joined').reverse()
         
         organisation_admins = OrganisationAdmin.objects.all()
         
