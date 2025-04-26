@@ -18,7 +18,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.password_validation import validate_password
 import random
 from org_admin.models import OrganisationAdmin
-
+import re
 # create uswer
 from django.contrib.auth.models import User
 
@@ -190,7 +190,11 @@ def create_account(request):
         if data["password"] == "":
             return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Password cannot be empty"})
         
+        #validate email with regex
+        email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
         
+        if not re.match(email_regex, data["email"]):
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email is not valid"})
         
         #check password is secure enough
         try:
