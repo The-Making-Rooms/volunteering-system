@@ -2,18 +2,22 @@
 
 {% block page_content %}
 
-{% if superform.opportunity_to_register.organisation.name == "National Festival of Making" %}
-<div class="flex flex-col md:flex-row rounded-xl p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
+
+
+<div class="font-[roboto] max-w-[90vw] w-[640px] m-auto text-wrap" style="overflow-wrap: break-word;">
+
+    {% if superform.opportunity_to_register.organisation.name == "National Festival of Making" %}
+<div class="flex flex-col md:flex-row rounded-[8px] p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
     <img src="/static/images/NFM_Black.png" alt="Festival of Making Logo" class="w-full md:w-1/2 object-contain p-3 md:p-10 max-h-96">
     <div class="divider md:divider-horizontal"></div>
     <img src="/static/images/ChipIn_Black.jpg" alt="Chip In Logo" class="object-contain w-full md:w-1/2 p-3 md:p-10 max-h-96">
 </div>
 {% endif %}
 
-<div class="p-5 bg-white border border-t-8 border-t-[#627fbb] border-gray-300 rounded-lg mb-3">
-<p class="text-4xl mb-3">{{ superform.name }}</p>
-<p class="text-lg mb-3 w-full">{{ superform.description|linebreaksbr  }}</p>
-<p class="text-lg mb-3 w-full text-red-600">* Indicates required question</p>
+<div class="p-5  bg-white border border-t-8 border-t-[#627fbb] border-gray-300 rounded-lg mb-3">
+    <p class="text-[24pt]  mb-3">{{ superform.name }}</p>
+    <p class="text-[11pt] mb-3 w-full">{{ superform.description|linebreaksbr  }}</p>
+    <p class="text-[14px] mb-3 w-full text-red-600">* Indicates required question</p>
 </div>
 <form action="/forms/register/{{superform.id}}/submit/" method="POST" class="mb-5">
 
@@ -25,38 +29,35 @@
 
 
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="first_name" class="mr-3">First Name <span class="text-red-600 font-bold">*</span></label>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="first_name" class="mr-3">First Name <span class="text-red-600 font-bold">*</span></label>
             <input type="text" name="first_name" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="last_name" class="mr-3">Last Name <span class="text-red-600 font-bold">*</span></label>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="last_name" class="mr-3">Last Name <span class="text-red-600 font-bold">*</span></label>
             <input type="text" name="last_name" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="preferred_name" class="mr-3">Preferred Name <span class="text-red-600 font-bold">*</span></label>
-            <input type="text" name="preferred_name" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2">
-        </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="date_of_birth" class="mr-3">Date of Birth <span class="text-red-600 font-bold">*</span></label>
+
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="date_of_birth" class="mr-3">Date of Birth <span class="text-red-600 font-bold">*</span></label>
             <input type="date" name="date_of_birth" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="phone_number" class="mr-3">Phone Number <span class="text-red-600 font-bold">*</span></label>
-            <input type="tel" value="07" name="phone_number" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" minlength="11" required>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="phone_number" class="mr-3">Phone Number <span class="text-red-600 font-bold">*</span></label>
+            <input type="tel" value="" name="phone_number" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" minlength="11" required>
         </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="email" class="mr-3">Email <span class="text-red-600 font-bold">*</span></label>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="email" class="mr-3">Email <span class="text-red-600 font-bold">*</span></label>
             <input type="email" name="email" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
 
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <p class="text-xl mb-3">Preferred Contact Method</p>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <p class="text-[12pt] mb-3">Preferred Contact Method</p>
             <label class="cursor-pointer">
                 <input type="checkbox" name="contact_method" value="email" class="checkbox mr-2" checked>
                 Email
@@ -71,8 +72,8 @@
             </label>
         </div>
         
-        <div class="flex flex-col rounded-xl p-5 bg-white border border-gray-300 mb-5">
-            <label class="text-xl mb-3" for="post_code" class="mr-3">Post Code <span class="text-red-600 font-bold">*</span></label>
+        <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+            <label class="text-[12pt] mb-3" for="post_code" class="mr-3">Post Code <span class="text-red-600 font-bold">*</span></label>
             <input type="text" name="post_code" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
 
@@ -82,7 +83,7 @@
 {% for form in forms%}
         <div class="">
             {% if superform.show_form_titles or superform.show_form_descriptions %}
-            <div class="p-5 bg-white border border-gray-400 rounded-xl mb-3">
+            <div class="p-5 bg-white border border-gray-400 rounded-[8px] mb-3">
                 {% if superform.show_form_titles%}<p class="text-2xl font-bold mb-3">{{ form.form.name }}</p>{% endif %}
                 {% if superform.show_form_descriptions%}<p class="text-lg mb-3">{{ form.form.description }}</p>{% endif %}
             </div>
@@ -104,4 +105,5 @@
     {% endfor %}
 <button class="btn bg-[#5576b6] text-white mb-5" >Submit</button>
 </form>
+</div>
 {%endblock%}
