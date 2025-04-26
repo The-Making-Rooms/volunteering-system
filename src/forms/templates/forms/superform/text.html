@@ -1,3 +1,3 @@
-<p class="text-xs mb-5">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</p>{% endif %}</p>
+<p class="text-[12pt] mb-5">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</p>{% endif %}</p>
 <input type="text" name="sup_{{form.form.id}}_{{question.question.id}}" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" {% if question.question.required %}required{% endif %}>
 
