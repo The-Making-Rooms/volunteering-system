@@ -81,8 +81,8 @@ def index(request):
                     return HTTPResponseHXRedirect("/forms/" + str(form.id))
                 else:
                     #check if the form has been completed
-                    form_req = FormResponseRequirement.objects.get(user=current_user, form=form)
-                    if form_req.completed == False:
+                    form_req = FormResponseRequirement.objects.filter(user=current_user, form=form, completed=False).first()
+                    if form_req:
                         #redirect to form
                         return HttpResponseRedirect("/forms/" + str(form.id))
                     else:
@@ -137,8 +137,7 @@ def index(request):
             return render(
                 request, "volunteer/container.html", {"hx": check_if_hx(request)}
             )
-        except Exception as e:
-            print(e)
+
 
     else:
         return render(

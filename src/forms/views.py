@@ -107,7 +107,6 @@ def submit_superform(request, id):
         userdata = {
             "first_name": request.POST.get('first_name'),
             "last_name": request.POST.get('last_name'),
-            "preferred_name": request.POST.get('preferred_name'),
             "date_of_birth": request.POST.get('date_of_birth'),
             "preferred_contact_method": request.POST.getlist('contact_method'),
             "post_code": request.POST.get('post_code'),
@@ -151,8 +150,7 @@ def submit_superform(request, id):
                     
                     volunteer = Volunteer.objects.get(user=user)
                     print("Volunteer exists")
-                    if volunteer.preferred_name != userdata["preferred_name"]:
-                        volunteer.preferred_name = userdata["preferred_name"]
+
                         
                     if volunteer.date_of_birth != userdata["date_of_birth"]:
                         volunteer.date_of_birth = userdata["date_of_birth"]

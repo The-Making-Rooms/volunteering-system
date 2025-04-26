@@ -1,5 +1,5 @@
 <div class="form-control">
-    <p class="text-2xl mb-5">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</span>{% endif %}</p>
+    <p class="text-[12pt] mb-5">{{question.question}}{% if question.question.required %}<span class="text-red-600 font-bold">*</span>{% endif %}</p>
     <div class="flex flex-col">
         {% for option in question.options %}
         <div class="flex items-center mb-3">
@@ -10,7 +10,7 @@
             <input class="radio mr-2" type="radio" name="sup_{{form.form.id}}_{{question.question.id}}" value="{{option.id}}" {% if question.question.required %}required{% endif %}>
             {% endif %}
             
-            <label for="{{option.id}}">{{option.option}}</label>
+            <label class="text-[11pt] " for="{{option.id}}">{{option.option}}</label>
         </div>
         {% endfor %}
     </div>
