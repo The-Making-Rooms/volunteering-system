@@ -185,6 +185,13 @@ def create_account(request):
         if data["password"] != data["password_confirm"]:
             return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Passwords do not match"})
         
+        if data["email"] == "":
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Email cannot be empty"})
+        if data["password"] == "":
+            return render(request, "commonui/error.html", {"hx": check_if_hx(request), "error": "Password cannot be empty"})
+        
+        
+        
         #check password is secure enough
         try:
             validate_password(data["password"])
