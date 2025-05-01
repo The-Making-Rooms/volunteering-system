@@ -68,7 +68,7 @@ class Response(models.Model):
     
 class Answer(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
-    answer = models.CharField(max_length=200, null=True, blank=True)
+    answer = models.CharField(max_length=500, null=True, blank=True)
     response = models.ForeignKey('Response', on_delete=models.CASCADE, blank=True, null=True)
     
     def __str__(self):
