@@ -205,7 +205,6 @@ def submit_superform(request, id):
                     print("Volunteer does not exist")
                     volunteer = Volunteer.objects.create(
                         user=user,
-                        preferred_name=userdata["preferred_name"],
                         date_of_birth=userdata["date_of_birth"],
                         phone_number=userdata["phone"],
                     )
@@ -244,7 +243,6 @@ def submit_superform(request, id):
                 
                 volunteer = Volunteer.objects.create(
                     user=user,
-                    preferred_name=userdata["preferred_name"],
                     date_of_birth=userdata["date_of_birth"],
                     phone_number=userdata["phone"],
                 )
