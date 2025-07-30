@@ -9,6 +9,9 @@ from django.utils import timezone
 from threading import Thread
 from django.core.mail import send_mail
 
+from rota.models import OneOffDate, VolunteerOneOffDateAvailability, Role, VolunteerRoleIntrest
+
+
 def check_volunteer_allowed_to_register(opportunity: Opportunity, volunteer: Volunteer):
     """
     Check if the volunteer is allowed to register for the opportunity.
@@ -109,15 +112,20 @@ def register(request, opportunity_id, error=None):
             supplementary_info_requirement.response = response.first()
         else:
             supplementary_info_requirement.response = None
-            
-            
-            
-        
-    
-    
+
+
+    #Volunteer Availability questions
+    available_dates = OneOffDate.objects.filter(opportunity=opportunity, date__gte=timezone.now()).order_by('date')
+    roles = Role.objects.filter(opportunity=opportunity)
+
+
     
     context = {
         "hx": check_if_hx(request),
+
+        "dates": available_dates,
+        "roles": roles,
+
         "error": error,
         "opportunity": opportunity,
         "volunteer": volunteer,
@@ -144,6 +152,9 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
     
     supplimentary_form_data = {}
     form_question_responses = {}
+
+    available_dates = []
+    interested_roles = []
     
     
     
@@ -151,10 +162,17 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
         if key.startswith("sup_"):
             supplementary_info_id = key.split("_")[1]
             supplimentary_form_data[supplementary_info_id] = value
+        elif key.startswith("schedule_"):
+            schedule_id = key.split("_")[1]
+            available_dates.append(schedule_id)
+        elif key.startswith("roles_"):
+            role_id = key.split("_")[1]
+            interested_roles.append(role_id)
         elif key != "csrfmiddlewaretoken":
             question_id = key
             form_question_responses[question_id] = value
-    
+
+
 
     if opportunity.form:
         form = Form.objects.get(id=opportunity.form.id)
@@ -238,6 +256,28 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
         registration=registration,
         registration_status=RegistrationStatus.objects.get(status="awaiting_approval"),
     )
+
+    #Create volunteer Availability and interested roles
+
+    print(request.POST)
+
+    for schedule_date in available_dates:
+        print("Schedule: ", schedule_date)
+        one_off_schedule_object = OneOffDate.objects.get(id=schedule_date)
+        availability = VolunteerOneOffDateAvailability(
+            registration=registration,
+            one_off_date=one_off_schedule_object,
+        )
+        availability.save()
+
+    for role in interested_roles:
+        print("Role: ", role)
+        role = Role.objects.get(id=role)
+        interested_role = VolunteerRoleIntrest(
+            registration=registration,
+            role=role,
+        )
+        interested_role.save()
     
     # Send email to organisation admins
     send_email_thread = SendEmailToOrgAdminsThread(request, opportunity.id)

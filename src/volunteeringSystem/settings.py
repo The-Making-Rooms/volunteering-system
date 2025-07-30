@@ -13,15 +13,12 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+if os.environ.get('DJANGO_ENV') == 'production':
+    ALLOWED_HOSTS = ['127.0.0.1', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
+else:
+    ALLOWED_HOSTS = ['*']
 
-# SECURITY WARNING: keep the secret key used in production secret!
-
-# SECURITY WARNING: don't run with debug turned on in production!
-
-ALLOWED_HOSTS = ['127.0.0.1', 'volunteerapp.makingrooms.org', 'chipinbwd.co.uk', 'chipinbwd.co.uk']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = True
@@ -103,6 +100,7 @@ INSTALLED_APPS = [
      'communications',
      'django_celery_results',
      'django_celery_beat',
+     'rota',
 ]
 
 

@@ -1,0 +1,78 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+    <button
+        class="btn btn-primary btn-sm mb-3"
+        type="submit"
+        hx-get="/org_admin/rota/assign/{{ opp.id }}/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+    >
+        ↩ Back
+    </button>
+
+    <div class="flex flex-col space-y-2">
+    <div class="flex justify-between">
+        <p class="text-2xl font-bold mb-3">Available Volunteers for: {{ opp.name }}</p>
+    </div>
+
+        <p class="text-slate-400">beans</p>
+    </div>
+
+    <div class="divider"></div>
+
+    {{ shifts }}
+
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+        <table class="table table-hover">
+            <thead>
+                <th>Name</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+            {{ assigned_volunteers }}
+            {% for registration in assigned_volunteers %}
+                <tr>
+                    <td>{{ registration.volunteer.user.first_name }} {{ registration.volunteer.user.last_name }}</td>
+                    <td>
+                        <button
+                        class="btn btn-sm bg-primary"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-get="/org_admin/rota/unassign/{{ registration.id }}/{{ role_id }}/"
+                    >
+                        Unassign
+                    </button></td>
+            {% endfor %}
+            {% for registration in registrations %}
+                <tr>
+                    <td>{{ registration.volunteer.user.first_name }} {{ registration.volunteer.user.last_name }}</td>
+                    {% if section_id %}
+                    <td>
+                        <button
+                        class="btn btn-sm bg-primary"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-get="/org_admin/rota/assign/instance/{{ registration.id }}/{{ role_id }}/{{ schedule_id }}/{{ section_id }}/"
+                    >
+                        Assign
+                    </button></td>
+                {% else %}
+                <td>
+                        <button
+                        class="btn btn-sm bg-primary"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-get="/org_admin/rota/assign/instance/{{ registration.id }}/{{ role_id }}/{{ schedule_id }}/"
+                    >
+                        Assign
+                    </button></td>
+                {% endif %}
+
+                <tr>
+            {% endfor %}
+        </table>
+    </div>
+
+{% endblock %}

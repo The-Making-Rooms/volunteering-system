@@ -198,8 +198,32 @@ urlpatterns = [
      path("superforms/", views.superforms, name="superforms"),
      path("superforms/new/", views.new_superform, name="new_superform"),
      path("superforms/edit/<str:superform_id>/", views.edit_superform, name="new_superform"),
-     
-    
+
+     path("rota/", views.rota_index, name="rota"),
+     path("rota/<int:opportunity_id>/", views.opportunity_rota_index, name="rota_opportunity"),
+
+    path("rota/role/new/<int:opp_id>/", views.edit_role, name="create_new_rota_role"),
+    path("rota/role/<int:role_id>/", views.edit_role, name="edit_rota_role"),
+
+    path("rota/section/new/<int:role_id>/", views.edit_section, name="create_new_rota_section"),
+    path("rota/section/<int:section_id>/", views.edit_section, name="edit_rota_section"),
+
+    path("rota/schedule/new/<int:opp_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+    path("rota/schedule/<int:schedule_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+
+    path("rota/assign/<int:opp_id>/", views.assign_rota, name="assign_rota"),
+
+    path("rota/assign/shift/<int:role_id>/<int:schedule_id>/", views.assign_volunteer_shift, name="assign_role_shift"),
+    path("rota/assign/shift/<int:role_id>/<int:schedule_id>/<int:section_id>/", views.assign_volunteer_shift, name="assign_role_shift"),
+
+    path("rota/assign/instance/<int:registration_id>/<int:role_id>/<int:schedule_id>/", views.assign_volunteer_shift_instance,
+         name="assign_role_shift"),
+    path("rota/assign/instance/<int:registration_id>/<int:role_id>/<int:schedule_id>/<int:section_id>/", views.assign_volunteer_shift_instance,
+             name="assign_role_shift"),
+
+    path("rota/unassign/<int:registration_id>/<int:role_id>/", views.unassign_volunteer_shift_instance, name="unassign_rota"),
+
+
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),
     #path("utils/gen_random_passwords/", views.utils_set_random_password, name="gen_random_passwords"),

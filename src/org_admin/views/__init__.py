@@ -24,3 +24,4 @@ from .data_import import *
 from .dashboard import *
 from .email_portal import *
 from .superforms import *
+from .rota import *

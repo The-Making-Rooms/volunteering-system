@@ -1,0 +1,97 @@
+{% extends 'commonui/navigation-template.html' %}
+
+{% block page_content %}
+
+    <button
+            class="btn btn-primary btn-sm mb-3"
+            hx-get="/volunteer/your-opportunities/"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+    >
+        ↩ Back
+    </button>
+
+    <form>
+        {% csrf_token %}
+
+        <div class="card w-full bg-base-200 mb-3">
+            <div class="card-body p-5">
+
+            <p>Please not that updating preferences will not cancel any shifts assigned to you. Please update your availability for shifts on the shifts screen.</p>
+            <div class="divider"></div>
+
+                {% if dates|length > 0 %}
+                    <p class="text-xl mb-1">Please indicate your availability:</p>
+                    <div class="flex flex-col gap-3">
+                        {% for d in dates %}
+                            <div class="flex items-center gap-x-3">
+                                <input
+                                        class="checkbox checkbox-primary"
+                                        type="checkbox"
+                                        id="schedule_{{ d.id }}"
+                                        name="schedule_{{ d.id }}"
+
+                                        {% if d.id in volunteer_dates %}checked{% endif %}
+                                />
+                                <label for="schedule_{{ d.id }}">
+                                    {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} -
+                                    {{ d.end_time|date:"H:i" }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="divider"></div>
+                {% else %}
+                    <p>This opportunity has no upcoming dates. Please contact the organisation.</p>
+                    <div class="divider"></div>
+                {% endif %}
+
+                {% if roles|length > 0 %}
+                    <p class="text-xl mb-3">Which roles are you interested in?</p>
+                    <div class="flex flex-col gap-3">
+                        {% for role in roles %}
+                            <div class="flex items-center gap-x-3">
+                                <input
+                                        class="checkbox checkbox-primary"
+                                        type="checkbox"
+                                        name="roles_{{ role.id }}"
+                                        id="{{ role.id }}"
+                                        {% if role.id in volunteer_roles %}checked{% endif %}
+                                />
+                                <label for="{{ role.id }}">
+                                    {{ role.name }}
+                                </label>
+                            </div>
+
+                        {% endfor %}
+                    </div>
+
+
+                {% else %}
+                    <p>This opportunity has no roles defined. Please contact the organisation.</p>
+
+
+                {% endif %}
+
+            {% if roles or dates %}
+                <div class="divider"></div>
+                <button
+                    class="btn btn-primary btn-sm mb-3"
+                    hx-post="/volunteer/manage_preferences/{{ registration.id }}/"
+                    hx-target=".htmx-navigator"
+                    hx-swap="outerHTML"
+                >Submit</button>
+
+            {% endif %}
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </form>
+
+{% endblock %}

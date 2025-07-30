@@ -7,6 +7,8 @@
 <form>
 {% csrf_token %}
 
+
+
 {% if formset|length != 0%}
 <p class="mb-3">This opportunity needs you to fill in some additional information to continue</p>
     {{ formset.management_form }}

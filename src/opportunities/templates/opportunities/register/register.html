@@ -17,6 +17,54 @@
 <form action="/opportunities/{{opportunity.id}}/register/" method="POST" class="mb-5">
     {% csrf_token %}
 
+
+
+    {% if dates|length > 0 %}
+        <p class="text-xl mb-1">Please indicate your availability:</p>
+        <div class="flex flex-col gap-3">
+            {% for d in dates %}
+                <div class="flex items-center gap-x-3">
+                    <input
+                            class="checkbox checkbox-primary"
+                            type="checkbox"
+                            id="schedule_{{ d.id }}"
+                            name="schedule_{{ d.id }}"
+                    />
+                    <label for="schedule_{{ d.id }}">
+                    {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="divider"></div>
+    {% endif %}
+
+
+
+
+    {% if roles|length > 0 %}
+        <p class="text-xl mb-3">Which roles are you interested in?</pc>
+        <div class="flex flex-col gap-3">
+            {% for role in roles %}
+                <div class="flex items-center gap-x-3">
+                    <input
+                        class="checkbox checkbox-primary"
+                        type="checkbox"
+                        name="roles_{{ role.id }}"
+                        id="{{ role.id }}"/>
+                    <label for="{{ role.id }}">
+                    {{ role.name }}
+                    </label>
+                </div>
+
+            {% endfor %}
+        </div>
+        <div class="divider"></div>
+    {% endif %}
+
+
+
+
 {% if form %}
 
 {% for question in questions %}

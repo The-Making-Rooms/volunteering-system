@@ -1,0 +1,57 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<button
+    class="btn btn-primary btn-sm mb-3"
+    type="submit"
+    hx-get="/org_admin/rota/role/{{ role.id }}/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+>
+    ↩ Back
+</button>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+    <p class="text-2xl font-bold">
+    {%if section %}Editing Section: {{ section.name }} for role {{ role.name }}{% else %}New Section for role: {{ role.name }}{% endif %}
+    </p>
+    <div class="divider"></div>
+        <form>
+            {% csrf_token %}
+
+        <div class="flex flex-col md:flex-row md:space-x-4">
+
+            <div class="mb-3 flex-grow">
+                <p>Section Name:</p>
+                <input class="input input bordered w-full" type="text" name="section_name" {% if section %}value="{{ section.name }}"{% endif %} required></input>
+            </div>
+
+            <div class="mb-3">
+                <p>Volunteers required:</p>
+                <input class="input input bordered" type="number" name="section_volunteers" {% if section %}value="{{ section.required_volunteers }}"{% endif %} required></input>
+            </div>
+
+        </div>
+
+        <div class="mb-3">
+            <p>Section Description:</p>
+            <textarea class="textarea textarea-bordered w-full" name="section_description" required>{{ section.description }}</textarea>
+        </div>
+
+
+            <button
+                class="btn btn-primary"
+                type="submit"
+                hx-post={% if section %}"/org_admin/rota/section/{{ section.id }}/" {% else %} "/org_admin/rota/section/new/{{ role.id }}/"{% endif %}
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+            >
+                Submit
+            </button>
+        </form>
+</div>
+
+
+
+{% endblock %}

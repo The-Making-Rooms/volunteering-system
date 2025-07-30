@@ -1,0 +1,36 @@
+{% extends 'commonui/navigation-template.html' %}
+
+{% block page_content %}
+    <button
+        class="btn btn-primary btn-sm mb-3"
+        hx-get="/volunteer/your-opportunities/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+        >
+            ↩ Back
+    </button>
+
+    <form>
+    {% csrf_token %}
+
+    <div class="card w-full bg-base-200 mb-3">
+        <div class="card-body p-5">
+            <p class="text-2xl font-bold">Shifts</p>
+
+            {% if shifts|length == 0 %}
+                <p>You have not been assigned any shifts yet. Please get in touch with the organisation or check back later.</p>
+            {% endif %}
+
+            {% for shift in shifts %}
+                <div>
+                    {{ shift.role }}
+                    {% if shift.section %}{{ shift.section }}{% endif %}
+                    {{ sift.occurrence.start_time }}
+                    {{ sift.occurrence.end_time }}
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock %}

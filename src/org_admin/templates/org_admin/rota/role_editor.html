@@ -1,0 +1,109 @@
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+<button
+    class="btn btn-primary btn-sm mb-3"
+    type="submit"
+    hx-get="/org_admin/rota/{{ opp }}/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+>
+    ↩ Back
+</button>
+
+<div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+    <p class="text-2xl font-bold">
+    {%if role %}Editing Role: {{ role.name }}{% else %}New Role{% endif %}
+    </p>
+    {% if sections|length > 0 %}
+        <p>
+            Note: You are using sections, therefore the volunteers required is calculated from the sum of required volunteers in sections
+        </p>
+    {% endif %}
+    <div class="divider"></div>
+        <form>
+            {% csrf_token %}
+
+        <div class="flex flex-col md:flex-row md:space-x-4">
+
+            <div class="mb-3 flex-grow">
+                <p>Role Name:</p>
+                <input class="input input bordered w-full" type="text" name="role_name" {% if role %}value="{{ role.name }}"{% endif %} required></input>
+            </div>
+
+            <div class="mb-3">
+                <p>Volunteers required:</p>
+            {% if sections|length > 0 %}
+                <input class="input input bordered" type="number" name="role_volunteers" {% if role %}value="{{ volunteers_required }}"{% endif %} disabled></input>
+            {% else %}
+                <input class="input input bordered" type="number" name="role_volunteers" {% if role %}value="{{ role.required_volunteers }}"{% endif %} required></input>
+            {% endif %}
+
+            </div>
+
+
+        </div>
+
+        <div class="mb-3">
+            <p>Role Description:</p>
+            <textarea class="textarea textarea-bordered w-full" name="role_description" required>{{ role.description }}</textarea>
+        </div>
+
+
+            <button
+                class="btn btn-primary"
+                type="submit"
+                hx-post={% if role %}"/org_admin/rota/role/{{ role.id }}/" {% else %} "/org_admin/rota/role/new/{{ opp }}/"{% endif %}
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+            >
+                Submit
+            </button>
+        </form>
+</div>
+
+{% if role %}
+    <div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+                <div class="flex">
+                    <div class="flex flex-col space-y-4">
+                        <p class="text-xl font-bold">Sections:</p>
+                        <p class="text-slate-400">Use sections to further split roles into administrative categories. Sections are not visible to volunteers but are used when assigning shifts. e.g. you can use sections to differentiate between location of a particular role.</p>
+                    </div>
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                        hx-get={% if section %}"/org_admin/rota/section/{{ section.id }}/" {% else %} "/org_admin/rota/section/new/{{ role.id }}/"{% endif %}
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                    >
+                        New Section
+                    </button>
+                </div>
+
+                <div class="divider"></div>
+
+                {% if sections|length > 0 %}
+                    {% for section in sections %}
+                        <div class="p-3 m-2 rounded bg-base-300 flex items-center justify-between">
+                            <p>{{ section.name }}</p>
+                            <button
+                            hx-get="/org_admin/rota/section/{{ section.id }}/"
+                            hx-target=".htmx-navigator"
+                            hx-swap="outerHTML"
+                            class="btn btn-primary btn-sm">
+                            Edit
+                        </button>
+                        </div>
+                    {% endfor %}
+
+                {% else %}
+                    <p>No sections available.</p>
+                {% endif %}
+
+
+
+    </div>
+{% endif %}
+
+{% endblock %}
