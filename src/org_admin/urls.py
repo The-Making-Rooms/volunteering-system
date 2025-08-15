@@ -205,10 +205,18 @@ urlpatterns = [
     path("rota/role/new/<int:opp_id>/", views.edit_role, name="create_new_rota_role"),
     path("rota/role/<int:role_id>/", views.edit_role, name="edit_rota_role"),
 
+    path("rota/toggle_rota_type/<int:opportunity_id>/", views.toggle_opportunity_scheduling_type, name="toggle_rota scheduling"),
+
+
+
     path("rota/section/new/<int:role_id>/", views.edit_section, name="create_new_rota_section"),
     path("rota/section/<int:section_id>/", views.edit_section, name="edit_rota_section"),
 
+
     path("rota/schedule/new/<int:opp_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+    path("rota/schedule/new/<int:opp_id>/<int:role_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+
+
     path("rota/schedule/<int:schedule_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
 
     path("rota/assign/<int:opp_id>/", views.assign_rota, name="assign_rota"),
@@ -222,6 +230,12 @@ urlpatterns = [
              name="assign_role_shift"),
 
     path("rota/unassign/<int:registration_id>/<int:role_id>/", views.unassign_volunteer_shift_instance, name="unassign_rota"),
+
+    path("rota/send_shifts/<int:opp_id>/", views.confirm_shifts, name="confirm_assigned_shifts"),
+
+
+
+    path("supervisors/", views.supervisor_index, name='supervisor_index'),
 
 
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),

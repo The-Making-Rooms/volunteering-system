@@ -65,7 +65,9 @@ def get_default_icon():
         
         return icon.id
    
-        
+class OpportunityRotaConfigChoices(models.TextChoices):
+    SHARED_SCHEDULE = "SHARED", "Shared Schedule"
+    PER_ROTA = "PER_ROLE", "Per Role"
         
 # Create your models here.
 class Opportunity(models.Model):
@@ -79,6 +81,8 @@ class Opportunity(models.Model):
     active = models.BooleanField(default=False)
     featured = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
+
+    rota_config = models.CharField(choices=OpportunityRotaConfigChoices.choices, default=OpportunityRotaConfigChoices.SHARED_SCHEDULE, max_length=50)
 
     def __str__(self):
         return self.name

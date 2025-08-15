@@ -1,17 +1,6 @@
+from tkinter.constants import CASCADE
+
 from django.db import models
-
-from django.core.exceptions import ValidationError
-from django.db import models
-from datetime import timedelta, date
-import calendar
-
-import opportunities
-
-class RSVPChoices(models.TextChoices):
-    YES = 'yes', 'Yes'
-    NO = 'no', 'No'
-    NONE = '-', 'No Response'
-
 import pickle
 from datetime import datetime, date, time
 from typing import Optional, List, Dict, Any
@@ -20,7 +9,19 @@ from dateutil.rrule import rrule
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from django.conf import settings
 
+class RSVPChoices(models.TextChoices):
+    YES = 'yes', 'Yes'
+    NO = 'no', 'No'
+    CANT_MAKE_IT = 'cmi', 'Can\'t make it'
+    NONE = '-', 'No Response'
+
+class SupervisorAccessRoleChoices(models.TextChoices):
+    ALL_ORG = 'all_org', 'All Organisation Shifts'
+    ALL_OPPORTUNITY = 'all_opportunity', 'All Shifts for given Opportunities'
+    ALL_ROLE = 'all_role', 'All shift for given roles'
+    SPECIFIC_SHIFTS = 'specific_shifts', 'Specific shifts'
 
 class Schedule(models.Model):
     opportunity = models.ForeignKey('opportunities.Opportunity', on_delete=models.CASCADE)
@@ -80,14 +81,18 @@ class Schedule(models.Model):
 
 class Role(models.Model):
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.TextField(blank=True, default='')
+    volunteer_description = models.TextField(blank=True, default='')
     required_volunteers = models.IntegerField()
     opportunity = models.ForeignKey("opportunities.Opportunity", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.opportunity.name + " - " + self.name
 
 
 class Section(models.Model):
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.TextField(blank=True, default='')
     required_volunteers = models.IntegerField()
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
@@ -120,6 +125,9 @@ class Occurrence(models.Model):
             self.start_time = self.one_off_date.start_time
             self.end_time = self.one_off_date.end_time
 
+    def __str__(self):
+        return str(self.date) + "(" + str(self.start_time) + " - " + str(self.end_time)  + ")"
+
 
 class VolunteerShift(models.Model):
     registration = models.ForeignKey('opportunities.Registration', on_delete=models.CASCADE, null=True)
@@ -131,11 +139,19 @@ class VolunteerShift(models.Model):
 
     confirmed = models.BooleanField(default=False)
 
+    check_in_time = models.TimeField(blank=True, null=True)
+    check_out_time = models.TimeField(blank=True, null=True)
+
     rsvp_response = models.CharField(
         max_length=10,
         choices=RSVPChoices.choices,
         default=RSVPChoices.NONE,
     )
+
+    rsvp_reason = models.CharField(blank=True, null=True)
+
+    def status(self):
+        return self.registration.get_registration_status()
 
     class Meta:
         unique_together = ('registration', 'occurrence')
@@ -151,10 +167,21 @@ class OneOffDate(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, default=None)
 
     def clean(self):
-        if self.start_time > self.end_time:
+        if self.start_time >= self.end_time:
             raise ValidationError("Start time must be before end time")
-        if self.start_time < self.end_time:
-            raise ValidationError("Start time must be after end time")
 
 
+class Supervisor(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    organisation = models.OneToOneField('organisations.Organisation', on_delete=models.CASCADE)
+
+    access_level = models.CharField(
+        max_length=20,
+        choices=SupervisorAccessRoleChoices.choices,
+        default=SupervisorAccessRoleChoices.SPECIFIC_SHIFTS,
+    )
+
+    supervisor_opportunities = models.ManyToManyField('opportunities.Opportunity', blank=True)
+    supervisor_roles = models.ManyToManyField(Role)
+    supervisor_shifts = models.ManyToManyField(Occurrence)
 

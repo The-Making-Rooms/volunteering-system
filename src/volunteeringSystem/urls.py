@@ -27,6 +27,7 @@ js_info_dict = {
 }
 
 urlpatterns = [
+    path("supervisor/", include("rota.urls")),
     path("organisations/", include("organisations.urls")),
     path("opportunities/", include("opportunities.urls")),
     path("volunteer/", include("volunteer.urls")),

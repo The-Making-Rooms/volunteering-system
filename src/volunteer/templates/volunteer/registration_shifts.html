@@ -1,36 +1,86 @@
 {% extends 'commonui/navigation-template.html' %}
 
 {% block page_content %}
+
+    <dialog id="my_modal_2" class="modal">
+        <div id="modalDiv" class="modal-box">
+            <h3 class="font-bold text-lg">Modal</h3>
+            <p class="py-4">Press ESC key or click outside to close</p>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     <button
-        class="btn btn-primary btn-sm mb-3"
-        hx-get="/volunteer/your-opportunities/"
-        hx-target=".htmx-navigator"
-        hx-swap="outerHTML"
-        >
-            ↩ Back
+            class="btn btn-primary btn-sm mb-3"
+            hx-get="/volunteer/your-opportunities/"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+    >
+        ↩ Back
     </button>
 
     <form>
-    {% csrf_token %}
+        {% csrf_token %}
 
-    <div class="card w-full bg-base-200 mb-3">
-        <div class="card-body p-5">
-            <p class="text-2xl font-bold">Shifts</p>
+        <div class="card w-full shadow-lg mb-3">
+            <div class="card-body p-5">
+                <p class="text-2xl font-bold">Shifts for {{ registration.opportunity.name }}</p>
 
-            {% if shifts|length == 0 %}
-                <p>You have not been assigned any shifts yet. Please get in touch with the organisation or check back later.</p>
-            {% endif %}
+                {% if shifts|length == 0 %}
+                    <p>You have not been assigned any shifts yet. Please get in touch with the organisation or check
+                        back later.</p>
+                {% endif %}
 
-            {% for shift in shifts %}
-                <div>
-                    {{ shift.role }}
-                    {% if shift.section %}{{ shift.section }}{% endif %}
-                    {{ sift.occurrence.start_time }}
-                    {{ sift.occurrence.end_time }}
-                </div>
-            {% endfor %}
+                {% for shift in shifts %}
+                    <div class="card w-full bg-base-200 mb-3">
+                        <div class="card-body p-5">
+                            <p class="font-bold">{{ shift.role.name }}</p>
+                            <p>{% if shift.section %}{{ shift.section }}{% endif %}</p>
+                            <p>{{ shift.occurrence.date }}, {{ shift.occurrence.start_time|time:"H:i" }} -
+                                {{ shift.occurrence.end_time|time:"H:i" }}</p>
+                            <div class="divider my-1"></div>
+                            <p>{{ shift.role.volunteer_description|linebreaks }}</p>
+                            {% if shift.section %}
+                                <div class="divider my-1"></div>
+                                {{ shift.role.section.description|linebreaks }}
+                            {% endif %}
+                            <div class="divider my-1"></div>
+                            <div>
+                                {% if shift.rsvp_response == '-' %}
+                                    <button
+                                            class="btn btn-sm bg-green-600 text-white hover:bg-green-800"
+                                            hx-get="/volunteer/rsvp/accept/{{ shift.id }}/"
+                                            hx-target=".htmx-navigator"
+                                            hx-swap="outerHTML"
+                                    >
+                                        Accept
+                                    </button>
+                                    <button class="btn btn-sm bg-red-600 text-white hover:bg-red-800">Decline</button>
+                                {% endif %}
 
+                                {% if shift.rsvp_response == 'yes' %}
+                                    <button class="btn btn-sm btn-primary">Can't make it?</button>
+
+                                     <button
+                                        class="btn btn-danger btn-sm bg-red-700 text-white"
+                                        hx-get="/volunteer/rsvp/cmi/{{ shift.id }}/"
+                                        hx-on:htmx:after-request="my_modal_2.showModal();"
+                                        hx-target="#modalDiv"
+                                        hx-swap="innerHTML"
+                                      >
+                                        Cant make it?
+                                      </button>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                    </div>
+                {% endfor %}
+
+            </div>
         </div>
-    </div>
 
 {% endblock %}

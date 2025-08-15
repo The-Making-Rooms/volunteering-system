@@ -33,7 +33,11 @@ urlpatterns = [
     path("volunteer_address_form/<int:address_id>/delete", views.volunteer_address_form, name="volunteer_address_form", kwargs={"delete": True}),
     
     path("toggle_interest/<int:organisation_id>/", views.toggle_interest, name="toggle_interest"),
-    
+    path("rsvp/accept/<int:shift_id>/", views.accept_shift_rsvp, name="accept_rsvp"),
+
+    path("rsvp/cmi/<int:shift_id>/", views.decline_shift_rsvp, name="cmi_rsvp", kwargs={"response":"cmi"}),
+    path("rsvp/decline/<int:shift_id>/", views.decline_shift_rsvp, name="decline_rsvp", kwargs={"response":"decline"}),
+
     #User views
     path("sign-up/", views.sign_up, name="sign-up"),
     path("logout/", views.user_logout, name="logout"),

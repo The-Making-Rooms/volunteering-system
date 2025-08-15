@@ -11,7 +11,7 @@
         ↩ Back
     </button>
 
-    <form>
+<form>
         {% csrf_token %}
 
         <div class="card w-full bg-base-200 mb-3">
@@ -20,6 +20,35 @@
             <p>Please not that updating preferences will not cancel any shifts assigned to you. Please update your availability for shifts on the shifts screen.</p>
             <div class="divider"></div>
 
+                {% csrf_token %}
+                {% if roles|length > 0 %}
+                    <p class="text-xl mb-3">Which roles are you interested in?</p>
+                    <div class="flex flex-col gap-3">
+                        {% for role in roles %}
+                            <div class="flex items-center gap-x-3">
+                                <input
+                                    class="checkbox checkbox-primary"
+                                    type="checkbox"
+                                    {% if opportunity.rota_config == "PER_ROLE" %}
+                                    hx-trigger="change"
+                                    hx-post="/opportunities/{{opportunity.id}}/get_dates/"
+                                    hx-target="#deduplicated_dates"
+                                    hx-swap="innerHTML"
+                                    {% endif %}
+                                    name="roles_{{ role.id }}"
+                                    id="{{ role.id }}"
+                                    {% if role.id in volunteer_roles %}checked{% endif %}
+                                >
+                                <label for="{{ role.id }}">
+                                {{ role.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="divider"></div>
+
+
+            <div id="deduplicated_dates">
                 {% if dates|length > 0 %}
                     <p class="text-xl mb-1">Please indicate your availability:</p>
                     <div class="flex flex-col gap-3">
@@ -28,43 +57,19 @@
                                 <input
                                         class="checkbox checkbox-primary"
                                         type="checkbox"
-                                        id="schedule_{{ d.id }}"
-                                        name="schedule_{{ d.id }}"
-
-                                        {% if d.id in volunteer_dates %}checked{% endif %}
+                                        id="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                                        name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                                        {% if d.is_checked %}checked{% endif %}
                                 />
-                                <label for="schedule_{{ d.id }}">
-                                    {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} -
-                                    {{ d.end_time|date:"H:i" }}
+                                <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
+                                {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
                                 </label>
                             </div>
                         {% endfor %}
                     </div>
-                    <div class="divider"></div>
-                {% else %}
-                    <p>This opportunity has no upcoming dates. Please contact the organisation.</p>
                     <div class="divider"></div>
                 {% endif %}
-
-                {% if roles|length > 0 %}
-                    <p class="text-xl mb-3">Which roles are you interested in?</p>
-                    <div class="flex flex-col gap-3">
-                        {% for role in roles %}
-                            <div class="flex items-center gap-x-3">
-                                <input
-                                        class="checkbox checkbox-primary"
-                                        type="checkbox"
-                                        name="roles_{{ role.id }}"
-                                        id="{{ role.id }}"
-                                        {% if role.id in volunteer_roles %}checked{% endif %}
-                                />
-                                <label for="{{ role.id }}">
-                                    {{ role.name }}
-                                </label>
-                            </div>
-
-                        {% endfor %}
-                    </div>
+            </div>
 
 
                 {% else %}
@@ -74,7 +79,6 @@
                 {% endif %}
 
             {% if roles or dates %}
-                <div class="divider"></div>
                 <button
                     class="btn btn-primary btn-sm mb-3"
                     hx-post="/volunteer/manage_preferences/{{ registration.id }}/"

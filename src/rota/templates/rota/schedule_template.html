@@ -1,0 +1,59 @@
+{% load compress %} {% load static %}
+
+
+<!DOCTYPE html>
+{% if not hx or hx == False %}
+<html lang="en" class="" style="height: 100%" data-theme="chipin">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Volunteering System - Shift Supervisor</title>
+    <!--Favicon /static/images/icons/icon-512x512.png-->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'images/icons/icon-72x72.png' %}"
+    />
+
+    <link
+    rel="stylesheet"
+    href="{% static 'fontawesome/css/fontawesome.min.css' %}">
+
+    <link
+    rel="stylesheet"
+    href="{% static 'fontawesome/css/solid.min.css' %}">
+
+
+
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}" />
+    {% endcompress %}
+  </head>
+
+  <body style="height: 100%">
+
+        {% endif %}
+        <div
+          class="htmx-navigator pb-20 mx-5 md:mx-10 xl:mx-20 2xl:mx-40 mt-3 lg:pt-5"
+          hx-ext="remove-me"
+        >
+          {% block page_content %} {% endblock %}
+        </div>
+
+        {% if not hx or hx == False %}
+
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script
+      src="https://unpkg.com/htmx.org@1.9.9"
+      integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/remove-me.js"></script>
+    <script>htmx.config.getCacheBusterParam = true</script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+  </body>
+</html>
+{% endif %}

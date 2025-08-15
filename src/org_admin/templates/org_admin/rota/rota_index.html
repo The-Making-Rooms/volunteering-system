@@ -1,7 +1,51 @@
+<!-- rota/rota_index.html -->
 {% extends 'org_admin/navigation_template.html' %}
 
 {% block page_content %}
 
-    <p>Rota Index</p>
+    <div class="flex flex-col space-y-4">
+
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col space-y-2">
+                <p class="text-2xl font-bold mb-3">Manage Rotas</p>
+                <p class="text-slate-400">
+                Use this screen to manage rotas for opportunities. Use the oppotunities tab to view and manage opportunity details.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+
+            <table class="w-full table table-sm">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opportunity in opportunities %}
+                        <tr class="hover:bg-base-300 border-b border-base-300">
+                            <td>{{ opportunity.name }}</td>
+                            <td>
+                                <button
+                                    class="btn btn-xs btn-primary"
+                                    hx-get="/org_admin/rota/{{ opportunity.id }}/"
+                                    hx-target=".htmx-navigator"
+                                    hx-swap="outerHTML">
+                                    Manage
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
 
 {% endblock %}

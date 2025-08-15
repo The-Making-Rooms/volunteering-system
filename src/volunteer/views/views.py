@@ -1,3 +1,4 @@
+#volunteer/views/views.py
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -173,17 +174,7 @@ def stop_volunteering(request, id):
             
             stopped_vol_status = VolunteerRegistrationStatus(registration=registration, registration_status=stopped_status, date=datetime.now())
             stopped_vol_status.save()
-            
-            #Send confirmation email
-            """
-            send_m = send_mail(
-                'Chip in - Volunteer Event Confirmation',
-                'You have stopped volunteering for the event: ' + registration.opportunity.name,
-                None,
-                [current_user.email],
-                fail_silently=True,
-            )
-            """
+
             
             subject = "Chip in - Volunteer Event Confirmation"
             message = "You have stopped volunteering for the event: " + registration.opportunity.name
