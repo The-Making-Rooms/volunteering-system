@@ -1,6 +1,3 @@
-from tkinter.constants import CASCADE
-
-from django.db import models
 import pickle
 from datetime import datetime, date, time
 from typing import Optional, List, Dict, Any
