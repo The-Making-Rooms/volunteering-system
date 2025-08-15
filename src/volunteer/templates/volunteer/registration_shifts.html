@@ -57,12 +57,18 @@
                                     >
                                         Accept
                                     </button>
-                                    <button class="btn btn-sm bg-red-600 text-white hover:bg-red-800">Decline</button>
+                                    <button
+                                        class="btn btn-sm bg-red-600 text-white hover:bg-red-800"
+                                        hx-get="/volunteer/rsvp/decline/{{ shift.id }}/"
+                                        hx-on:htmx:after-request="my_modal_2.showModal();"
+                                        hx-target="#modalDiv"
+                                        hx-swap="innerHTML"
+                                      >
+                                        Decline
+                                      </button>
                                 {% endif %}
 
                                 {% if shift.rsvp_response == 'yes' %}
-                                    <button class="btn btn-sm btn-primary">Can't make it?</button>
-
                                      <button
                                         class="btn btn-danger btn-sm bg-red-700 text-white"
                                         hx-get="/volunteer/rsvp/cmi/{{ shift.id }}/"

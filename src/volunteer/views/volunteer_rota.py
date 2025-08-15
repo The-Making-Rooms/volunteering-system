@@ -6,7 +6,9 @@ from django.shortcuts import render
 from opportunities.models import Registration
 from rota.models import VolunteerRoleIntrest, VolunteerOneOffDateAvailability, OneOffDate, Role, VolunteerShift
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
-
+from django.core.mail import send_mail
+from threading import Thread
+from typing import List
 
 def get_deduplicated_dates(request):
     roles = [key.split("_")[1] for key in request.POST.keys() if key.startswith('roles_')]
@@ -177,7 +179,7 @@ def manage_registration_shifts(request, registration_id):
     if registration.get_registration_status() != 'active':
         return render(request, "404.html", context={"hx": check_if_hx(request)})
 
-    shifts = VolunteerShift.objects.filter(registration=registration)
+    shifts = VolunteerShift.objects.filter(registration=registration, rsvp_response__in=['-','yes'])
 
     context = {
         'hx' : check_if_hx(request),
@@ -220,7 +222,6 @@ def decline_shift_rsvp(request, shift_id, response):
         shift.rsvp_reason = request.POST['reason']
 
         shift.save()
-
         request.method='GET'
 
         return HTTPResponseHXRedirect('/volunteer/your-opportunities/')
@@ -235,3 +236,13 @@ def decline_shift_rsvp(request, shift_id, response):
         }
 
         return render(request, "volunteer/partials/rsvp_reason_modal.html", context)
+
+
+def send_confirmation_email_thread(recipients: List[str], subject, message):
+    send_mail(
+        subject,
+        message,
+        None,
+        recipients,
+        fail_silently=True,
+    )
