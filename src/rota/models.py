@@ -145,7 +145,7 @@ class VolunteerShift(models.Model):
         default=RSVPChoices.NONE,
     )
 
-    rsvp_reason = models.CharField(blank=True, null=True)
+    rsvp_reason = models.CharField(blank=True, null=True, max_length=255)
 
     def status(self):
         return self.registration.get_registration_status()
