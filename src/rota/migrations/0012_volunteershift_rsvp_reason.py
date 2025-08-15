@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='volunteershift',
             name='rsvp_reason',
-            field=models.CharField(blank=True, null=True),
+            field=models.CharField(max_length=255, blank=True, null=True),
         ),
     ]
