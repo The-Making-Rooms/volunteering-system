@@ -5,18 +5,14 @@
 
     <div class="flex flex-col space-y-4">
 
-
-
-    <div class="flex items-start justify-between">
-        <div class="flex flex-col space-y-2">
-            <p class="text-2xl font-bold mb-3">Manage shift supervisors</p>
-            <p class="text-slate-400">
-            Use this screen to manage who is allowed to see shifts, as well as check volunteers in and out.
-            </p>
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col space-y-2">
+                <p class="text-2xl font-bold mb-3">Manage shift supervisors</p>
+                <p class="text-slate-400">
+                Use this screen to manage who is allowed to see shifts, as well as check volunteers in and out.
+                </p>
+            </div>
         </div>
-
-    </div>
-
 
 
     <div class="divider"></div>
@@ -26,7 +22,7 @@
         <div class="flex items-center justify-between">
             <p class="text-2xl font-bold">Supervisors</p>
             <button
-                hx-get="/org_admin/rota/supervisor/new/"
+                hx-get="/org_admin/supervisors/new/"
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
                 class="btn btn-primary btn-sm">
@@ -35,11 +31,11 @@
         </div>
 
     <div class="divider"></div>
-        {% if schedules|length > 0 %}
+        {% if supervisors|length > 0 %}
             <table class="w-full table table-sm">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Email</th>
                     <th>Access</th>
                     <th>Last Log in</th>
                     <th>Actions</th>
@@ -49,13 +45,13 @@
             <tbody>
                 {% for supervisor in supervisors %}
                     <tr class="hover:bg-base-300 border-b border-base-300">
-                        <td>{{ supervisor.first_name }} {{ supervisor.last_name }}</td>
+                        <td>{{ supervisor.user.email}}</td>
                         <td>{{ supervisor.access_level }}</td>
-                        <td>{{ schedule.user.last_login }}</td>
+                        <td>{{ supervisor.user.last_login }}</td>
                         <td>
                             <button
                                     class="btn btn-primary btn-sm"
-                                    hx-get="/org_admin/rota/supervisor/{{ supervisor.id }}/"
+                                    hx-get="/org_admin/supervisor/{{ supervisor.id }}/"
                                     hx-target=".htmx-navigator"
                                     hx-swap="outerHTML"
                             >Edit</button>

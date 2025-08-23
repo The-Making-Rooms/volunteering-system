@@ -217,7 +217,7 @@ def decline_shift_rsvp(request, shift_id, response):
             case "cmi":
                 shift.rsvp_response = "cmi"
             case "decline":
-                shift.rsvp_response = "decline"
+                shift.rsvp_response = "no"
 
         shift.rsvp_reason = request.POST['reason']
 

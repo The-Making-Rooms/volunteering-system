@@ -237,6 +237,16 @@ urlpatterns = [
 
     path("supervisors/", views.supervisor_index, name='supervisor_index'),
 
+    path("supervisor/<int:supervisor_id>/", views.edit_supervisor, name='supervisor_index'),
+    path("supervisor/<int:supervisor_id>/save/", views.save_supervisor, name='supervisor_index'),
+
+    path("supervisors/new/", views.add_supervisor, name='supervisor_add'),
+
+
+
+    path("supervisors/partials/opp_picker/", views.partial_opp_picker, name='supervisor_add'),
+    path("supervisors/partials/role_picker/", views.partial_role_picker, name='supervisor_add'),
+    path("supervisors/partials/shift_picker/", views.partial_shift_picker, name='supervisor_add'),
 
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),

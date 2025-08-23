@@ -893,6 +893,11 @@ html {
     color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
   }
 
+  .radio-primary:hover {
+    --tw-border-opacity: 1;
+    border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  }
+
   .tab:hover {
     --tw-text-opacity: 1;
   }
@@ -3175,6 +3180,26 @@ details.collapse summary::-webkit-details-marker {
       0 0 0 4px var(--fallback-b1,oklch(var(--b1)/1)) inset;
 }
 
+.radio-primary {
+  --chkbg: var(--p);
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
+.radio-primary:focus-visible {
+  outline-color: var(--fallback-p,oklch(var(--p)/1));
+}
+
+.radio-primary:checked,
+    .radio-primary[aria-checked="true"] {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
+  --tw-text-opacity: 1;
+  color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity)));
+}
+
 .radio:disabled {
   cursor: not-allowed;
   opacity: 0.2;
@@ -4413,11 +4438,6 @@ html:has(.drawer-toggle:checked) {
   width: 100%;
 }
 
-.w-min {
-  width: -moz-min-content;
-  width: min-content;
-}
-
 .min-w-44 {
   min-width: 11rem;
 }
@@ -4588,6 +4608,10 @@ html:has(.drawer-toggle:checked) {
 .gap-x-3 {
   -moz-column-gap: 0.75rem;
        column-gap: 0.75rem;
+}
+
+.gap-y-3 {
+  row-gap: 0.75rem;
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {

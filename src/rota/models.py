@@ -169,8 +169,8 @@ class OneOffDate(models.Model):
 
 
 class Supervisor(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    organisation = models.OneToOneField('organisations.Organisation', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    organisation = models.ForeignKey('organisations.Organisation', on_delete=models.CASCADE)
 
     access_level = models.CharField(
         max_length=20,
@@ -179,6 +179,8 @@ class Supervisor(models.Model):
     )
 
     supervisor_opportunities = models.ManyToManyField('opportunities.Opportunity', blank=True)
-    supervisor_roles = models.ManyToManyField(Role)
-    supervisor_shifts = models.ManyToManyField(Occurrence)
+    supervisor_roles = models.ManyToManyField(Role, blank=True)
+    supervisor_shifts = models.ManyToManyField(Occurrence, blank=True)
 
+    class Meta:
+        unique_together = ('user', 'organisation')

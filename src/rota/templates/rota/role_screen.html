@@ -9,6 +9,8 @@
     <div class="divider"></div>
 
     <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+        <p class="text-xl font-bold">Expected Volunteers:</p>
+        <div class="divider"></div>
         <table class="w-full table table-sm">
             <thead>
                 <tr>
@@ -22,6 +24,7 @@
 
             <tbody>
                 {% for shift in shifts %}
+                    {% if shift.rsvp_response == 'yes' or shift.rsvp_response == '-' %}
                     <tr class="hover:bg-base-300 border-b border-base-300">
                         <td>{{ shift.registration.volunteer.user.first_name }} {{ shift.registration.volunteer.user.last_name }}</td>
                         <td>{{ shift.rsvp_response }}</td>
@@ -47,8 +50,36 @@
 
                             {% endif %}
                         </td>
-
                     </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+        <p class="text-xl font-bold">Cancellations:</p>
+        <div class="divider"></div>
+        <table class="w-full table table-sm">
+            <thead>
+                <tr>
+                    <th>Volunteer Name</th>
+                    <th>RSVP Status</th>
+                    <th>RSVP Reason</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for shift in shifts %}
+                    {% if shift.rsvp_response != 'yes' and shift.rsvp_response != '-' %}
+                    <tr class="hover:bg-base-300 border-b border-base-300">
+                        <td>{{ shift.registration.volunteer.user.first_name }} {{ shift.registration.volunteer.user.last_name }}</td>
+                        <td>{{ shift.rsvp_response }}</td>
+                        <td>{{ shift.rsvp_reason }}</td>
+                    </tr>
+                    {% endif %}
                 {% endfor %}
             </tbody>
 

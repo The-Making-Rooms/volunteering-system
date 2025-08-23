@@ -8,9 +8,9 @@ from opportunities.models import Opportunity, Registration
 from org_admin.models import OrganisationAdmin
 from rota.models import Role, Section, VolunteerShift, OneOffDate, VolunteerOneOffDateAvailability, \
     VolunteerRoleIntrest, Occurrence, Supervisor
+from django.contrib.auth.models import User
 
-
-def supervisor_index(request):
+def supervisor_index(request, error=None):
     """
     Display supervisor management index page.
     Only accessible to organisation admins.
@@ -24,7 +24,8 @@ def supervisor_index(request):
         context = {
             "organisation": organisation,
             'hx': check_if_hx(request),
-            'supervisors': supervisors
+            'supervisors': supervisors,
+            'error' : error
         }
 
         return render(
@@ -910,3 +911,252 @@ def confirm_shifts(request, opp_id):
             opp_id,
             error="Failed to confirm shifts. Please try again."
         )
+
+def edit_supervisor(request, supervisor_id):
+    admin = OrganisationAdmin.objects.filter(user=request.user).first()
+
+
+    if supervisor_id:
+        try:
+            sup = Supervisor.objects.get(
+                id=supervisor_id
+            )
+
+            sup_opps = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_opportunities.filter().values_list('id', flat=True)
+
+            sup_roles = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_roles.filter().values_list('id', flat=True)
+
+            sup_shifts = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_shifts.filter().values_list('id', flat=True)
+
+
+        except:
+            sup = None
+            sup_opps = None
+            sup_shifts = None
+            sup_roles = None
+
+    else:
+        sup = None
+        sup_opps = None
+        sup_shifts = None
+        sup_roles = None
+
+    if admin:
+        opportunities = Opportunity.objects.filter(organisation=admin.organisation)
+    else:
+        opportunities = None
+
+    if admin:
+        roles = Role.objects.filter(opportunity__organisation=admin.organisation)
+    else:
+        roles = None
+
+    if admin:
+        shifts = Occurrence.objects.filter(
+            one_off_date__opportunity__organisation=admin.organisation,
+            one_off_date__date__gt=datetime.now().date())
+    else:
+        shifts = None
+
+
+
+    context = {
+        'sup' : sup,
+        'hx' : check_if_hx(request),
+        'sup_roles' : sup_roles,
+        'sup_shifts' : sup_shifts,
+        'sup_opps' : sup_opps,
+        'roles' : roles,
+        'shifts' : shifts,
+        'opportunities' : opportunities
+    }
+
+    return render(request, "org_admin/rota/add_edit_supervisor.html", context)
+
+
+def add_supervisor(request):
+
+    if request.method == 'POST':
+        return save_supervisor(request)
+
+    context = {
+        'hx' : check_if_hx(request)
+    }
+
+    return render(request, "org_admin/rota/add_edit_supervisor.html", context)
+
+
+def partial_opp_picker(request, supervisor_id=None):
+    admin = OrganisationAdmin.objects.filter(user=request.user).first()
+
+    if supervisor_id:
+        try:
+            sup_opps = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_opportunities.filter().values_list('id', flat=True)
+        except:
+            sup_opps = None
+    else:
+        sup_opps = None
+
+
+    if admin:
+        opportunities = Opportunity.objects.filter(organisation=admin.organisation)
+    else:
+        opportunities = None
+
+    context = {
+        'hx' : check_if_hx(request),
+        'opportunities' : opportunities,
+        'sup_opps' : sup_opps
+    }
+
+    return render(request, "org_admin/rota/partials/opp_picker.html", context)
+
+def partial_role_picker(request, supervisor_id=None):
+    if supervisor_id:
+        try:
+            sup_roles = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_roles.filter().values_list('id', flat=True)
+        except:
+            sup_roles = None
+    else:
+        sup_roles = None
+
+    admin = OrganisationAdmin.objects.filter(user=request.user).first()
+    if admin:
+        roles = Role.objects.filter(opportunity__organisation=admin.organisation)
+    else:
+        roles = None
+
+    context = {
+        'hx' : check_if_hx(request),
+        'roles' : roles,
+        'sup_roles' : sup_roles
+    }
+
+    return render(request, "org_admin/rota/partials/role_picker.html", context)
+
+def partial_shift_picker(request, supervisor_id=None):
+    if supervisor_id:
+        try:
+            sup_shifts = Supervisor.objects.get(
+                id=supervisor_id
+            ).supervisor_shifts.filter().values_list('id', flat=True)
+        except:
+            sup_shifts = None
+    else:
+        sup_shifts = None
+
+    admin = OrganisationAdmin.objects.filter(user=request.user).first()
+    if admin:
+        shifts = Occurrence.objects.filter(
+            one_off_date__opportunity__organisation=admin.organisation,
+            one_off_date__date__gt=datetime.now().date())
+    else:
+        shifts = None
+
+    context = {
+        'shifts' : shifts,
+        'hx' : check_if_hx(request),
+        'sup_shifts' : sup_shifts
+    }
+
+    return render(request, "org_admin/rota/partials/shift_picker.html", context)
+
+
+def save_supervisor(request, supervisor_id=None):
+    data = request.POST
+    admin = OrganisationAdmin.objects.filter(user=request.user).first()
+    supervisor = Supervisor.objects.get(id=supervisor_id) if supervisor_id else None
+
+    print(data)
+
+    if not supervisor_id:
+        email = request.POST['sup_email']
+
+        if not email or len(email) == 0:
+            return supervisor_index(request, error="Enter valid email!")
+
+        user = User.objects.filter(email=email)
+        if user.exists():
+            # Check that an existing profile for this supervisor doesn't already exist
+            sup = Supervisor.objects.filter(
+                organisation = admin.organisation,
+                user = user.first()
+            )
+
+            if sup.exists():
+                return supervisor_index(request, error="User already exists as a supervisor")
+            else:
+                supervisor = Supervisor(
+                    user=user.first(),
+                    organisation=admin.organisation,
+                )
+
+                supervisor.save()
+        else:
+            user = User.objects.create_user(
+                email=email,
+                username=email
+            )
+            user.set_unusable_password()
+            user.save()
+
+
+
+            supervisor = Supervisor(
+                user=user,
+                organisation=admin.organisation,
+            )
+
+            supervisor.save()
+
+
+    #At this point we should have a supervisor
+
+    if supervisor:
+        access_level = request.POST['access_type']
+
+        print(access_level, type(access_level))
+
+        match access_level:
+            case 'all_org':
+                print('[debug] Matched all_org')
+                supervisor.access_level = 'all_org'
+            case 'opp':
+                print('[debug] Matched opp')
+                supervisor.access_level = 'all_opportunity'
+                supervisor.supervisor_opportunities.set(
+                    Opportunity.objects.filter(
+                        id__in=request.POST.getlist('opp_select')
+                    )
+                )
+            case 'roles':
+                print('[debug] Matched roles')
+                supervisor.access_level = 'all_role'
+                supervisor.supervisor_roles.set(
+                    Role.objects.filter(
+                        id__in=request.POST.getlist('role_select')
+                    )
+                )
+            case 'shifts':
+                print('[debug] Matched shifts')
+                supervisor.access_level = 'specific_shifts'
+                supervisor.supervisor_shifts.set(
+                    Role.objects.filter(
+                        id__in=request.POST.getlist('shift_select')
+                    )
+                )
+        supervisor.save()
+
+
+    return supervisor_index(request)
+

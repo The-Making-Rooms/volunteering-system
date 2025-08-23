@@ -39,6 +39,8 @@ import re
 
 from threading import Thread
 
+from rota.models import VolunteerShift
+
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
     def inner(request):
@@ -175,6 +177,10 @@ def stop_volunteering(request, id):
             stopped_vol_status = VolunteerRegistrationStatus(registration=registration, registration_status=stopped_status, date=datetime.now())
             stopped_vol_status.save()
 
+            for shift in VolunteerShift.objects.filter(registration=registration):
+                shift.rsvp_response = 'no'
+                shift.rsvp_reason = 'Automated: Volunteer stopped volunteering'
+                shift.save()
             
             subject = "Chip in - Volunteer Event Confirmation"
             message = "You have stopped volunteering for the event: " + registration.opportunity.name
