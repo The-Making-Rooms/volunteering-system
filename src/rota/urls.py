@@ -16,12 +16,12 @@ urlpatterns = [
     path('logout/', views.sign_out, name='logout'),
 
     path("password_reset_sent", views.password_reset_sent, name="password_reset_sent_supervisor"),
-    path("password_reset/", views.ResetPasswordView.as_view(), name="reset_password"),
+    path("password_reset/", views.ResetPasswordView.as_view(), name="reset_password_supervisor"),
     path('password-reset-confirm/<uidb64>/<token>/',
          auth_views.PasswordResetConfirmView.as_view(template_name='rota/password_reset_confirm.html'),
          name='password_reset_confirm_supervisor'),
     path('password-reset-complete/',
          auth_views.PasswordResetCompleteView.as_view(template_name='rota/password_reset_complete.html'),
-         name='password_reset_complete'),
+         name='password_reset_complete_supervisor'),
 
 ]
