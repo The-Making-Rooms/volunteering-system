@@ -193,7 +193,7 @@ def register(request, opportunity_id, error=None):
 
         available_dates = list(seen.values())
     else:
-        dates = []
+        available_dates = []
 
     roles = Role.objects.filter(opportunity=opportunity)
 
