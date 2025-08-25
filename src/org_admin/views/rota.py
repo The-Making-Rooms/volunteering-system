@@ -7,6 +7,8 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.mail import send_mail
+from threading import Thread
 
 from organisations.models import Organisation
 from commonui.views import check_if_hx
@@ -25,6 +27,7 @@ from rota.models import (
 )
 
 from django.contrib.auth.models import User
+
 
 
 # ------------- Authorization & Utilities -------------
@@ -130,6 +133,42 @@ def safe_check_if_hx(request: Optional[HttpRequest] = None) -> bool:
 
 
 # ------------- Core Business Helpers -------------
+
+def send_email_to_volunteer(shift_id):
+    shift = VolunteerShift.objects.get(id=shift_id)
+    subject = 'Chip in System - Shift Assignment'
+
+    section_name = "" if not shift.section else "Section Name: " + shift.section.name
+    section_desc = "" if not shift.section else "Section Description: " + shift.section.description
+
+    message = f"""
+Hello {shift.registration.volunteer.user.first_name} {shift.registration.volunteer.user.last_name},
+
+You have been assigned a shift for the opportunity: {shift.registration.opportunity.name}.
+
+Shift Details:
+Role: {shift.role.name}
+Role description: {shift.role.description}
+Role Volunteer Information: {shift.role.volunteer_description}
+{section_name}
+{section_desc}
+
+Please login to the Chip In system to RSVP for the shift. You can access the screen by clicking the calendar icon at the bottom of the screen, then clicking shifts for the relevent opportunity.
+
+Regards,
+The Chip In Team
+"""
+
+    send_mail(subject, message, '', [shift.registration.volunteer.user.email], fail_silently=True)
+
+
+class SendEmailToVolunteer(Thread):
+    def __init__(self, shift_id):
+        Thread.__init__(self)
+        self.shift = shift_id
+
+    def run(self):
+        send_email_to_volunteer(self.shift)
 
 def times_overlap(start_a: time, end_a: time, start_b: time, end_b: time) -> bool:
     """
@@ -916,6 +955,10 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
         for shift in unconfirmed_shifts:
             shift.confirmed = True
             shift.save()
+
+            email_thread = SendEmailToVolunteer(shift.id)
+            email_thread.start()
+
             count += 1
 
         return assign_rota(request, opportunity.id, success=f"Sent shifts to {count} volunteers.")
@@ -1193,3 +1236,5 @@ def confirm_shifts_for_occurrence(request: HttpRequest, occurrence_id: int) -> H
 
     updated = VolunteerShift.objects.filter(occurrence=occ, confirmed=False).update(confirmed=True)
     return redirect('rota:shift_assignment_for_occurrence', occurrence_id=occurrence_id)
+
+
