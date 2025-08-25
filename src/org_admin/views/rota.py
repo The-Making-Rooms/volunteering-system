@@ -586,7 +586,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     unconfirmed_shifts = VolunteerShift.objects.filter(
         registration__opportunity=opportunity,
         confirmed=False
-    ).exists()
+    )
 
     unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
 
