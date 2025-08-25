@@ -588,6 +588,8 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
         confirmed=False
     ).exists()
 
+    unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
+
     context = {
         'hx': safe_check_if_hx(request),
         'shifts': shifts,
@@ -953,13 +955,15 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
         ).select_related("registration")
 
         for shift in unconfirmed_shifts:
-            shift.confirmed = True
-            shift.save()
+            if shift.registration.get_registration_status() == 'active':
 
-            email_thread = SendEmailToVolunteer(shift.id)
-            email_thread.start()
+                shift.confirmed = True
+                shift.save()
 
-            count += 1
+                email_thread = SendEmailToVolunteer(shift.id)
+                email_thread.start()
+
+                count += 1
 
         return assign_rota(request, opportunity.id, success=f"Sent shifts to {count} volunteers.")
     except Exception:
