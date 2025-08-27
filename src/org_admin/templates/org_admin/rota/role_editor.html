@@ -27,13 +27,13 @@
 
         <div class="flex flex-col md:flex-row md:space-x-4">
 
-            <div class="mb-3 flex-grow">
-                <p>Role Name:</p>
+            <div class="mb-5 flex-grow">
+                <p class="font-bold">Role Name:</p>
                 <input class="input input bordered w-full" type="text" name="role_name" {% if role %}value="{{ role.name }}"{% endif %} required></input>
             </div>
 
             <div class="mb-3">
-                <p>Volunteers required:</p>
+                <p class="font-bold">Volunteers required:</p>
             {% if sections|length > 0 %}
                 <input class="input input bordered" type="number" name="role_volunteers" {% if role %}value="{{ volunteers_required }}"{% endif %} disabled></input>
             {% else %}
@@ -45,13 +45,15 @@
 
         </div>
 
-        <div class="mb-3">
-            <p>Role Description:</p>
+        <div class="mb-5">
+            <p class="font-bold">Role Description:</p>
+            <p class="text-gray-500 mb-3">This description will be visible to volunteers on the public Chip in opportunity page</p>
             <textarea class="textarea textarea-bordered w-full" name="role_description" required>{{ role.description }}</textarea>
         </div>
 
-        <div class="mb-3">
-            <p>Volunteer Description:</p>
+        <div class="mb-5">
+            <p class="font-bold">Volunteer Description:</p>
+            <p class="text-gray-500 mb-3">This description is only sent to the volunteer once you have assigned a rota for this role. Include information like the meetup location, role duties and key contacts fo the day.</p>
             <textarea class="textarea textarea-bordered w-full" name="volunteer_description" required>{{ role.volunteer_description }}</textarea>
         </div>
 

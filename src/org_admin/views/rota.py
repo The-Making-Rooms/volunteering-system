@@ -1,6 +1,12 @@
 from datetime import datetime, date, time
 from typing import Optional, Iterable
 
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.template.loader import render_to_string
+
+from django.conf import settings
+
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
@@ -134,7 +140,7 @@ def safe_check_if_hx(request: Optional[HttpRequest] = None) -> bool:
 
 # ------------- Core Business Helpers -------------
 
-def send_email_to_volunteer(shift_id):
+def send_email_to_volunteer(domain, shift_id):
     shift = VolunteerShift.objects.get(id=shift_id)
     subject = 'Chip in System - Shift Assignment'
 
@@ -142,33 +148,52 @@ def send_email_to_volunteer(shift_id):
     section_desc = "" if not shift.section else "Section Description: " + shift.section.description
 
     message = f"""
-Hello {shift.registration.volunteer.user.first_name} {shift.registration.volunteer.user.last_name},
+<p>Hello {shift.registration.volunteer.user.first_name} {shift.registration.volunteer.user.last_name},</p>
 
-You have been assigned a shift for the opportunity: {shift.registration.opportunity.name}.
+<p>You have been assigned a shift for the opportunity: {shift.registration.opportunity.name}.</p>
 
-Shift Details:
+<p style="font-weight: bold">Shift Details:</p>
+
 Role: {shift.role.name}
 Role description: {shift.role.description}
 Role Volunteer Information: {shift.role.volunteer_description}
 {section_name}
 {section_desc}
 
-Please login to the Chip In system to RSVP for the shift. You can access the screen by clicking the calendar icon at the bottom of the screen, then clicking shifts for the relevent opportunity.
+Please press the button below to RSVP
+<a class="btn" href="{domain}/volunteer/shifts/{shift.registration.id}/"
+
+Alternatively, log in to the app, press the calendar icon at the bottom of the screen and click the "shifts' button for the relevant opportunity.
 
 Regards,
 The Chip In Team
 """
 
-    send_mail(subject, message, '', [shift.registration.volunteer.user.email], fail_silently=True)
+    context = {
+        'content' : message
+    }
+
+    text = render_to_string('org_admin/email_portal/email_template.html', context)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[shift.registration.volunteer.user.email]
+    )
+
+    email.attach_alternative(text, "text/html")
+    email.send()
 
 
 class SendEmailToVolunteer(Thread):
-    def __init__(self, shift_id):
+    def __init__(self, domain, shift_id):
         Thread.__init__(self)
         self.shift = shift_id
+        self.domain = domain
 
     def run(self):
-        send_email_to_volunteer(self.shift)
+        send_email_to_volunteer(self.domain, self.shift)
 
 def times_overlap(start_a: time, end_a: time, start_b: time, end_b: time) -> bool:
     """
@@ -954,13 +979,16 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
             confirmed=False
         ).select_related("registration")
 
+        domain = request.get_host()
+
         for shift in unconfirmed_shifts:
             if shift.registration.get_registration_status() == 'active':
 
                 shift.confirmed = True
                 shift.save()
 
-                email_thread = SendEmailToVolunteer(shift.id)
+
+                email_thread = SendEmailToVolunteer(domain, shift.id)
                 email_thread.start()
 
                 count += 1
