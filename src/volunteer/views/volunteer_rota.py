@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from opportunities.models import Registration
 from rota.models import VolunteerRoleIntrest, VolunteerOneOffDateAvailability, OneOffDate, Role, VolunteerShift
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
@@ -49,9 +49,6 @@ def manage_registration_preferences(request, registration_id):
     registration = Registration.objects.get(id=registration_id)
 
     if registration.volunteer.user != request.user:
-        return render(request, "404.html", context={"hx": check_if_hx(request)})
-
-    if registration.get_registration_status() != 'active':
         return render(request, "404.html", context={"hx": check_if_hx(request)})
 
     if request.method == "POST":
@@ -123,8 +120,6 @@ def update_registration_preferences(request, registration_id):
     if registration.volunteer.user != request.user:
         return render(request, "404.html")
 
-    if registration.get_registration_status() != 'active':
-        return render(request, "404.html")
 
     updated_dates = [key.split("_")[1] for key in request.POST.keys() if key.startswith('schedule_')]
     updated_roles = [key.split("_")[1] for key in request.POST.keys() if key.startswith('roles_')]
@@ -172,6 +167,9 @@ def update_registration_preferences(request, registration_id):
 
 def manage_registration_shifts(request, registration_id):
     registration = Registration.objects.get(id=registration_id)
+
+    if not request.user.is_authenticated:
+        return redirect('/volunteer')
 
     if registration.volunteer.user != request.user:
         return render(request, "404.html", context={"hx": check_if_hx(request)})

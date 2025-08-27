@@ -155,17 +155,16 @@ def send_email_to_volunteer(domain, shift_id):
 <p style="font-weight: bold">Shift Details:</p>
 
 <p>Role: {shift.role.name}</p>
-<p>Role description: {shift.role.description}</p>
 <p>Role Volunteer Information: {shift.role.volunteer_description}</p>
 <p>{section_name}</p>
 <p>{section_desc}</p>
 
 <a class="btn" href="https://{domain}/volunteer/shifts/{shift.registration.id}/">RSVP Here</a>
 
-Alternatively, log in to the app, press the calendar icon at the bottom of the screen and click the "shifts' button for the relevant opportunity.
+<p>Alternatively, log in to the app, press the calendar icon at the bottom of the screen and click the "shifts' button for the relevant opportunity.</p>
 
-Regards,
-The Chip In Team
+<p>Regards,<br>
+The Chip In Team</p>
 """
 
     context = {
