@@ -154,14 +154,13 @@ def send_email_to_volunteer(domain, shift_id):
 
 <p style="font-weight: bold">Shift Details:</p>
 
-Role: {shift.role.name}
-Role description: {shift.role.description}
-Role Volunteer Information: {shift.role.volunteer_description}
-{section_name}
-{section_desc}
+<p>Role: {shift.role.name}</p>
+<p>Role description: {shift.role.description}</p>
+<p>Role Volunteer Information: {shift.role.volunteer_description}</p>
+<p>{section_name}</p>
+<p>{section_desc}</p>
 
-Please press the button below to RSVP
-<a class="btn" href="{domain}/volunteer/shifts/{shift.registration.id}/"
+<a class="btn" href="https://{domain}/volunteer/shifts/{shift.registration.id}/">RSVP Here</a>
 
 Alternatively, log in to the app, press the calendar icon at the bottom of the screen and click the "shifts' button for the relevant opportunity.
 
@@ -173,7 +172,7 @@ The Chip In Team
         'content' : message
     }
 
-    text = render_to_string('org_admin/email_portal/email_template.html', context)
+    text = render_to_string('org_admin/rota/email_template.html', context)
 
     email = EmailMultiAlternatives(
         subject=subject,
@@ -980,6 +979,7 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
         ).select_related("registration")
 
         domain = request.get_host()
+        print(domain)
 
         for shift in unconfirmed_shifts:
             if shift.registration.get_registration_status() == 'active':
