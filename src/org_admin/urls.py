@@ -214,6 +214,9 @@ urlpatterns = [
 
 
     path("rota/schedule/new/<int:opp_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+    path("rota/schedule/import/<int:opportunity_id>/<int:role_id>/", views.import_dates_csv, name="import_csv_role"),
+    path("rota/schedule/import/<int:opportunity_id>/", views.import_dates_csv, name="import_csv_opp"),
+
     path("rota/schedule/new/<int:opp_id>/<int:role_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
 
 
@@ -229,7 +232,7 @@ urlpatterns = [
     path("rota/assign/instance/<int:registration_id>/<int:role_id>/<int:schedule_id>/<int:section_id>/", views.assign_volunteer_shift_instance,
              name="assign_role_shift"),
 
-    path("rota/unassign/<int:registration_id>/<int:role_id>/", views.unassign_volunteer_shift_instance, name="unassign_rota"),
+    path("rota/unassign/<int:registration_id>/<int:role_id>/<int:schedule_id>/", views.unassign_volunteer_shift_instance, name="unassign_rota"),
 
     path("rota/send_shifts/<int:opp_id>/", views.confirm_shifts, name="confirm_assigned_shifts"),
 

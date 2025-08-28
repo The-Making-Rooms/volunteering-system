@@ -5,8 +5,14 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from django.conf import settings
-from django.db.models import Count
+from datetime import datetime, time as dtime
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
+
+from django.db.models import Count, Q, F, Min
+import csv
+import io
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -140,6 +146,57 @@ def safe_check_if_hx(request: Optional[HttpRequest] = None) -> bool:
 
 
 # ------------- Core Business Helpers -------------
+def _parse_date(dstr: str):
+    return datetime.strptime(dstr.strip(), "%d/%m/%Y").date()
+
+def _parse_time(tstr: str):
+    t = tstr.strip()
+    try:
+        return dtime.fromisoformat(t)  # accepts HH:MM or HH:MM:SS
+    except ValueError:
+        return datetime.strptime(t, "%H:%M").time()
+
+@transaction.atomic
+def import_csv_dates(file_like_text, opportunity: Opportunity, role: Role | None = None) -> tuple[int, int]:
+    """
+    Imports a set of dates from a CSV text stream.
+    expected columns: date, start_time, end_time
+    """
+    reader = csv.DictReader(file_like_text)
+    required = {"date", "start_time", "end_time"}
+    headers = {h.lower() for h in (reader.fieldnames or [])}
+    missing = required - headers
+    if missing:
+        raise ValidationError(f"Missing required columns: {', '.join(sorted(missing))}")
+
+    new_count = 0
+    dup_count = 0
+
+    for row in reader:
+        r = {k.lower(): (v or "").strip() for k, v in row.items()}
+        d = _parse_date(r["date"])
+        st = _parse_time(r["start_time"])
+        et = _parse_time(r["end_time"])
+        if st >= et:
+            raise ValidationError(f"Start time must be before end time for {d}.")
+
+        query = {
+            "date": d,
+            "start_time": st,
+            "end_time": et,
+            "opportunity": opportunity,
+        }
+        if role:
+            query["role"] = role
+
+        if OneOffDate.objects.filter(**query).exists():
+            dup_count += 1
+            continue
+
+        OneOffDate.objects.create(**query)
+        new_count += 1
+
+    return new_count, dup_count
 
 def send_email_to_volunteer(domain, shift_id):
     shift = VolunteerShift.objects.get(id=shift_id)
@@ -345,17 +402,43 @@ def get_accepted_and_confirmed(schedule_id: int, role_id: int, section_id: Optio
         return [Registration.objects.none(), Registration.objects.none()]
 
 
-def get_available_volunteers_discrete(opportunity_id: int, omit_confirmed: bool=False):
+def get_available_volunteers_discrete(opportunity_id: int, omit_confirmed: bool=False, selected_role=None, selected_date=None):
     """
     Build a list of shift blocks for per-role scheduling: each role has its own OneOffDate(s).
     omit_confirmed omits confirmed opportunities from the assigned count
     """
     shifts = []
-    roles = Role.objects.filter(opportunity=opportunity_id).select_related("opportunity__organisation")
+
+    if not selected_role:
+        roles = Role.objects.filter(opportunity=opportunity_id).select_related("opportunity__organisation")
+    else:
+        roles = Role.objects.filter(id=selected_role)
+
+    print(f"[debug]: roles {roles}")
+
+
+
     for role in roles:
         sections = Section.objects.filter(role=role)
-        schedules = OneOffDate.objects.filter(role=role, date__gte=datetime.now().date()).select_related(
-            "opportunity__organisation")
+
+        if not selected_date:
+            schedules = OneOffDate.objects.filter(role=role, date__gte=datetime.now().date()).select_related(
+                "opportunity__organisation")
+        else:
+            filtered = OneOffDate.objects.get(id=selected_date)
+
+            schedules = OneOffDate.objects.filter(
+                role=role,
+                date=filtered.date,
+                start_time=filtered.start_time,
+                end_time=filtered.end_time
+            ).select_related(
+                "opportunity__organisation")
+
+        print(schedules)
+
+
+
         for schedule in schedules:
             if sections.exists():
                 for section in sections:
@@ -432,15 +515,19 @@ def toggle_opportunity_scheduling_type(request: HttpRequest, opportunity_id: int
 
 
 @login_required
-def unassign_volunteer_shift_instance(request: HttpRequest, registration_id: int, role_id: int) -> HttpResponse:
+def unassign_volunteer_shift_instance(request: HttpRequest, registration_id: int, role_id: int, schedule_id: int) -> HttpResponse:
     """
     Remove a volunteer from a specific shift assignment.
     Requires org access to the underlying opportunity/occurrence.
     """
+
+    print(f"[debug]: unassign called: {registration_id} {role_id}")
+
     require_authenticated(request)
     shift = VolunteerShift.objects.filter(
         registration_id=registration_id,
-        role_id=role_id
+        role_id=role_id,
+        occurrence__one_off_date__id=schedule_id
     ).select_related("occurrence__one_off_date__opportunity__organisation", "role__opportunity__organisation").first()
 
     if not shift:
@@ -459,6 +546,8 @@ def unassign_volunteer_shift_instance(request: HttpRequest, registration_id: int
     section_id = shift.section.id if shift.section else None
 
     shift.delete()
+
+    print(f"[debug] unassigned {role_id, schedule_id, section_id}")
 
     return assign_volunteer_shift(request, role_id, schedule_id, section_id)
 
@@ -540,6 +629,7 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
     """
     Display the volunteer shift assignment interface for a specific role/schedule combination.
     """
+    print(f"[debug]: Got assign shift for {role_id} {schedule_id} {section_id}")
     require_authenticated(request)
     try:
         role = Role.objects.select_related("opportunity__organisation").get(id=role_id)
@@ -558,14 +648,31 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
     registrations = get_shift_volunteers(schedule.id, role.id) if schedule else Registration.objects.none()
     assigned_volunteers = get_assigned_volunteers(schedule.id, role.id, section_id) if schedule else Registration.objects.none()
 
+    registrations = (
+        registrations
+        .annotate(
+            interested_roles_count=Count(
+                "volunteerroleintrest",
+                filter=Q(volunteerroleintrest__role__opportunity=F("opportunity")),
+                distinct=True,
+            )
+        )
+        .order_by("interested_roles_count")  # ascending; use "-interested_roles_count" for descending
+    )
+
+    print(registrations)
+
+    print(f"[debug]: delivered shift for {role.id} {schedule.id} {section_id}")
+
+
     context = {
         'hx': safe_check_if_hx(request),
         'opp': opportunity,
         'registrations': registrations,
         'assigned_volunteers': assigned_volunteers,
-        'schedule_id': schedule.id if schedule else None,
+        'schedule': schedule,
         'section_id': section_id,
-        'role_id': role.id,
+        'role': role,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
 
@@ -579,6 +686,20 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     require_authenticated(request)
     opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opp_id)
     assert_org_access(request, opportunity)
+
+    roles = Role.objects.filter(opportunity=opportunity)
+
+    selected_role = None
+    selected_date = None
+
+    if request.method == 'POST':
+        post_role = request.POST.get('role_filter')
+        post_date = request.POST.get('date_filter')
+        selected_role = post_role if post_role != 'all' else None
+        selected_date = post_date if post_date != 'all' else None
+
+    print(f"[debug] {request.POST}")
+    print(f"[debug] got filters Role: {selected_role} Date:{selected_date}")
 
     shifts = []
     if getattr(opportunity, "rota_config", "SHARED") == "SHARED":
@@ -614,7 +735,9 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
                         'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id),
                     })
     else:
-        shifts = get_available_volunteers_discrete(opportunity.id, omit_confirmed=True)
+
+        print(selected_date, selected_role)
+        shifts = get_available_volunteers_discrete(opportunity.id, omit_confirmed=True, selected_role=selected_role, selected_date=selected_date)
 
     unconfirmed_shifts = VolunteerShift.objects.filter(
         registration__opportunity=opportunity,
@@ -623,14 +746,29 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
 
     unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
 
+    # In-place ascending sort (modifies the original list)
+    shifts.sort(key=lambda d: len(d.get("available_volunteers", [])))
+
+    slots = (
+        OneOffDate.objects
+        .filter(opportunity=opportunity, date__gte=datetime.now())
+        .values("date", "start_time", "end_time")
+        .annotate(id=Min("id"))  # or Max("id")
+        .order_by("date", "start_time", "end_time")
+    )
 
     context = {
         'hx': safe_check_if_hx(request),
         'shifts': shifts,
         'opp': opportunity,
         'unconfirmed_shifts': unconfirmed_shifts,
+        "slots" : slots,
+        'opportunity' : opportunity,
+        'roles' : roles,
         'success': success,
         'error': error,
+        'selected_role' : selected_role,
+        'selected_date' : selected_date
     }
     return render(request, "org_admin/rota/shift_assignment.html", context)
 
@@ -846,7 +984,7 @@ def create_new_section(request: HttpRequest, role_id: int) -> HttpResponse:
 
 
 @login_required
-def edit_role(request: HttpRequest, role_id: Optional[int] = None, opp_id: Optional[int] = None) -> HttpResponse:
+def edit_role(request: HttpRequest, role_id: Optional[int] = None, opp_id: Optional[int] = None, error: str = None, success: str = None) -> HttpResponse:
     """
     Handle creation and editing of volunteer roles.
     """
@@ -883,6 +1021,8 @@ def edit_role(request: HttpRequest, role_id: Optional[int] = None, opp_id: Optio
         "sections": sections,
         "volunteers_required": volunteers_required,
         "one_off_dates": one_off_dates,
+        'error' : error,
+        'success' : success
     }
     return render(request, "org_admin/rota/role_editor.html", context)
 
@@ -1262,6 +1402,61 @@ def save_supervisor(request: HttpRequest, supervisor_id: Optional[int] = None):
         return supervisor_index(request, error=f"Validation error: {ve}")
     except Exception:
         return supervisor_index(request, error="Failed to save supervisor")
+
+@login_required
+def import_dates_csv(request: HttpRequest, opportunity_id: int, role_id: int|None=None) -> HttpResponse:
+
+    require_authenticated(request)
+    opp = get_object_or_404(Opportunity, id=opportunity_id)
+    role= None
+    if role_id:
+        role = get_object_or_404(Role, id=role_id)
+    assert_org_access(request, opp)
+    assert_org_access(request, role)
+
+    if request.method == 'POST':
+        upload = request.FILES.get('import_file')
+        if not upload:
+            request.method = 'GET'
+            return edit_role(request, role_id, opportunity_id, error="Please choose a file.")
+
+        # Simple filename check only
+        if not upload.name.lower().endswith('.csv'):
+            request.method = 'GET'
+            return edit_role(request, role_id, opportunity_id, error="Please upload a .csv file.")
+
+        # Wrap as text for csv.DictReader
+        text_stream = io.TextIOWrapper(upload.file, encoding='utf-8', newline='')
+        try:
+            new_count, dup_count = import_csv_dates(
+                file_like_text=text_stream,
+                opportunity=opp,
+                role=role
+            )
+        finally:
+            # Avoid closing the underlying file; detach wrapper
+            try:
+                text_stream.detach()
+            except Exception:
+                pass
+
+        request.method = 'GET'
+        return edit_role(request, role_id, opportunity_id, success=f"Successfully imported {new_count} dates. Ignored {dup_count} duplicated dates.")
+
+
+
+    else:
+
+        context = {
+            'hx' : safe_check_if_hx(request),
+            'opportunity' : opp,
+            'role' : role
+        }
+
+        return render(request, "org_admin/rota/import_roles_csv.html", context)
+
+    pass
+
 
 
 # ------------- Additional Helper Routes -------------

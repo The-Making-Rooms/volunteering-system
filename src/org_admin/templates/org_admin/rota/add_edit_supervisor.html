@@ -51,6 +51,7 @@
                                value="all_org"
                                id="all_org"
                                class="radio radio-primary"
+                               onclick="document.getElementById('supervisor_picker_partial').innerHTML = '';"
                                required
                                {% if sup.access_level == 'all_org' %}checked{% endif %}
 

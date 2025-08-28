@@ -96,6 +96,7 @@
                                 hx-post="/opportunities/{{ superform.opportunity_to_register.id }}/get_superform_dates/"
                                 hx-target="#deduplicated_dates"
                                 hx-swap="innerHTML"
+                                hx-disabled-elt="#submit-button"
                                 {% endif %}
                                 name="roles_{{ role.id }}"
                                 id="{{ role.id }}"/>
@@ -137,7 +138,7 @@
             {% endfor %}
     </div>
     {% endfor %}
-<button class="btn bg-[#5576b6] text-white mb-5" >Submit</button>
+<button id="submit-button" class="btn bg-[#5576b6] text-white mb-5" >Submit</button>
 </form>
 </div>
 {%endblock%}

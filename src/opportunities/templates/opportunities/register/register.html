@@ -31,6 +31,7 @@
                                 hx-post="/opportunities/{{ opportunity.id }}/get_dates/"
                                 hx-target="#deduplicated_dates"
                                 hx-swap="innerHTML"
+                                hx-disabled-elt="#register-submit"
                                 {% endif %}
                                 name="roles_{{ role.id }}"
                                 id="{{ role.id }}"/>
@@ -106,7 +107,7 @@
             stores and manages your data, please refer to our <a class="text-blue-400 underline" href="/privacy_policy">Privacy
                 Policy</a></p>
         <div class="divider"></div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button id="register-submit" type="submit" class="btn btn-primary" hx-disabled-elt="this">Submit</button>
 
     </form>
 

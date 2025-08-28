@@ -1,0 +1,37 @@
+<!-- rota/rota_index.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+    <div class="flex flex-col space-y-4">
+
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col space-y-2">
+                <p class="text-2xl font-bold mb-3">Upload CSV for dates</p>
+                <p>Dates will be added to: {{ opportunity.name }}</p>
+                {% if role %}
+                <p>Role: {{ role.name }}</p>
+                {% endif %}
+                <p class="text-slate-400">
+                Use this screen to batch create dates. Duplicates will not be added. Ensure your CSV has 3 columns, date, start_time and end_time.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+            <form enctype="multipart/form-data" method="post" {% if role %}action="/org_admin/rota/schedule/import/{{ opportunity.id }}/{{ role.id }}/"{% else %}action="/org_admin/rota/schedule/import/{{ opportunity.id }}/"{% endif %}>
+                {% csrf_token %}
+                <input type="file" name="import_file" class="file-input file-input-bordered w-full max-w-xs" required/>
+                <button class="btn btn-primary btn-sm" hx-target=".htmx-navigator" hx-swap="outerHTML">Submit</button>
+            </form>
+
+        </div>
+
+
+
+    </div>
+
+{% endblock %}

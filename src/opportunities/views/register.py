@@ -24,6 +24,8 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
             role_id = key.split("_")[1]
             interested_roles.append(int(role_id))
 
+    print(f"[debug]: Interested roles {interested_roles}")
+
     # Query OneOffDate for either roles or the opportunity
     if interested_roles:
         print("[info]: roles filter", interested_roles)
@@ -32,6 +34,15 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
             date__gte=datetime.now().date()
         )
     else:
+        opportunity = Opportunity.objects.filter(id=opportunity_id)
+        if opportunity.exists():
+            if opportunity.first().rota_config == 'PER_ROLE':
+                if not superform:
+                    return render(request, "opportunities/partials/date_picker.html")
+                else:
+                    return render(request, "forms/partials/date_picker.html")
+
+
         print("[info]: opportunity filter", opportunity_id)
         dates = OneOffDate.objects.filter(
             role__opportunity__id=opportunity_id,

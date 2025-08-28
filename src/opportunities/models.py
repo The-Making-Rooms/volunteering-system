@@ -13,6 +13,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import os
 import uuid
+from rota.models import VolunteerRoleIntrest
 
 def get_random_filename_image(instance, filename):
     ext = filename.split('.')[-1]
@@ -164,14 +165,15 @@ class Registration(models.Model):
     def get_registration_status(self):
         return VolunteerRegistrationStatus.objects.filter(registration=self).last().registration_status.status
 
+    def get_interested_roles_count(self):
+        return VolunteerRoleIntrest.objects.filter(registration=self).count()
+
+
 class RegistrationAbsence(models.Model):
     registration = models.ForeignKey('Registration', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
 
 class Image(models.Model):
-    
-    
-    
     image = models.ImageField(upload_to=get_random_filename_image)
     thumbnail_image = models.ImageField(upload_to=get_random_filename_image, null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)
