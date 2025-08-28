@@ -33,6 +33,28 @@
 
   <body style="height: 100%">
 
+    <div class="navbar bg-base-100 shadow-lg">
+      <div class="flex-1">
+        <img
+              src="{% static 'images/chip_in_logo.svg' %}"
+              alt="logo"
+              class="flex-none ml-5 w-20"
+            />
+      </div>
+      <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+          <li>
+              <a
+                class="btn btn-primary btn-sm"
+                href="/supervisor/logout/"
+                >
+                  Logout
+              </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
         {% endif %}
         <div
           class="htmx-navigator pb-20 mx-5 md:mx-10 xl:mx-20 2xl:mx-40 mt-3 lg:pt-5"

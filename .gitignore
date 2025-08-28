@@ -4,3 +4,4 @@ src/media/*
 db.sqlite3
 node_modules
 src/media.zip
+/.idea

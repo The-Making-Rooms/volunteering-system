@@ -1,0 +1,21 @@
+{% if dates|length > 0 %}
+<div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+    <label class="text-[12pt] mb-3" for="post_code" class="mr-3">Please select the roles you are interested in: <span class="text-red-600 font-bold">*</span></label>
+
+        <div class="flex flex-col gap-3">
+            {% for d in dates %}
+                <div class="flex items-center gap-x-3">
+                    <input
+                            class="checkbox"
+                            type="checkbox"
+                            id="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                            name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                    />
+                    <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
+                    {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+</div>
+{% endif %}

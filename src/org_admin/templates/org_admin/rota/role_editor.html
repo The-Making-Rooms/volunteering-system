@@ -12,6 +12,13 @@
     ↩ Back
 </button>
 
+        {% if error %}
+        {% include "commonui/error.html" %}
+    {% endif %}
+    {% if success %}
+        {% include "commonui/success.html" %}
+    {% endif %}
+
 <div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
     <p class="text-2xl font-bold">
     {%if role %}Editing Role: {{ role.name }}{% else %}New Role{% endif %}
@@ -22,7 +29,7 @@
         </p>
     {% endif %}
     <div class="divider"></div>
-        <form>
+        <form method="post" action={% if role %}"/org_admin/rota/role/{{ role.id }}/"{% else %}"/org_admin/rota/role/new/{{ opp.id }}/"{% endif %} >
             {% csrf_token %}
 
         <div class="flex flex-col md:flex-row md:space-x-4">
@@ -61,7 +68,6 @@
             <button
                 class="btn btn-primary"
                 type="submit"
-                hx-post={% if role %}"/org_admin/rota/role/{{ role.id }}/" {% else %} "/org_admin/rota/role/new/{{ opp.id }}/"{% endif %}
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
             >

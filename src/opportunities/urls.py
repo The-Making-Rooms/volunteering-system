@@ -12,5 +12,6 @@ urlpatterns = [
     path("<int:opportunity_id>/", views.detail, name="detail"),
     path("<int:opportunity_id>/register/", views.register, name="register"),
     path("<int:opportunity_id>/get_dates/", views.get_opportunity_dates, name="get_dates"),
+    path("<int:opportunity_id>/get_superform_dates/", views.get_opportunity_dates, kwargs={'superform':True}, name="get_dates"),
 
 ]

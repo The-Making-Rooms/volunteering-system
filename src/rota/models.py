@@ -161,7 +161,7 @@ class OneOffDate(models.Model):
     opportunity = models.ForeignKey('opportunities.Opportunity', on_delete=models.CASCADE)
 
     #allow optional role to be defined, which mean this schedule is only for
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, default=None)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, default=None, blank=True)
 
     def clean(self):
         if self.start_time >= self.end_time:

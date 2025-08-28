@@ -37,17 +37,21 @@
     </div>
 
     <div class="divider"></div>
+
+    <div class="divider"></div>
+
+
     <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>Occurrence</th>
+                <th>Date</th>
                 <th>Times</th>
                 <th>Role</th>
                 <th>Section</th>
                 <th>Required</th>
                 <th>Available</th>
-                <th>Assigned</th>
+                <th>Assigned (Unsent)</th>
                 <th>Accepted</th>
                 <th>Actions</th>
             </tr>
@@ -62,7 +66,7 @@
                 <td>{% if shift.section %}{{ shift.section.name }}{% else %}-{% endif %}</td>
                 <td>{% if shift.section %}{{ shift.section.required_volunteers }}{% else %}{{ shift.role.required_volunteers }}{% endif %}</td>
                 <td>{{ shift.available_volunteers|length }}</td>
-                <td>{{ shift.assigned_volunteers|length }}</td>
+                <td>{{ shift.assigned_volunteers|length}}</td>
                 <td>{{ shift.accepted_volunteers.0|length }}/{{ shift.accepted_volunteers.1|length }}</td>
                 <td>
                     {% if shift.section %}

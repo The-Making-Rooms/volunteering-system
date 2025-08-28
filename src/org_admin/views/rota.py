@@ -5,6 +5,7 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from django.conf import settings
+from django.db.models import Count
 
 
 from django.contrib.auth.decorators import login_required
@@ -228,7 +229,7 @@ def check_time_conflict(registration_id: int,
     return False
 
 
-def get_assigned_volunteers(schedule_id: int, role_id: int, section_id: Optional[int] = None):
+def get_assigned_volunteers(schedule_id: int, role_id: int, section_id: Optional[int] = None, omit_unconfirmed: bool=False):
     """
     Get volunteers already assigned to a specific shift (schedule+role [+optional section]).
     """
@@ -244,6 +245,9 @@ def get_assigned_volunteers(schedule_id: int, role_id: int, section_id: Optional
             'role': role,
             'occurrence__one_off_date': schedule,
         }
+        if omit_unconfirmed:
+            shift_filter["confirmed"] = False
+
 
         if section_id:
             shift_filter['section_id'] = section_id
@@ -251,6 +255,9 @@ def get_assigned_volunteers(schedule_id: int, role_id: int, section_id: Optional
             shift_filter['section__isnull'] = True
 
         shifts = VolunteerShift.objects.filter(**shift_filter).values_list('registration_id', flat=True)
+
+        print("[debug]: Shifts:", shifts)
+
         if shifts:
             return Registration.objects.filter(id__in=shifts)
         return Registration.objects.none()
@@ -338,9 +345,10 @@ def get_accepted_and_confirmed(schedule_id: int, role_id: int, section_id: Optio
         return [Registration.objects.none(), Registration.objects.none()]
 
 
-def get_available_volunteers_discrete(opportunity_id: int):
+def get_available_volunteers_discrete(opportunity_id: int, omit_confirmed: bool=False):
     """
     Build a list of shift blocks for per-role scheduling: each role has its own OneOffDate(s).
+    omit_confirmed omits confirmed opportunities from the assigned count
     """
     shifts = []
     roles = Role.objects.filter(opportunity=opportunity_id).select_related("opportunity__organisation")
@@ -355,16 +363,18 @@ def get_available_volunteers_discrete(opportunity_id: int):
                         'role': role,
                         'schedule': schedule,
                         'available_volunteers': get_shift_volunteers(schedule.id, role.id),
-                        'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, section.id),
+                        'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, section.id, omit_confirmed),
                         'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id, section.id),
                         'section': section,
                     })
+
+
             else:
                 shifts.append({
                     'role': role,
                     'schedule': schedule,
                     'available_volunteers': get_shift_volunteers(schedule.id, role.id),
-                    'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id),
+                    'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, omit_unconfirmed=omit_confirmed),
                     'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id),
                     'section': None,
                 })
@@ -591,7 +601,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
                             'role': role,
                             'schedule': schedule,
                             'available_volunteers': available_volunteers,
-                            'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, section.id),
+                            'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, section.id, True),
                             'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id, section.id),
                         })
                 else:
@@ -600,11 +610,11 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
                         'schedule': schedule,
                         'section': None,
                         'available_volunteers': available_volunteers,
-                        'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id),
+                        'assigned_volunteers': get_assigned_volunteers(schedule.id, role.id, omit_unconfirmed=True),
                         'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id),
                     })
     else:
-        shifts = get_available_volunteers_discrete(opportunity.id)
+        shifts = get_available_volunteers_discrete(opportunity.id, omit_confirmed=True)
 
     unconfirmed_shifts = VolunteerShift.objects.filter(
         registration__opportunity=opportunity,
@@ -612,6 +622,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     )
 
     unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
+
 
     context = {
         'hx': safe_check_if_hx(request),

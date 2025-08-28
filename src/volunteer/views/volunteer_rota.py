@@ -64,6 +64,7 @@ def manage_registration_preferences(request, registration_id):
     volunteer_dates = list(VolunteerOneOffDateAvailability.objects.filter(registration=registration).values_list('one_off_date_id', flat=True))
     volunteer_roles = list(VolunteerRoleIntrest.objects.filter(registration=registration).values_list('role_id', flat=True))
 
+    print("[debug]: Volunteer Dates:", volunteer_dates)
 
     if opportunity.rota_config == "SHARED":
         # Fetch all future OneOffDates for this opportunity (including role-specific and shared)
@@ -89,8 +90,9 @@ def manage_registration_preferences(request, registration_id):
                 'start_time': date_obj.start_time,
                 'end_time': date_obj.end_time,
                 'ids': [date_obj.id],
-                'is_checked' : set(volunteer_dates).issubset({date_obj.id})
+                'is_checked' : len(set(volunteer_dates).intersection(set([date_obj.id]))) > 0
             }
+            print("[debug]: Sets:",set(volunteer_dates).issubset({date_obj.id}), {date_obj.id})
         else:
             if date_obj.id not in seen[key]['ids']:
                 seen[key]['ids'].append(date_obj.id)

@@ -14,7 +14,7 @@ from datetime import datetime
 from rota.models import OneOffDate, VolunteerOneOffDateAvailability, Role, VolunteerRoleIntrest
 
 
-def get_opportunity_dates(request, opportunity_id):
+def get_opportunity_dates(request, opportunity_id, superform = False):
     interested_roles = []
     dedup_dates = []
 
@@ -62,7 +62,10 @@ def get_opportunity_dates(request, opportunity_id):
         "dates" : dedup_dates
     }
 
-    return render(request, "opportunities/partials/date_picker.html", context)
+    if not superform:
+        return render(request, "opportunities/partials/date_picker.html", context)
+    else:
+        return render(request, "forms/partials/date_picker.html", context)
 
 
 
