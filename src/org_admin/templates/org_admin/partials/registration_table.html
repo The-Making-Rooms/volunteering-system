@@ -1,9 +1,26 @@
 
-<table class="table" id="reg-table">
+<table class="table" id="reg-table"
+  hx-on:change="
+    if (event.target && event.target.matches('tbody input[name=registration_ids]')) {
+      const c = this.querySelectorAll('tbody input[name=registration_ids]:not(:disabled)');
+      const checked = [...c].filter(cb => cb.checked).length;
+      const header = this.querySelector('#select-all');
+      header.checked = c.length > 0 && checked === c.length;
+      header.indeterminate = checked > 0 && checked < c.length;
+    }
+  ">
     
     <thead>
         <tr>
-            <th></th>
+            <th>
+                <input type="checkbox" id="select-all" class="checkbox checkbox-primary" aria-label="Select all"
+  hx-on:change="
+    const t = this.closest('table');
+    const c = t.querySelectorAll('tbody input[name=registration_ids]:not(:disabled)');
+    c.forEach(cb => cb.checked = this.checked);
+    this.indeterminate = false;
+  ">
+              </th>
             <th>Name</th>
             <th>Volunteering for</th>
             <th>Registered on</th>
