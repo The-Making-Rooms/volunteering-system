@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 
-from django.db.models import Count, Q, F, Min
+from django.db.models import Count, Q, F, Min, Prefetch, OuterRef, Subquery
 import csv
 import io
 
@@ -25,7 +25,7 @@ from threading import Thread
 
 from organisations.models import Organisation
 from commonui.views import check_if_hx
-from opportunities.models import Opportunity, Registration
+from opportunities.models import Opportunity, Registration, VolunteerRegistrationStatus
 from org_admin.models import OrganisationAdmin
 from rota.models import (
     Role,
@@ -185,6 +185,7 @@ def import_csv_dates(file_like_text, opportunity: Opportunity, role: Role | None
             "start_time": st,
             "end_time": et,
             "opportunity": opportunity,
+            "role": None
         }
         if role:
             query["role"] = role
@@ -197,6 +198,89 @@ def import_csv_dates(file_like_text, opportunity: Opportunity, role: Role | None
         new_count += 1
 
     return new_count, dup_count
+
+from django.db import transaction
+from django.db.models import Q
+
+def copy_shared_schedule_dates(opportunity_id):
+    """
+    For the given opportunity:
+    - Find all OneOffDate entries with no role (shared dates).
+    - For each Role belonging to the opportunity, ensure there is a per-role
+      OneOffDate with the same (date, start_time, end_time).
+    - Do not create duplicates if a per-role OneOffDate already exists.
+    Returns the count of created OneOffDate records.
+    """
+    # Pull shared dates once
+    shared_dates = OneOffDate.objects.filter(
+        opportunity_id=opportunity_id,
+        role__isnull=True,
+    ).values('date', 'start_time', 'end_time')
+
+    if not shared_dates.exists():
+        return 0
+
+    # Fetch roles for the opportunity
+    roles = list(
+        Role.objects.filter(opportunity_id=opportunity_id).only('id')
+    )
+    if not roles:
+        return 0
+
+    # Build the target triples for all roles
+    # Use a set of tuples for deduping in Python space
+    target_triples = set()
+    for sd in shared_dates:
+        d = sd['date']
+        st = sd['start_time']
+        et = sd['end_time']
+        for r in roles:
+            target_triples.add((r.id, d, st, et))
+
+    # Query existing per-role OneOffDate entries to avoid duplicates
+    # We only want role!=NULL entries matching any of the desired triples.
+    # Build a Q filter combining ORs over the triples in manageable chunks.
+    existing_triples = set()
+    CHUNK = 500  # avoid overly large Q objects
+    targets = list(target_triples)
+
+    for i in range(0, len(targets), CHUNK):
+        chunk = targets[i:i+CHUNK]
+        q = Q()
+        for role_id, d, st, et in chunk:
+            q |= Q(role_id=role_id, date=d, start_time=st, end_time=et, opportunity_id=opportunity_id)
+        for row in OneOffDate.objects.filter(q).values_list('role_id', 'date', 'start_time', 'end_time'):
+            existing_triples.add(row)
+
+    # Prepare OneOffDate instances that don't already exist
+    to_create = []
+    for role_id, d, st, et in targets:
+        if (role_id, d, st, et) in existing_triples:
+            continue
+        to_create.append(
+            OneOffDate(
+                opportunity_id=opportunity_id,
+                role_id=role_id,
+                date=d,
+                start_time=st,
+                end_time=et,
+            )
+        )
+
+    if not to_create:
+        return 0
+
+    # Create missing rows atomically; use ignore_conflicts to be extra safe under races
+    with transaction.atomic():
+        created = OneOffDate.objects.bulk_create(
+            to_create,
+            ignore_conflicts=True  # supported since Django 2.2
+        )  # [web:2][web:7][web:8][web:11]
+
+    # bulk_create returns the list of instances created (may be empty if all conflicted)
+    return len(created)
+
+
 
 def send_email_to_volunteer(domain, shift_id):
     shift = VolunteerShift.objects.get(id=shift_id)
@@ -241,6 +325,51 @@ The Chip In Team</p>
     email.attach_alternative(text, "text/html")
     email.send()
 
+def send_email_to_supervisor(domain, supervisor_id):
+    supervisor = Supervisor.objects.get(id=supervisor_id)
+
+
+    subject = 'Chip in System - New Supervisor'
+
+    message = f"""
+<p>Hello,</p>
+
+<p>You have been assigned as a supervisor for {supervisor.organisation.name}.</p>
+<p>To get started, please reset your password by clicking on the link below.</p>
+
+<a class="btn" href="https://{domain}/supervisor/">Supervisor Login</a>
+
+<p>If the button above does not work, please copy the following link into your browser:</p>
+<p>https://{domain}/supervisor/</p>
+
+<p>Regards,<br>
+The Chip In Team</p>
+"""
+
+    context = {
+        'content' : message
+    }
+
+    text = render_to_string('org_admin/rota/email_template.html', context)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[supervisor.user.email]
+    )
+
+    email.attach_alternative(text, "text/html")
+    email.send()
+
+class SendEmailToSupervisor(Thread):
+    def __init__(self, domain, supervisor_id):
+        Thread.__init__(self)
+        self.supervisor = supervisor_id
+        self.domain = domain
+
+    def run(self):
+        send_email_to_supervisor(self.domain, self.supervisor)
 
 class SendEmailToVolunteer(Thread):
     def __init__(self, domain, shift_id):
@@ -496,7 +625,7 @@ def supervisor_index(request: HttpRequest, error: Optional[str] = None) -> HttpR
 
 
 @login_required
-def toggle_opportunity_scheduling_type(request: HttpRequest, opportunity_id: int) -> HttpResponse:
+def toggle_opportunity_scheduling_type(request: HttpRequest, opportunity_id: int, copy: bool = False) -> HttpResponse:
     """
     Toggle between SHARED and PER_ROLE scheduling modes for an opportunity.
     """
@@ -509,7 +638,13 @@ def toggle_opportunity_scheduling_type(request: HttpRequest, opportunity_id: int
         opportunity.rota_config = "SHARED"
     else:
         opportunity.rota_config = "PER_ROLE" if opportunity.rota_config == "SHARED" else "SHARED"
+
+
     opportunity.save()
+
+    if copy and opportunity.rota_config == "PER_ROLE":
+        copy_res = copy_shared_schedule_dates(opportunity.id)
+        return opportunity_rota_index(request, opportunity_id, success=f"Successfully copied {copy_res} dates.")
 
     return opportunity_rota_index(request, opportunity_id)
 
@@ -667,6 +802,8 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
 
     context = {
         'hx': safe_check_if_hx(request),
+        'selected_date' : request.GET.get('date'),
+        'selected_role' : request.GET.get('role'),
         'opp': opportunity,
         'registrations': registrations,
         'assigned_volunteers': assigned_volunteers,
@@ -676,6 +813,101 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
 
+@login_required
+def faster_assign_rota(request: HttpRequest, opp_id: int, success: str | None = None, error: str | None = None) -> HttpResponse:
+
+
+    # Authz and base objects
+    print("faster_assign_rota")
+    require_authenticated(request)
+    opportunity = get_object_or_404(
+        Opportunity.objects.select_related("organisation"),
+        id=opp_id,
+    )
+    assert_org_access(request, opportunity)
+
+    # Filter controls
+
+    rget_role = request.GET.get("role")
+    rget_date = request.GET.get("date")
+
+    selected_role = rget_role if rget_role else None
+    selected_date = rget_date if rget_date else None
+
+    if request.method == "POST":
+        post_role = request.POST.get("role_filter")
+        post_date = request.POST.get("date_filter")
+        selected_role = post_role if post_role and post_role != "all" else None
+        selected_date = post_date if post_date and post_date != "all" else None
+
+    # Load roles with sections (for filter UI and template)
+    roles = (
+        Role.objects.filter(opportunity=opportunity)
+        .only("id", "name", "volunteer_description", "opportunity_id")
+        .select_related("opportunity__organisation")
+        .prefetch_related(Prefetch("section_set", queryset=Section.objects.only("id", "name", "description", "role_id")))
+    )
+
+    # Build shifts efficiently
+    if getattr(opportunity, "rota_config", "SHARED") == "SHARED":
+        # Materialize per-role OneOffDate from shared ones once, then reuse the discrete builder
+        # This avoids nested loops over schedule×role×section and per-iteration helper DB calls
+        copy_shared_schedule_dates(opportunity.id)
+        shifts = get_available_volunteers_discrete(
+            opportunity.id,
+            omit_confirmed=True,
+            selected_role=selected_role,
+            selected_date=selected_date,
+        )
+    else:
+        shifts = get_available_volunteers_discrete(
+            opportunity.id,
+            omit_confirmed=True,
+            selected_role=selected_role,
+            selected_date=selected_date,
+        )
+
+    # Unconfirmed shifts: filter "active" at the DB using a subquery for latest status
+    latest_status_subq = (
+        VolunteerRegistrationStatus.objects
+        .filter(registration=OuterRef("registration_id"))
+        .order_by("-date")
+        .values("registration_status__status")[:1]
+    )
+    unconfirmed_shifts = (
+        VolunteerShift.objects
+        .filter(registration__opportunity=opportunity, confirmed=False)
+        .annotate(latest_status=Subquery(latest_status_subq))
+        .filter(latest_status="active")
+        .select_related("registration", "occurrence", "role", "section")
+    )
+
+    # Sort shifts by number of available volunteers (identical behavior)
+    shifts.sort(key=lambda d: len(d.get("available_volunteers", [])))
+
+    # Time slots for filter UI
+    slots = (
+        OneOffDate.objects
+        .filter(opportunity=opportunity, date__gte=date.today())
+        .values("date", "start_time", "end_time")
+        .annotate(id=Min("id"))
+        .order_by("date", "start_time", "end_time")
+    )
+
+    context = {
+        "hx": safe_check_if_hx(request),
+        "shifts": shifts,
+        "opp": opportunity,
+        "unconfirmed_shifts": unconfirmed_shifts,
+        "slots": slots,
+        "opportunity": opportunity,
+        "roles": roles,
+        "success": success,
+        "error": error,
+        "selected_role": selected_role,
+        "selected_date": selected_date,
+    }
+    return render(request, "org_admin/rota/shift_assignment.html", context)
 
 @login_required
 def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None, error: Optional[str] = None) -> HttpResponse:
@@ -683,6 +915,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     Display the main shift assignment interface for an opportunity.
     Shows all shifts that need volunteers assigned.
     """
+    print("slower_assign_rota")
     require_authenticated(request)
     opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opp_id)
     assert_org_access(request, opportunity)
@@ -1098,7 +1331,7 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opportunity_id)
     assert_org_access(request, opportunity)
 
-    schedules = OneOffDate.objects.filter(opportunity=opportunity, role=None)
+    schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True, date__gte=datetime.now())
     roles = Role.objects.filter(opportunity=opportunity)
 
     context = {
@@ -1129,7 +1362,6 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
         ).select_related("registration")
 
         domain = request.get_host()
-        print(domain)
 
         for shift in unconfirmed_shifts:
             if shift.registration.get_registration_status() == 'active':
@@ -1335,6 +1567,12 @@ def save_supervisor(request: HttpRequest, supervisor_id: Optional[int] = None):
             supervisor = Supervisor(user=user, organisation=(admin.organisation if admin else None))
             supervisor.full_clean()
             supervisor.save()
+
+            domain = request.get_host()
+
+            email = SendEmailToSupervisor(domain, supervisor.id)
+            email.start()
+
     else:
         supervisor = get_object_or_404(Supervisor.objects.select_related("organisation"), id=supervisor_id)
         assert_org_access(request, supervisor)
@@ -1441,9 +1679,11 @@ def import_dates_csv(request: HttpRequest, opportunity_id: int, role_id: int|Non
                 pass
 
         request.method = 'GET'
-        return edit_role(request, role_id, opportunity_id, success=f"Successfully imported {new_count} dates. Ignored {dup_count} duplicated dates.")
 
-
+        if role_id:
+            return edit_role(request, role_id, opportunity_id, success=f"Successfully imported {new_count} dates. Ignored {dup_count} duplicated dates.")
+        else:
+            return opportunity_rota_index(request, opportunity_id, success=f"Successfully imported {new_count} dates. Ignored {dup_count} duplicated dates.")
 
     else:
 
@@ -1454,8 +1694,6 @@ def import_dates_csv(request: HttpRequest, opportunity_id: int, role_id: int|Non
         }
 
         return render(request, "org_admin/rota/import_roles_csv.html", context)
-
-    pass
 
 
 

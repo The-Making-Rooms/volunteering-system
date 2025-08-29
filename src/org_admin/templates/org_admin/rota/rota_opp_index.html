@@ -42,6 +42,7 @@
     <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
         <div class="flex items-center justify-between">
             <p class="text-2xl font-bold">Schedules</p>
+            <div>
             <button
                 hx-get="/org_admin/rota/schedule/new/{{ opportunity.id }}/"
                 hx-target=".htmx-navigator"
@@ -49,6 +50,14 @@
                 class="btn btn-primary btn-sm">
                 New Schedule
             </button>
+            <button
+                hx-get="/org_admin/rota/schedule/import/{{ opportunity.id }}/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                class="btn btn-primary btn-sm">
+                Import CSV
+            </button>
+                </div>
         </div>
 
     <div class="divider"></div>
@@ -159,7 +168,17 @@
             Switch to shared scheduling
             {% endif %}
         </button>
+    {% if opportunity.rota_config == "SHARED"%}
+       <button
+                hx-get="/org_admin/rota/toggle_rota_type/{{ opportunity.id }}/copy/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                class="btn btn-primary btn-sm mt-3">
 
+            Switch to per role scheduling and copy dates
+
+        </button>
+    {% endif %}
 
 
     </div>

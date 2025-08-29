@@ -6,7 +6,7 @@
     <button
         class="btn btn-primary btn-sm mb-3"
         type="submit"
-        hx-get="/org_admin/rota/assign/{{ opp.id }}/"
+        hx-get="/org_admin/rota/assign/{{ opp.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
         hx-target=".htmx-navigator"
         hx-swap="outerHTML"
         hx-disabled-elt="this"
