@@ -34,6 +34,7 @@
                                     hx-post="/opportunities/{{opportunity.id}}/get_dates/"
                                     hx-target="#deduplicated_dates"
                                     hx-swap="innerHTML"
+                                    hx-disabled-elt="#register-submit"
                                     {% endif %}
                                     name="roles_{{ role.id }}"
                                     id="{{ role.id }}"
@@ -80,6 +81,7 @@
 
             {% if roles or dates %}
                 <button
+                    id="register-submit"
                     class="btn btn-primary btn-sm mb-3"
                     hx-post="/volunteer/manage_preferences/{{ registration.id }}/"
                     hx-target=".htmx-navigator"
