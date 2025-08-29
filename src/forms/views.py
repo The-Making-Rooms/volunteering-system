@@ -421,20 +421,28 @@ def submit_superform(request, id):
         for schedule_date in available_dates:
             print("Schedule: ", schedule_date)
             one_off_schedule_object = OneOffDate.objects.get(id=schedule_date)
-            availability = VolunteerOneOffDateAvailability(
-                registration=registration,
-                one_off_date=one_off_schedule_object,
-            )
-            availability.save()
+            if not VolunteerOneOffDateAvailability.objects.filter(
+                    registration=registration,
+                    one_off_date=one_off_schedule_object
+            ).exists():
+                availability = VolunteerOneOffDateAvailability(
+                    registration=registration,
+                    one_off_date=one_off_schedule_object,
+                )
+                availability.save()
 
         for role in interested_roles:
             print("Role: ", role)
             role = Role.objects.get(id=role)
-            interested_role = VolunteerRoleIntrest(
-                registration=registration,
-                role=role,
-            )
-            interested_role.save()
+            if not VolunteerRoleIntrest.objects.filter(
+                    registration=registration,
+                    role=role,
+            ).exists():
+                interested_role = VolunteerRoleIntrest(
+                    registration=registration,
+                    role=role,
+                )
+                interested_role.save()
         
         completion_message = superform.submitted_message if superform.submitted_message else "Thank you for completing the form. You will be contacted shortly."
         
