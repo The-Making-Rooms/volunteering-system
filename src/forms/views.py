@@ -48,7 +48,8 @@ def superform(request, id):
         # Fetch all future OneOffDates for this opportunity (including role-specific and shared)
         dates_qs = OneOffDate.objects.filter(
             opportunity=superform.opportunity_to_register,
-            date__gte=timezone.now().date()
+            date__gte=timezone.now().date(),
+            role__isnull=True
         ).order_by('date', 'start_time')
 
         # Deduplicate into template-friendly structure

@@ -187,7 +187,8 @@ def register(request, opportunity_id, error=None):
         # Fetch all future OneOffDates for this opportunity (including role-specific and shared)
         dates_qs = OneOffDate.objects.filter(
             opportunity=opportunity,
-            date__gte=timezone.now().date()
+            date__gte=timezone.now().date(),
+            role__isnull=True
         ).order_by('date', 'start_time')
 
         # Deduplicate into template-friendly structure

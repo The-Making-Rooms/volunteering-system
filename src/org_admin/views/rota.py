@@ -479,6 +479,9 @@ def get_shift_volunteers(schedule_id: int, role_id: int):
             ).values_list('registration_id', flat=True)
         )
 
+        print(f"[debug]: available_vols: {one_off_available_reg_ids}, {role_interest_reg_ids}")
+
+
         available_registrations = one_off_available_reg_ids.intersection(role_interest_reg_ids)
 
         if available_registrations:
