@@ -716,6 +716,7 @@ def assign_volunteer_shift_instance(request: HttpRequest, registration_id: int, 
     if section:
         assert_org_access(request, section)
 
+
     # Verify eligible for this shift
     eligible_qs = get_shift_volunteers(schedule.id, role.id)
     if not eligible_qs.filter(id=registration_id).exists():
@@ -1257,6 +1258,7 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
 
     schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True, date__gte=datetime.now())
     roles = Role.objects.filter(opportunity=opportunity)
+
 
     context = {
         'opportunity': opportunity,

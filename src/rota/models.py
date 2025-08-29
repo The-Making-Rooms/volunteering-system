@@ -86,6 +86,13 @@ class Role(models.Model):
     def __str__(self):
         return self.opportunity.name + " - " + self.name
 
+    def get_volunteers(self):
+        sections = Section.objects.filter(role=self)
+        if sections.exists():
+            return sections.aggregate(total=models.Sum('required_volunteers'))['total']
+        else:
+            return self.required_volunteers
+
 
 class Section(models.Model):
     name = models.CharField(max_length=255)

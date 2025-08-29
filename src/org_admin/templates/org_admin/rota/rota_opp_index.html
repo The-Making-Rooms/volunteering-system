@@ -3,6 +3,17 @@
 
 {% block page_content %}
 
+        <button
+        class="btn btn-primary btn-sm mb-3"
+        type="submit"
+        hx-get="/org_admin/rota/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+        hx-disabled-elt="this"
+    >
+        ↩ Back
+    </button>
+
     <div class="flex flex-col space-y-4">
 
 
@@ -129,7 +140,7 @@
             {% for role in roles %}
                     <tr class="hover:bg-base-300 border-b border-base-300">
                         <td>{{ role.name }}</td>
-                        <td>{{ role.required_volunteers }}</td>
+                        <td>{{ role.get_volunteers }}</td>
                         <td>
                             <button
                                 hx-get="/org_admin/rota/role/{{ role.id }}/"
