@@ -222,7 +222,7 @@ urlpatterns = [
 
     path("rota/schedule/<int:schedule_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
 
-    path("rota/assign/<int:opp_id>/", views.faster_assign_rota, name="assign_rota"),
+    path("rota/assign/<int:opp_id>/", views.assign_rota, name="assign_rota"),
 
     path("rota/assign/shift/<int:role_id>/<int:schedule_id>/", views.assign_volunteer_shift, name="assign_role_shift"),
     path("rota/assign/shift/<int:role_id>/<int:schedule_id>/<int:section_id>/", views.assign_volunteer_shift, name="assign_role_shift"),

@@ -813,101 +813,6 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
 
-@login_required
-def faster_assign_rota(request: HttpRequest, opp_id: int, success: str | None = None, error: str | None = None) -> HttpResponse:
-
-
-    # Authz and base objects
-    print("faster_assign_rota")
-    require_authenticated(request)
-    opportunity = get_object_or_404(
-        Opportunity.objects.select_related("organisation"),
-        id=opp_id,
-    )
-    assert_org_access(request, opportunity)
-
-    # Filter controls
-
-    rget_role = request.GET.get("role")
-    rget_date = request.GET.get("date")
-
-    selected_role = rget_role if rget_role else None
-    selected_date = rget_date if rget_date else None
-
-    if request.method == "POST":
-        post_role = request.POST.get("role_filter")
-        post_date = request.POST.get("date_filter")
-        selected_role = post_role if post_role and post_role != "all" else None
-        selected_date = post_date if post_date and post_date != "all" else None
-
-    # Load roles with sections (for filter UI and template)
-    roles = (
-        Role.objects.filter(opportunity=opportunity)
-        .only("id", "name", "volunteer_description", "opportunity_id")
-        .select_related("opportunity__organisation")
-        .prefetch_related(Prefetch("section_set", queryset=Section.objects.only("id", "name", "description", "role_id")))
-    )
-
-    # Build shifts efficiently
-    if getattr(opportunity, "rota_config", "SHARED") == "SHARED":
-        # Materialize per-role OneOffDate from shared ones once, then reuse the discrete builder
-        # This avoids nested loops over schedule×role×section and per-iteration helper DB calls
-        copy_shared_schedule_dates(opportunity.id)
-        shifts = get_available_volunteers_discrete(
-            opportunity.id,
-            omit_confirmed=True,
-            selected_role=selected_role,
-            selected_date=selected_date,
-        )
-    else:
-        shifts = get_available_volunteers_discrete(
-            opportunity.id,
-            omit_confirmed=True,
-            selected_role=selected_role,
-            selected_date=selected_date,
-        )
-
-    # Unconfirmed shifts: filter "active" at the DB using a subquery for latest status
-    latest_status_subq = (
-        VolunteerRegistrationStatus.objects
-        .filter(registration=OuterRef("registration_id"))
-        .order_by("-date")
-        .values("registration_status__status")[:1]
-    )
-    unconfirmed_shifts = (
-        VolunteerShift.objects
-        .filter(registration__opportunity=opportunity, confirmed=False)
-        .annotate(latest_status=Subquery(latest_status_subq))
-        .filter(latest_status="active")
-        .select_related("registration", "occurrence", "role", "section")
-    )
-
-    # Sort shifts by number of available volunteers (identical behavior)
-    shifts.sort(key=lambda d: len(d.get("available_volunteers", [])))
-
-    # Time slots for filter UI
-    slots = (
-        OneOffDate.objects
-        .filter(opportunity=opportunity, date__gte=date.today())
-        .values("date", "start_time", "end_time")
-        .annotate(id=Min("id"))
-        .order_by("date", "start_time", "end_time")
-    )
-
-    context = {
-        "hx": safe_check_if_hx(request),
-        "shifts": shifts,
-        "opp": opportunity,
-        "unconfirmed_shifts": unconfirmed_shifts,
-        "slots": slots,
-        "opportunity": opportunity,
-        "roles": roles,
-        "success": success,
-        "error": error,
-        "selected_role": selected_role,
-        "selected_date": selected_date,
-    }
-    return render(request, "org_admin/rota/shift_assignment.html", context)
 
 @login_required
 def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None, error: Optional[str] = None) -> HttpResponse:
@@ -922,30 +827,46 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
 
     roles = Role.objects.filter(opportunity=opportunity)
 
-    selected_role = None
-    selected_date = None
+    rget_role = request.GET.get("role")
+    rget_date = request.GET.get("date")
 
-    if request.method == 'POST':
-        post_role = request.POST.get('role_filter')
-        post_date = request.POST.get('date_filter')
-        selected_role = post_role if post_role != 'all' else None
-        selected_date = post_date if post_date != 'all' else None
+    selected_role = rget_role if rget_role else None
+    selected_date = rget_date if rget_date else None
+
+    if request.method == "POST":
+        post_role = request.POST.get("role_filter")
+        post_date = request.POST.get("date_filter")
+        selected_role = post_role if post_role and post_role != "all" else None
+        selected_date = post_date if post_date and post_date != "all" else None
 
     print(f"[debug] {request.POST}")
     print(f"[debug] got filters Role: {selected_role} Date:{selected_date}")
 
     shifts = []
     if getattr(opportunity, "rota_config", "SHARED") == "SHARED":
-        # Shared scheduling: same dates across all roles
-        schedules = OneOffDate.objects.filter(
-            opportunity=opportunity,
-            date__gte=datetime.now().date(),
-            role__isnull=True
-        ).select_related("opportunity__organisation")
 
-        roles = Role.objects.filter(opportunity=opp_id).select_related("opportunity__organisation")
+
+        if not selected_role:
+            filtered_roles = Role.objects.filter(opportunity=opp_id).select_related("opportunity__organisation")
+        else:
+            filtered_roles = Role.objects.filter(id=selected_role)
+
+        if not selected_date:
+            schedules = OneOffDate.objects.filter(role__isnull=True, date__gte=datetime.now().date()).select_related(
+                "opportunity__organisation")
+        else:
+            filtered = OneOffDate.objects.get(id=selected_date)
+
+            schedules = OneOffDate.objects.filter(
+                role__isnull=True,
+                date=filtered.date,
+                start_time=filtered.start_time,
+                end_time=filtered.end_time
+            ).select_related(
+                "opportunity__organisation")
+
         for schedule in schedules:
-            for role in roles:
+            for role in filtered_roles:
                 sections = Section.objects.filter(role=role)
                 available_volunteers = get_shift_volunteers(schedule.id, role.id)
                 if sections.exists():
