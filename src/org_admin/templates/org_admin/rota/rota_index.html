@@ -35,7 +35,8 @@
                                     class="btn btn-xs btn-primary"
                                     hx-get="/org_admin/rota/{{ opportunity.id }}/"
                                     hx-target=".htmx-navigator"
-                                    hx-swap="outerHTML">
+                                    hx-swap="outerHTML"
+                                hx-push-url="true">
                                     Manage
                                 </button>
                             </td>

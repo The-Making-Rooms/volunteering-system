@@ -8,6 +8,7 @@
     type="submit"
     hx-get="/org_admin/rota/role/{{ role.id }}/"
     hx-target=".htmx-navigator"
+    hx-push-url="true"
     hx-swap="outerHTML"
 >
     ↩ Back
@@ -47,6 +48,7 @@
                 hx-post={% if section %}"/org_admin/rota/section/{{ section.id }}/" {% else %} "/org_admin/rota/section/new/{{ role.id }}/"{% endif %}
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
+                hx-push-url="true"
             >
                 Submit
             </button>

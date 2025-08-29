@@ -9,6 +9,7 @@
         hx-get="/org_admin/rota/"
         hx-target=".htmx-navigator"
         hx-swap="outerHTML"
+        hx-push-url="true"
         hx-disabled-elt="this"
     >
         ↩ Back
@@ -32,6 +33,7 @@
             hx-target=".htmx-navigator"
             hx-swap="outerHTML"
             hx-disabled-elt="this"
+            hx-push-url="true"
             class="btn btn-primary btn-sm">
             Assign Shifts
         </button>
@@ -50,25 +52,27 @@
 
     {% if opportunity.rota_config == "SHARED" %}
 
-    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3 overflow-scroll">
         <div class="flex items-center justify-between">
             <p class="text-2xl font-bold">Schedules</p>
-            <div>
-            <button
-                hx-get="/org_admin/rota/schedule/new/{{ opportunity.id }}/"
-                hx-target=".htmx-navigator"
-                hx-swap="outerHTML"
-                class="btn btn-primary btn-sm">
-                New Schedule
-            </button>
-            <button
-                hx-get="/org_admin/rota/schedule/import/{{ opportunity.id }}/"
-                hx-target=".htmx-navigator"
-                hx-swap="outerHTML"
-                class="btn btn-primary btn-sm">
-                Import CSV
-            </button>
-                </div>
+            <div class="ml-5">
+                <button
+                    hx-get="/org_admin/rota/schedule/new/{{ opportunity.id }}/"
+                    hx-target=".htmx-navigator"
+                    hx-swap="outerHTML"
+                    hx-push-url="true"
+                    class="btn btn-primary btn-sm">
+                    New Schedule
+                </button>
+                <button
+                    hx-get="/org_admin/rota/schedule/import/{{ opportunity.id }}/"
+                    hx-target=".htmx-navigator"
+                    hx-swap="outerHTML"
+                    hx-push-url="true"
+                    class="btn btn-primary btn-sm">
+                    Import CSV
+                </button>
+            </div>
         </div>
 
     <div class="divider"></div>
@@ -97,6 +101,7 @@
                                     class="btn btn-primary btn-sm"
                                     hx-get="/org_admin/rota/schedule/{{ schedule.id }}/"
                                     hx-target=".htmx-navigator"
+                                    hx-push-url="true"
                                     hx-swap="outerHTML"
                             >Edit</button>
                         </td>
@@ -121,6 +126,7 @@
             hx-get="/org_admin/rota/role/new/{{ opportunity.id }}/"
             hx-target=".htmx-navigator"
             hx-swap="outerHTML"
+            hx-push-url="true"
             class="btn btn-primary btn-sm">
             New Role
         </button>
@@ -146,6 +152,7 @@
                                 hx-get="/org_admin/rota/role/{{ role.id }}/"
                                 hx-target=".htmx-navigator"
                                 hx-swap="outerHTML"
+                                hx-push-url="true"
                                 class="btn btn-primary btn-sm">
                                 Edit
                             </button>

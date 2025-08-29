@@ -25,6 +25,7 @@
                 hx-get="/org_admin/supervisors/new/"
                 hx-target=".htmx-navigator"
                 hx-swap="outerHTML"
+                hx-push-url="true"
                 class="btn btn-primary btn-sm">
                 New Supervisor
             </button>
@@ -54,6 +55,7 @@
                                     hx-get="/org_admin/supervisor/{{ supervisor.id }}/"
                                     hx-target=".htmx-navigator"
                                     hx-swap="outerHTML"
+                                    hx-push-url="true"
                             >Edit</button>
                         </td>
                     </tr>
