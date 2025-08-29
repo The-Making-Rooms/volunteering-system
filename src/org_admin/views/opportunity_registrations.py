@@ -109,7 +109,9 @@ def get_registration_table(request):
             registrations = Registration.objects.all()
         else:
             registrations = Registration.objects.filter(opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
-        
+
+    registrations = registrations.order_by('date_created').reverse()
+
     if name != "":
         registrations = registrations.filter(volunteer__user__first_name__contains=name) | registrations.filter(volunteer__user__last_name__contains=name)
     
@@ -117,7 +119,7 @@ def get_registration_table(request):
         status = RegistrationStatus.objects.get(id=status)
         registrations = [registration for registration in registrations if registration.get_registration_status() == status.status]
         
-    registrations = registrations.order_by('date_created').reverse()
+
     
     context = {
         "registrations": registrations,

@@ -2,57 +2,113 @@
 
 {% block page_content %}
 
-<p class="text-2xl font-bold">Register for {{opportunity.name}}</p>
+    <p class="text-2xl font-bold">Register for {{ opportunity.name }}</p>
 
-{% if error %}
-<p class="text-red-600 font-bold text-xl mb-5">There was an error with your submission. Please check the form and try again.</p>
-{% endif %}
+    {% if error %}
+        <p class="text-red-600 font-bold text-xl mb-5">There was an error with your submission. Please check the form
+            and try again.</p>
+    {% endif %}
 
-{% if success %}
-<p class="text-green-600 font-bold text-xl mb-5">Your registration was successful! You will receive a confirmation email shortly.</p>
-{% endif %}
+    {% if success %}
+        <p class="text-green-600 font-bold text-xl mb-5">Your registration was successful! You will receive a
+            confirmation email shortly.</p>
+    {% endif %}
 
-<div class="divider"></div>
+    <div class="divider"></div>
+    <form action="/opportunities/{{ opportunity.id }}/register/" method="POST" class="mb-5">
 
-<form action="/opportunities/{{opportunity.id}}/register/" method="POST" class="mb-5">
-    {% csrf_token %}
-
-{% if form %}
-
-{% for question in questions %}
-    <div class="p-5 bg-secondary rounded-xl mb-3">
-        {% if question.question.question_type == "text" %}
-        {% include "forms/form_elements/text.html" %}
-        {% elif question.question.question_type == "multi_choice" %}
-        {% include "forms/form_elements/multi-choice.html" %}
-        {% elif question.question.question_type == "boolean" %}
-        {% include "forms/form_elements/boolean.html" %}
+        {% csrf_token %}
+        {% if roles|length > 0 %}
+            <p class="text-xl mb-3">Which roles are you interested in?</p>
+            <div class="flex flex-col gap-3">
+                {% for role in roles %}
+                    <div class="flex items-center gap-x-3">
+                        <input
+                                class="checkbox checkbox-primary"
+                                type="checkbox"
+                                {% if opportunity.rota_config == 'PER_ROLE' %}
+                                hx-trigger="change"
+                                hx-post="/opportunities/{{ opportunity.id }}/get_dates/"
+                                hx-target="#deduplicated_dates"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="#register-submit"
+                                {% endif %}
+                                name="roles_{{ role.id }}"
+                                id="{{ role.id }}"/>
+                        <label for="{{ role.id }}">
+                            {{ role.name }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="divider"></div>
         {% endif %}
-    </div>
-{% endfor %}
 
-<div class="divider"></div>
-{% endif %}
+        <div id="deduplicated_dates">
+            {% if dates|length > 0 and opportunity.rota_config == 'SHARED' %}
+                <p class="text-xl mb-1">Please indicate your availability:</p>
+                <div class="flex flex-col gap-3">
+                    {% for d in dates %}
+                        <div class="flex items-center gap-x-3">
+                            <input
+                                    class="checkbox checkbox-primary"
+                                    type="checkbox"
+                                    id="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                                    name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+                            />
+                            <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
+                            {{ d.date|date:"Y-m-d" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="divider"></div>
+            {% endif %}
+        </div>
 
-{% if supplementary_info %}
 
-{% for info in supplementary_info %}
-<div class="p-5 bg-secondary rounded-xl mb-3">
-<p class="text-2xl mb-1">{{info.info.title}}<span class="text-red-600 font-bold">*</span></p>
-{% if info.response %}<p class="mb-3 text-gray-400">This field has been populated with your previous response.</p>{% endif %}
-    <input type="text" name="sup_{{info.info.id}}" value="{% if info.response %}{{info.response.data}}{%endif%}" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
-</div>
-    
-{% endfor %}    
+        {% if form %}
 
-<div class="divider"></div>
-{% endif %}
+            {% for question in questions %}
+                <div class="p-5 bg-secondary rounded-xl mb-3">
+                    {% if question.question.question_type == "text" %}
+                        {% include "forms/form_elements/text.html" %}
+                    {% elif question.question.question_type == "multi_choice" %}
+                        {% include "forms/form_elements/multi-choice.html" %}
+                    {% elif question.question.question_type == "boolean" %}
+                        {% include "forms/form_elements/boolean.html" %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="divider"></div>
+        {% endif %}
+
+        {% if supplementary_info %}
+
+            {% for info in supplementary_info %}
+                <div class="p-5 bg-secondary rounded-xl mb-3">
+                    <p class="text-2xl mb-1">{{ info.info.title }}<span class="text-red-600 font-bold">*</span></p>
+                    {% if info.response %}<p class="mb-3 text-gray-400">This field has been populated with your previous
+                        response.</p>{% endif %}
+                    <input type="text" name="sup_{{ info.info.id }}"
+                           value="{% if info.response %}{{ info.response.data }}{% endif %}" placeholder="Your Answer"
+                           class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
+                </div>
+
+            {% endfor %}
+
+            <div class="divider"></div>
+        {% endif %}
 
 
-<p class="mb-3 text-slate-500">By continuing, you agree for Chip In to store the information you have provided, and share this with the organisation that is hosting this opportunity. For more information on how Chip In stores and manages your data, please refer to our <a class="text-blue-400 underline" href="/privacy_policy">Privacy Policy</a></p>
-<div class="divider"></div>
-<button type="submit" class="btn btn-primary">Submit</button>
+        <p class="mb-3 text-slate-500">By continuing, you agree for Chip In to store the information you have provided,
+            and share this with the organisation that is hosting this opportunity. For more information on how Chip In
+            stores and manages your data, please refer to our <a class="text-blue-400 underline" href="/privacy_policy">Privacy
+                Policy</a></p>
+        <div class="divider"></div>
+        <button id="register-submit" type="submit" class="btn btn-primary" hx-disabled-elt="this">Submit</button>
 
-</form>
+    </form>
 
 {% endblock %}

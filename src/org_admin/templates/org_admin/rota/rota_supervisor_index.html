@@ -1,0 +1,76 @@
+<!-- rota/rota_supervisor_index.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+    <div class="flex flex-col space-y-4">
+
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col space-y-2">
+                <p class="text-2xl font-bold mb-3">Manage shift supervisors</p>
+                <p class="text-slate-400">
+                Use this screen to manage who is allowed to see shifts, as well as check volunteers in and out.
+                </p>
+            </div>
+        </div>
+
+
+    <div class="divider"></div>
+
+
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+        <div class="flex items-center justify-between">
+            <p class="text-2xl font-bold">Supervisors</p>
+            <button
+                hx-get="/org_admin/supervisors/new/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+                class="btn btn-primary btn-sm">
+                New Supervisor
+            </button>
+        </div>
+
+    <div class="divider"></div>
+        {% if supervisors|length > 0 %}
+            <table class="w-full table table-sm">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Access</th>
+                    <th>Last Log in</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for supervisor in supervisors %}
+                    <tr class="hover:bg-base-300 border-b border-base-300">
+                        <td>{{ supervisor.user.email}}</td>
+                        <td>{{ supervisor.access_level }}</td>
+                        <td>{{ supervisor.user.last_login }}</td>
+                        <td>
+                            <button
+                                    class="btn btn-primary btn-sm"
+                                    hx-get="/org_admin/supervisor/{{ supervisor.id }}/"
+                                    hx-target=".htmx-navigator"
+                                    hx-swap="outerHTML"
+                                    hx-push-url="true"
+                            >Edit</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+
+            </table>
+
+        {% else %}
+            <p>No supervisors found.</p>
+        {% endif %}
+    </div>
+
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,186 @@
+<!-- rota/role_editor.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+<button
+    class="btn btn-primary btn-sm mb-3"
+    type="submit"
+    hx-get="/org_admin/rota/{{ opp.id }}/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+>
+    ↩ Back
+</button>
+
+        {% if error %}
+        {% include "commonui/error.html" %}
+    {% endif %}
+    {% if success %}
+        {% include "commonui/success.html" %}
+    {% endif %}
+
+<div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+    <p class="text-2xl font-bold">
+    {%if role %}Editing Role: {{ role.name }}{% else %}New Role{% endif %}
+    </p>
+    {% if sections|length > 0 %}
+        <p>
+            Note: You are using sections, therefore the volunteers required is calculated from the sum of required volunteers in sections
+        </p>
+    {% endif %}
+    <div class="divider"></div>
+        <form method="post" action={% if role %}"/org_admin/rota/role/{{ role.id }}/"{% else %}"/org_admin/rota/role/new/{{ opp.id }}/"{% endif %} >
+            {% csrf_token %}
+
+        <div class="flex flex-col md:flex-row md:space-x-4">
+
+            <div class="mb-5 flex-grow">
+                <p class="font-bold">Role Name:</p>
+                <input class="input input bordered w-full" type="text" name="role_name" {% if role %}value="{{ role.name }}"{% endif %} required></input>
+            </div>
+
+            <div class="mb-3">
+                <p class="font-bold">Volunteers required:</p>
+            {% if sections|length > 0 %}
+                <input class="input input bordered" type="number" name="role_volunteers" {% if role %}value="{{ volunteers_required }}"{% endif %} disabled></input>
+            {% else %}
+                <input class="input input bordered" type="number" name="role_volunteers" {% if role %}value="{{ role.required_volunteers }}"{% endif %} required></input>
+            {% endif %}
+
+            </div>
+
+
+        </div>
+
+        <div class="mb-5">
+            <p class="font-bold">Role Description:</p>
+            <p class="text-gray-500 mb-3">This description will be visible to volunteers on the public Chip in opportunity page</p>
+            <textarea class="textarea textarea-bordered w-full" name="role_description" required>{{ role.description }}</textarea>
+        </div>
+
+        <div class="mb-5">
+            <p class="font-bold">Volunteer Description:</p>
+            <p class="text-gray-500 mb-3">This description is only sent to the volunteer once you have assigned a rota for this role. Include information like the meetup location, role duties and key contacts fo the day.</p>
+            <textarea class="textarea textarea-bordered w-full" name="volunteer_description" required>{{ role.volunteer_description }}</textarea>
+        </div>
+
+
+            <button
+                class="btn btn-primary btn-sm"
+                type="submit"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+            >
+                Submit
+            </button>
+        </form>
+</div>
+
+{% if role %}
+
+
+    {% if opp.rota_config == "PER_ROLE" %}
+    <div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+                <div class="flex justify-between">
+                    <div class="flex flex-col space-y-4">
+                        <p class="text-xl font-bold">Schedule:</p>
+                        <p class="text-slate-400">If you define a schedule here, it will override any shifts generated from schedules from the parent opportunity.</p>
+                    </div>
+                    <button
+                        hx-get="/org_admin/rota/schedule/import/{{ opp.id }}/{{ role.id }}/"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        class="btn btn-primary btn-sm">
+                        Import CSV
+                    </button>
+                    <button
+                        hx-get="/org_admin/rota/schedule/new/{{ opp.id }}/{{ role.id }}/"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        class="btn btn-primary btn-sm">
+                        New Schedule
+                    </button>
+                </div>
+
+                <div class="divider"></div>
+
+                {% if one_off_dates|length > 0 %}
+            <table class="w-full table table-sm">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for schedule in one_off_dates %}
+                    <tr class="hover:bg-base-300 border-b border-base-300">
+                        <td>{{ schedule.date }}</td>
+                        <td>{{ schedule.start_time|time:"H:i" }}</td>
+                        <td>{{ schedule.end_time|time:"H:i" }}</td>
+                        <td>
+                            <button
+                                    class="btn btn-primary btn-sm"
+                                    hx-get="/org_admin/rota/schedule/{{ schedule.id }}/"
+                                    hx-target=".htmx-navigator"
+                                    hx-swap="outerHTML"
+                            >Edit</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+
+            </table>
+
+        {% else %}
+            <p>No schedules found.</p>
+        {% endif %}
+    </div>
+
+    {% endif %}
+
+    <div class="p-5 rounded-lg bg-base-200 mb-3 flex flex-col">
+                <div class="flex">
+                    <div class="flex flex-col space-y-4">
+                        <p class="text-xl font-bold">Sections:</p>
+                        <p class="text-slate-400">Use sections to further split roles into administrative categories. Sections are not visible to volunteers but are used when assigning shifts. e.g. you can use sections to differentiate between location of a particular role.</p>
+                    </div>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        type="submit"
+                        hx-get={% if section %}"/org_admin/rota/section/{{ section.id }}/" {% else %} "/org_admin/rota/section/new/{{ role.id }}/"{% endif %}
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                    >
+                        New Section
+                    </button>
+
+                </div>
+
+                <div class="divider"></div>
+
+                {% if sections|length > 0 %}
+                    {% for section in sections %}
+                        <div class="p-3 m-2 rounded bg-base-300 flex items-center justify-between">
+                            <p>{{ section.name }}</p>
+                            <button
+                            hx-get="/org_admin/rota/section/{{ section.id }}/"
+                            hx-target=".htmx-navigator"
+                            hx-swap="outerHTML"
+                            class="btn btn-primary btn-sm">
+                            Edit
+                        </button>
+                        </div>
+                    {% endfor %}
+
+                {% else %}
+                    <p>No sections available.</p>
+                {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

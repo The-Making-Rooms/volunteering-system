@@ -24,6 +24,8 @@ from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from django.http import HttpResponse
 from organisations.models import OrganisationAdmin
 
+from rota.models import Role
+
 # Create your views here.
 def detail(request, opportunity_id):
     
@@ -47,6 +49,7 @@ def detail(request, opportunity_id):
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
     sections = OpportunitySection.objects.filter(opportunity=opportunity)
+    roles = Role.objects.filter(opportunity=opportunity)
     
     #print(opportunity.recurrences.rrules)
     #print(opportunity.recurrences.rdates)
@@ -111,7 +114,8 @@ def detail(request, opportunity_id):
         "exists": active,
         "linked_tags": tags,
         "supp_info_reqs": supp_info_reqs,
-        "sections": sections
+        "sections": sections,
+        "roles":roles
     }
 
     return HttpResponse(template.render(context, request))

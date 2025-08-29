@@ -1,0 +1,44 @@
+{% extends 'rota/schedule_template.html' %}
+
+{% block page_content %}
+    <div class="flex justify-between">
+        <p class="text-2xl font-bold">Shift Supervisor</p>
+
+    </div>
+
+
+    <div class="divider"></div>
+
+      <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3 overflow-scroll">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Opportunity</th>
+                    <th>Date</th>
+                    <th>Times</th>
+                    <th>Role</th>
+                    <th>RSVP - Yes</th>
+                    <th>RSVP - Tentative</th>
+                    <th>RSVP - No</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for shift in shifts %}
+                    <tr>
+                        <td>{{ shift.opportunity.name }}</td>
+                        <td>{{ shift.occurrence.date }}</td>
+                        <td>{{ shift.occurrence.start_time|time:"H:i"}} - {{ shift.occurrence.start_time|time:"H:i" }}</td>
+                        <td>{% if  shift.occurrence.one_off_date.role.name %}{{shift.occurrence.one_off_date.role.name }}{% else %}-{% endif %}</td>
+                        <td>{{ shift.rsvp_yes|length }}</td>
+                        <td>{{ shift.rsvp_null|length }}</td>
+                        <td>{{ shift.rsvp_no|length }}</td>
+                        <td><a class="btn btn-primary btn-sm" href="/supervisor/{{ shift.occurrence.id }}">View</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+
+{% endblock %}

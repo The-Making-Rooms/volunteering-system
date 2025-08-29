@@ -11,9 +11,12 @@ from .models import Form, Question, Options, Answer, Response, FormResponseRequi
 from volunteer.views import index
 import datetime
 from volunteer.models import Volunteer, VolunteerAddress, VolunteerContactPreferences
-from opportunities.models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus
+from opportunities.models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus, \
+    OpportunityRotaConfigChoices
 from org_admin.models import OrganisationAdmin
 from django.contrib.auth.models import User
+from rota.models import Role, OneOffDate, VolunteerOneOffDateAvailability, VolunteerRoleIntrest
+from django.utils import timezone
 
 def pretty_print_dict(d):
     """Pretty prints a dictionary"""
@@ -36,6 +39,38 @@ def superform(request, id):
     forms = Form.objects.filter(id__in=forms_to_complete).order_by('name')
     
     formsets = []
+
+    opportunity_roles = Role.objects.filter(
+        opportunity = superform.opportunity_to_register
+    )
+
+    if superform.opportunity_to_register.rota_config == OpportunityRotaConfigChoices.SHARED_SCHEDULE:
+        # Fetch all future OneOffDates for this opportunity (including role-specific and shared)
+        dates_qs = OneOffDate.objects.filter(
+            opportunity=superform.opportunity_to_register,
+            date__gte=timezone.now().date(),
+            role__isnull=True
+        ).order_by('date', 'start_time')
+
+        # Deduplicate into template-friendly structure
+        seen = {}
+        for date_obj in dates_qs:
+            key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+            if key not in seen:
+                seen[key] = {
+                    'date': date_obj.date,
+                    'start_time': date_obj.start_time,
+                    'end_time': date_obj.end_time,
+                    'ids': [date_obj.id]
+                }
+            else:
+                if date_obj.id not in seen[key]['ids']:
+                    seen[key]['ids'].append(date_obj.id)
+
+        available_dates = list(seen.values())
+    else:
+        available_dates = []
+
     
     for form in forms:
         question_objects = Question.objects.filter(form=form, enabled=True).order_by('index')
@@ -54,7 +89,9 @@ def superform(request, id):
         
     context = {
         "superform": superform,
+        "roles" : opportunity_roles,
         "forms": formsets,
+        "dates": available_dates,
         "hx": check_if_hx(request),
     }
     
@@ -88,6 +125,9 @@ def submit_superform(request, id):
         post_data = request.POST
         #print("Post data", post_data)
         #each form data key is in the format sup_(form_id)_(question_id)
+        available_dates = []
+        interested_roles = []
+
         for key in post_data.keys():
             if key.startswith('sup_'):
                 # Extract the form ID and question ID from the key
@@ -102,6 +142,12 @@ def submit_superform(request, id):
                     form_data[form_id][question_id] = post_data.get(key)
                 else:
                     form_data[form_id][question_id] = post_data.getlist(key)
+            elif key.startswith("roles_"):
+                role_id = key.split("_")[1]
+                interested_roles.append(role_id)
+            elif key.startswith("schedule_"):
+                schedule_ids = key.split("_")[1:]
+                available_dates.extend(schedule_ids)
 
                 
         userdata = {
@@ -316,6 +362,8 @@ def submit_superform(request, id):
             print("Form ID does not exist")
                 
         # Create a opportunity registration
+        registration = None
+
         if superform.opportunity_to_register:
             opportunity = Opportunity.objects.get(pk=superform.opportunity_to_register.id)
             
@@ -369,6 +417,32 @@ def submit_superform(request, id):
         )
         superform_registration.save()
         print("Superform registration saved")
+
+        for schedule_date in available_dates:
+            print("Schedule: ", schedule_date)
+            one_off_schedule_object = OneOffDate.objects.get(id=schedule_date)
+            if not VolunteerOneOffDateAvailability.objects.filter(
+                    registration=registration,
+                    one_off_date=one_off_schedule_object
+            ).exists():
+                availability = VolunteerOneOffDateAvailability(
+                    registration=registration,
+                    one_off_date=one_off_schedule_object,
+                )
+                availability.save()
+
+        for role in interested_roles:
+            print("Role: ", role)
+            role = Role.objects.get(id=role)
+            if not VolunteerRoleIntrest.objects.filter(
+                    registration=registration,
+                    role=role,
+            ).exists():
+                interested_role = VolunteerRoleIntrest(
+                    registration=registration,
+                    role=role,
+                )
+                interested_role.save()
         
         completion_message = superform.submitted_message if superform.submitted_message else "Thank you for completing the form. You will be contacted shortly."
         

@@ -13,6 +13,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import os
 import uuid
+from rota.models import VolunteerRoleIntrest
 
 def get_random_filename_image(instance, filename):
     ext = filename.split('.')[-1]
@@ -65,7 +66,9 @@ def get_default_icon():
         
         return icon.id
    
-        
+class OpportunityRotaConfigChoices(models.TextChoices):
+    SHARED_SCHEDULE = "SHARED", "Shared Schedule"
+    PER_ROTA = "PER_ROLE", "Per Role"
         
 # Create your models here.
 class Opportunity(models.Model):
@@ -79,6 +82,8 @@ class Opportunity(models.Model):
     active = models.BooleanField(default=False)
     featured = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
+
+    rota_config = models.CharField(choices=OpportunityRotaConfigChoices.choices, default=OpportunityRotaConfigChoices.SHARED_SCHEDULE, max_length=50)
 
     def __str__(self):
         return self.name
@@ -160,14 +165,15 @@ class Registration(models.Model):
     def get_registration_status(self):
         return VolunteerRegistrationStatus.objects.filter(registration=self).last().registration_status.status
 
+    def get_interested_roles_count(self):
+        return VolunteerRoleIntrest.objects.filter(registration=self).count()
+
+
 class RegistrationAbsence(models.Model):
     registration = models.ForeignKey('Registration', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
 
 class Image(models.Model):
-    
-    
-    
     image = models.ImageField(upload_to=get_random_filename_image)
     thumbnail_image = models.ImageField(upload_to=get_random_filename_image, null=True, blank=True)
     opportunity = models.ForeignKey('Opportunity', on_delete=models.CASCADE)

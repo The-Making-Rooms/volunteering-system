@@ -1,0 +1,91 @@
+<!-- rota/volunteer_shift_assignment.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+    <button
+        class="btn btn-primary btn-sm mb-3"
+        type="submit"
+        hx-get="/org_admin/rota/assign/{{ opp.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+        hx-disabled-elt="this"
+        hx-push-url="true"
+    >
+        ↩ Back
+    </button>
+
+    <div class="flex flex-col space-y-2">
+    <div class="flex flex-col gap-y-5">
+        <p class="text-2xl font-bold mb-3">Assign shifts for: {{ opp.name }}</p>
+        <div class="divider"></div>
+        <p>Role: {{ role.name }}</p>
+        <p>Date & time: {{ schedule.date|date:"d-m-Y" }} {{ schedule.start_time|date:"H:i" }} - {{ schedule.end_time|date:"H:i" }}</p>
+        <p class="text-slate-400">Volunteers are sorted by least availability.</p>
+    </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3 overflow-scroll">
+        <table class="table table-hover">
+            <thead>
+                <th>Name</th>
+                <th># of Interested Opportunities</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+
+
+            {% for registration in registrations %}
+                <tr class="hover:bg-base-300 border-b border-base-300">
+                    <td>{{ registration.volunteer.user.first_name }} {{ registration.volunteer.user.last_name }}</td>
+                    <td>{{ registration.get_interested_roles_count }}</td>
+                    {% if section_id %}
+                    <td>
+                        <button
+                        class="btn btn-sm bg-primary"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        hx-get="/org_admin/rota/assign/instance/{{ registration.id }}/{{ role.id }}/{{ schedule.id }}/{{ section_id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+                    >
+                        Assign
+                    </button></td>
+                {% else %}
+                <td>
+                        <button
+                        class="btn btn-sm bg-primary text-black"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        hx-get="/org_admin/rota/assign/instance/{{ registration.id }}/{{ role.id }}/{{ schedule.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+                    >
+                        Assign
+                    </button></td>
+                {% endif %}
+
+                <tr>
+            {% endfor %}
+
+            {% for registration in assigned_volunteers %}
+                <tr class="hover:bg-base-300 border-b border-base-300">
+                    <td>{{ registration.volunteer.user.first_name }} {{ registration.volunteer.user.last_name }}</td>
+                    <td>{{ registration.get_interested_roles_count }}</td>
+                <td>
+                        <button
+                        class="btn btn-sm bg-primary text-black"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-disabled-elt="this"
+                        hx-get="/org_admin/rota/unassign/{{ registration.id }}/{{ role.id }}/{{ schedule.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+                    >
+                        Unassign
+                    </button></td>
+            {% endfor %}
+        </table>
+    </div>
+
+
+
+{% endblock %}

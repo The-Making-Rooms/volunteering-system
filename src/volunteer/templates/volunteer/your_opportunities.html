@@ -52,10 +52,24 @@
 
           <div>
 
+          <button
+                  class="btn btn-primary btn-sm"
+                  hx-get="/volunteer/shifts/{{ loop.registration.id }}/"
+                  hx-swap="outerHTML"
+                  hx-target=".htmx-navigator"
+          >Shifts</button>
+
+          <button
+                  class="btn btn-primary btn-sm"
+                  hx-get="/volunteer/manage_preferences/{{ loop.registration.id }}/"
+                  hx-swap="outerHTML"
+                  hx-target=".htmx-navigator"
+          >Interested Roles & Availability</button>
+
+            <!--
             {% if loop.next_occurance != None %}
-            <button 
             <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-sm"
             hx-get="/volunteer/register_absence/{{loop.registration.id}}"
             hx-on:htmx:after-request="my_modal_2.showModal();"
             hx-target="#modalDiv"
@@ -63,8 +77,9 @@
              I can't make it
             </button>
             {% endif %}
+            -->
             <button
-                    class="btn btn-primary"
+                    class="btn btn-danger btn-sm bg-red-700 text-white"
                     hx-get="/volunteer/stop_volunteering/{{ loop.registration.id }}"
                     hx-on:htmx:after-request="my_modal_2.showModal();"
                     hx-target="#modalDiv"

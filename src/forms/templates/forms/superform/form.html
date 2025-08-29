@@ -14,6 +14,12 @@
 </div>
 {% endif %}
 
+{% if superform.photo %}
+    <div class="flex flex-col md:flex-row rounded-[8px] p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
+        <img src="/media/{{ superform.photo }}" alt="From Banner" class="w-full object-contain p-3 max-h-96">
+    </div>
+{% endif %}
+
 <div class="p-5  bg-white border border-t-8 border-t-[#627fbb] border-gray-300 rounded-lg mb-3">
     <p class="text-[24pt]  mb-3">{{ superform.name }}</p>
     <p class="text-[11pt] mb-3 w-full">{{ superform.description|linebreaksbr  }}</p>
@@ -58,15 +64,15 @@
 
         <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
             <p class="text-[12pt] mb-3">Preferred Contact Method</p>
-            <label class="cursor-pointer">
+            <label class="cursor-pointer flex items-center mb-2">
                 <input type="checkbox" name="contact_method" value="email" class="checkbox mr-2" checked>
                 Email
             </label>
-            <label class="cursor-pointer">
+            <label class="cursor-pointer flex items-center mb-2">
                 <input type="checkbox" name="contact_method" value="phone" class="checkbox mr-2">
                 Phone
             </label>
-            <label class="cursor-pointer">
+            <label class="cursor-pointer flex items-center mb-2">
                 <input type="checkbox" name="contact_method" value="whatsapp" class="checkbox mr-2">
                 WhatsApp
             </label>
@@ -76,6 +82,35 @@
             <label class="text-[12pt] mb-3" for="post_code" class="mr-3">Post Code <span class="text-red-600 font-bold">*</span></label>
             <input type="text" maxlength="10" name="post_code" placeholder="Your Answer" class="input rounded-none border-b-gray-300 w-full mb-3 md:w-1/2" required>
         </div>
+
+        {% if roles %}
+            <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
+                <label class="text-[12pt] mb-3" for="post_code" class="mr-3">Please select the roles you are interested in: <span class="text-red-600 font-bold">*</span></label>
+                {% for role in roles %}
+                    <label class="cursor-pointer flex items-center mb-2">
+                        <input type="checkbox"
+                               value="email"
+                               class="checkbox mr-2"
+                               {% if superform.opportunity_to_register.rota_config == 'PER_ROLE' %}
+                                hx-trigger="change"
+                                hx-post="/opportunities/{{ superform.opportunity_to_register.id }}/get_superform_dates/"
+                                hx-target="#deduplicated_dates"
+                                hx-swap="innerHTML"
+                                hx-disabled-elt="#submit-button"
+                                {% endif %}
+                                name="roles_{{ role.id }}"
+                                id="{{ role.id }}"/>
+
+                        {{ role.name }}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div id="deduplicated_dates">
+                {% include "forms/partials/date_picker.html" %}
+            </div>
+
+        {% endif %}
 
     </div>
 
@@ -103,7 +138,7 @@
             {% endfor %}
     </div>
     {% endfor %}
-<button class="btn bg-[#5576b6] text-white mb-5" >Submit</button>
+<button id="submit-button" class="btn bg-[#5576b6] text-white mb-5" >Submit</button>
 </form>
 </div>
 {%endblock%}

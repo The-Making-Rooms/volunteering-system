@@ -3,11 +3,82 @@ from forms.models import Form, FormResponseRequirement, Question, Options, Answe
 from commonui.views import check_if_hx
 from org_admin.models import OrganisationAdmin
 
-from ..models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus, SupplimentaryInfoRequirement
+from ..models import Opportunity, Registration, RegistrationStatus, VolunteerRegistrationStatus, \
+    SupplimentaryInfoRequirement, OpportunityRotaConfigChoices
 from django.shortcuts import render, HttpResponseRedirect
+from django.http import HttpResponse
 from django.utils import timezone
 from threading import Thread
 from django.core.mail import send_mail
+from datetime import datetime
+from rota.models import OneOffDate, VolunteerOneOffDateAvailability, Role, VolunteerRoleIntrest
+
+
+def get_opportunity_dates(request, opportunity_id, superform = False):
+    interested_roles = []
+    dedup_dates = []
+
+    # Get interested role IDs from POST
+    for key, value in request.POST.items():
+        if key.startswith("roles_"):
+            role_id = key.split("_")[1]
+            interested_roles.append(int(role_id))
+
+    print(f"[debug]: Interested roles {interested_roles}")
+
+    # Query OneOffDate for either roles or the opportunity
+    if interested_roles:
+        print("[info]: roles filter", interested_roles)
+        dates = OneOffDate.objects.filter(
+            role_id__in=interested_roles,
+            date__gte=datetime.now().date()
+        )
+    else:
+        opportunity = Opportunity.objects.filter(id=opportunity_id)
+        if opportunity.exists():
+            if opportunity.first().rota_config == 'PER_ROLE':
+                if not superform:
+                    return render(request, "opportunities/partials/date_picker.html")
+                else:
+                    return render(request, "forms/partials/date_picker.html")
+
+
+        print("[info]: opportunity filter", opportunity_id)
+        dates = OneOffDate.objects.filter(
+            role__opportunity__id=opportunity_id,
+            date__gte=datetime.now().date()
+        )
+
+    # Deduplicate by (date, start_time, end_time)
+    seen = {}
+    for date_obj in dates:
+        key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+        if key not in seen:
+            seen[key] = {
+                'date': date_obj.date,
+                'start_time': date_obj.start_time,
+                'end_time': date_obj.end_time,
+                'ids': [date_obj.id]
+            }
+        else:
+            if date_obj.id not in seen[key]['ids']:
+                seen[key]['ids'].append(date_obj.id)
+
+    dedup_dates = list(seen.values())
+
+    print("Original:", list(dates))
+    print("Deduped:", dedup_dates)
+
+    context = {
+        "dates" : dedup_dates
+    }
+
+    if not superform:
+        return render(request, "opportunities/partials/date_picker.html", context)
+    else:
+        return render(request, "forms/partials/date_picker.html", context)
+
+
 
 def check_volunteer_allowed_to_register(opportunity: Opportunity, volunteer: Volunteer):
     """
@@ -109,15 +180,46 @@ def register(request, opportunity_id, error=None):
             supplementary_info_requirement.response = response.first()
         else:
             supplementary_info_requirement.response = None
-            
-            
-            
-        
-    
-    
+
+
+    #Volunteer Availability questions
+    if opportunity.rota_config == OpportunityRotaConfigChoices.SHARED_SCHEDULE:
+        # Fetch all future OneOffDates for this opportunity (including role-specific and shared)
+        dates_qs = OneOffDate.objects.filter(
+            opportunity=opportunity,
+            date__gte=timezone.now().date(),
+            role__isnull=True
+        ).order_by('date', 'start_time')
+
+        # Deduplicate into template-friendly structure
+        seen = {}
+        for date_obj in dates_qs:
+            key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+            if key not in seen:
+                seen[key] = {
+                    'date': date_obj.date,
+                    'start_time': date_obj.start_time,
+                    'end_time': date_obj.end_time,
+                    'ids': [date_obj.id]
+                }
+            else:
+                if date_obj.id not in seen[key]['ids']:
+                    seen[key]['ids'].append(date_obj.id)
+
+        available_dates = list(seen.values())
+    else:
+        available_dates = []
+
+    roles = Role.objects.filter(opportunity=opportunity)
+
+
     
     context = {
         "hx": check_if_hx(request),
+
+        "dates": available_dates,
+        "roles": roles,
+
         "error": error,
         "opportunity": opportunity,
         "volunteer": volunteer,
@@ -139,11 +241,26 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
     :param volunteer: The volunteer object
     :return: HttpResponseRedirect to the volunteer page
     """
+
+    existing_registrations = Registration.objects.filter(
+        opportunity = opportunity,
+        volunteer = volunteer,
+    )
+
+    if existing_registrations.exists():
+        for registration in existing_registrations:
+            if registration.get_registration_status() != 'stopped':
+                return HttpResponseRedirect("/volunteer/your-opportunities/")
+
+
     
     form_data = request.POST
     
     supplimentary_form_data = {}
     form_question_responses = {}
+
+    available_dates = []
+    interested_roles = []
     
     
     
@@ -151,10 +268,17 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
         if key.startswith("sup_"):
             supplementary_info_id = key.split("_")[1]
             supplimentary_form_data[supplementary_info_id] = value
+        elif key.startswith("schedule_"):
+            schedule_ids = key.split("_")[1:]
+            available_dates.extend(schedule_ids)
+        elif key.startswith("roles_"):
+            role_id = key.split("_")[1]
+            interested_roles.append(role_id)
         elif key != "csrfmiddlewaretoken":
             question_id = key
             form_question_responses[question_id] = value
-    
+
+
 
     if opportunity.form:
         form = Form.objects.get(id=opportunity.form.id)
@@ -238,6 +362,28 @@ def register_opportunity(request, opportunity: Opportunity, volunteer: Volunteer
         registration=registration,
         registration_status=RegistrationStatus.objects.get(status="awaiting_approval"),
     )
+
+    #Create volunteer Availability and interested roles
+
+    print(request.POST)
+
+    for schedule_date in available_dates:
+        print("Schedule: ", schedule_date)
+        one_off_schedule_object = OneOffDate.objects.get(id=schedule_date)
+        availability = VolunteerOneOffDateAvailability(
+            registration=registration,
+            one_off_date=one_off_schedule_object,
+        )
+        availability.save()
+
+    for role in interested_roles:
+        print("Role: ", role)
+        role = Role.objects.get(id=role)
+        interested_role = VolunteerRoleIntrest(
+            registration=registration,
+            role=role,
+        )
+        interested_role.save()
     
     # Send email to organisation admins
     send_email_thread = SendEmailToOrgAdminsThread(request, opportunity.id)

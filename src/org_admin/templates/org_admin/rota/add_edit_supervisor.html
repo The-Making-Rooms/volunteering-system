@@ -1,0 +1,154 @@
+<!-- rota/one_off_schedule_editor.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+    <button
+    class="btn btn-primary btn-sm mb-3"
+    type="submit"
+    hx-get="/org_admin/supervisors/"
+    hx-target=".htmx-navigator"
+    hx-swap="outerHTML"
+    >
+        ↩ Back
+    </button>
+
+
+    <div class="flex flex-col space-y-4">
+
+        <div class="flex items-start justify-between">
+            <div class="flex flex-col space-y-2">
+                <p class="text-2xl font-bold mb-3">Manage shift supervisor</p>
+                <p class="text-slate-400">
+                Use this screen to edit/create a shift supervisor and their permissions.
+                </p>
+            </div>
+        </div>
+
+
+    <div class="divider"></div>
+
+        {% if error %}
+            {% include "commonui/error.html" %}
+        {% endif %}
+
+        <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3">
+
+            <form>
+
+            {% csrf_token %}
+
+                <div class="flex flex-col gap-y-3">
+                    <label for="sup_email">Supervisors Email</label>
+                    <input id="sup_email" name="sup_email" type="email" class="input input-bordered" {% if sup %}value="{{ sup.user.email }}" disabled{% endif %} required>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="flex flex-col gap-y-3">
+                    <div class="flex items-center gap-x-3">
+                        <input type="radio"
+                               name="access_type"
+                               value="all_org"
+                               id="all_org"
+                               class="radio radio-primary"
+                               onclick="document.getElementById('supervisor_picker_partial').innerHTML = '';"
+                               required
+                               {% if sup.access_level == 'all_org' %}checked{% endif %}
+
+                        >
+
+                        <label for="all_org">All Organisation shifts</label>
+                    </div>
+
+                    <div class="flex items-center gap-x-3">
+                        <input
+                                type="radio"
+                                name="access_type"
+                                value="opp"
+                                id="opp"
+                                class="radio radio-primary"
+                                hx-trigger="click"
+                                hx-get="/org_admin/supervisors/partials/opp_picker/"
+                                hx-target="#supervisor_picker_partial"
+                               {% if sup.access_level == 'all_opportunity' %}checked{% endif %}
+
+                        >
+
+                        <label for="all_org">Shifts for given opportunities</label>
+                    </div>
+
+                    <div class="flex items-center gap-x-3">
+                        <input
+                                type="radio"
+                                name="access_type"
+                                value="roles"
+                                id="roles"
+                                class="radio radio-primary"
+                                hx-trigger="click"
+                                hx-get="/org_admin/supervisors/partials/role_picker/"
+                                hx-target="#supervisor_picker_partial"
+                               {% if sup.access_level == 'all_role' %}checked{% endif %}
+                        >
+
+                        <label for="all_org">Shifts for given roles</label>
+                    </div>
+
+                    <div class="flex items-center gap-x-3">
+                        <input
+                                type="radio"
+                                name="access_type"
+                                value="shifts"
+                                id="shifts"
+                                class="radio radio-primary"
+                                hx-trigger="click"
+                                hx-get="/org_admin/supervisors/partials/shift_picker/"
+                                hx-target="#supervisor_picker_partial"
+                               {% if sup.access_level == 'specific_shifts' %}checked{% endif %}
+
+                        >
+                        <label for="all_org">Specific Shifts</label>
+                    </div>
+                </div>
+
+                <div id="supervisor_picker_partial">
+
+                    {% if sup.access_level == 'all_opportunity' %}
+                        {% include 'org_admin/rota/partials/opp_picker.html' %}
+                    {% endif %}
+
+                    {% if sup.access_level == 'all_role' %}
+                        {% include 'org_admin/rota/partials/role_picker.html' %}
+                    {% endif %}
+
+                    {% if sup.access_level == 'specific_shifts' %}
+                        {% include 'org_admin/rota/partials/shift_picker.html' %}
+                    {% endif %}
+
+                </div>
+
+                <div class="divider"></div>
+
+                <button
+                        type="submit"
+                        class="btn btn-primary btn-sm"
+                        {% if sup %}hx-post="/org_admin/supervisor/{{ sup.id }}/save/"{% else %}hx-post="/org_admin/supervisors/new/"{% endif %}
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        >
+                    Submit
+                </button>
+
+            </form>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,142 @@
+<!-- rota/shift_assignment.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+    <button
+        class="btn btn-primary btn-sm mb-3"
+        type="submit"
+        hx-get="/org_admin/rota/{{ opp.id }}/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+        hx-push-url="true"
+    >
+        ↩ Back
+    </button>
+
+    {% if error %}
+    {% include "commonui/error.html" %}
+    {% endif %}
+
+    {% if success %}
+    {% include "commonui/success.html" %}
+    {% endif %}
+
+    <div class="mt-3 flex flex-col space-y-2">
+     <div class="flex justify-between">
+        <p class="text-2xl font-bold mb-3">Shifts for: {{ opp.name }}</p>
+        {% if unconfirmed_shifts %}
+            <button
+                    class="btn btn-primary btn-sm"
+                    hx-get="/org_admin/rota/send_shifts/{{ opp.id }}/"
+                    hx-swap="outerHTML"
+                    hx-target=".htmx-navigator"
+                    hx-disabled-elt="this"
+            >Confirm assigned shifts -></button>
+        {% endif %}
+     </div>
+        <p class="text-slate-400">Use this screen to assign shifts. Please note that only approved registrations will appear in the available volunteers section. Please note that you can not assign shift for past opportunities.
+    </div>
+
+    <div class="divider"></div>
+
+    <form id="filters">
+  {% csrf_token %}
+
+      <select
+    class="select select-bordered"
+    name="date_filter"
+    hx-post="{% url 'assign_rota' opportunity.id %}"
+    hx-trigger="change changed"
+    hx-swap="outerHTML"
+    hx-target=".htmx-navigator"
+  >
+    <option value="all" {% if not selected_date %}selected{% endif %}>All Dates/Times</option>
+    {% for slot in slots %}
+      <option value="{{ slot.id }}" {% if slot.id|slugify == selected_date %}selected{% endif %}>{{ slot.date|date:"Y-m-d" }} {{ slot.start_time|date:"H:i" }}-{{ slot.end_time|date:"H:i" }}</option>
+    {% endfor %}
+  </select>
+  <select
+    class="select select-bordered"
+    name="role_filter"
+    hx-post="{% url 'assign_rota' opportunity.id %}"
+    hx-trigger="change changed"
+    hx-swap="outerHTML"
+    hx-target=".htmx-navigator"
+  >
+
+    <option value="all" {% if not selected_role %}selected{% endif %}>All Roles</option>
+    {% for role in roles %}
+      <option value="{{ role.id }}" {% if role.id|slugify == selected_role %}selected{% endif %}>{{ role.name }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+    <div class="divider"></div>
+
+
+    <div class="flex flex-col p-5 bg-base-200 rounded-md mb-3 overflow-scroll">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Times</th>
+                <th>Role</th>
+                <th>Section</th>
+                <th>Required</th>
+                <th>Available</th>
+                <th>Assigned (Unsent)</th>
+                <th>Accepted</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% if shifts|length > 0 %}
+            {% for shift in shifts %}
+                <tr class="hover:bg-base-300 border-b border-base-300">
+                    <td>{{ shift.schedule.date|date:"Y-m-d" }}</td>
+                    <td>{{ shift.schedule.start_time|date:"H:i" }} - {{ shift.schedule.end_time|date:"H:i" }}</td>
+                    <td>{{ shift.role.name }}</td>
+                    <td>{% if shift.section %}{{ shift.section.name }}{% else %}-{% endif %}</td>
+                    <td>{% if shift.section %}{{ shift.section.required_volunteers }}{% else %}{{ shift.role.required_volunteers }}{% endif %}</td>
+                    <td>{{ shift.available_volunteers|length }}</td>
+                    <td>{{ shift.assigned_volunteers|length}}</td>
+                    <td>{{ shift.accepted_volunteers.0|length }}/{{ shift.accepted_volunteers.1|length }}</td>
+                    <td>
+                        {% if shift.section %}
+                            <button
+                                class="btn btn-primary btn-xs"
+                                hx-get="/org_admin/rota/assign/shift/{{ shift.role.id }}/{{ shift.schedule.id }}/{{ shift.section.id }}/"
+                            hx-target=".htmx-navigator"
+                            hx-swap="outerHTML">
+                                Assign
+                            </button>
+                        {% else %}
+                            <button
+                                class="btn btn-primary btn-xs"
+                                hx-get="/org_admin/rota/assign/shift/{{ shift.role.id }}/{{ shift.schedule.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+                            hx-target=".htmx-navigator"
+                            hx-swap="outerHTML">
+                                Assign
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+        <tr >
+        <td colspan="9"><p> No results found. Try revising your filters or make sure that you have dates available in the future.</p></td>
+
+        </tr>
+        {% endif %}
+        </tbody>
+
+
+
+    </table>
+    </div>
+
+
+
+{% endblock %}

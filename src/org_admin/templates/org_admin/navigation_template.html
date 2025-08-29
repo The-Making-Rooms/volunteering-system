@@ -88,7 +88,7 @@
           class="drawer-overlay"
         ></label>
         <ul
-          class="menu p-4 w-80 bg-base-200 text-lg min-h-full"
+          class="menu p-4 w-80 bg-base-200 text-lg min-h-full text-sm"
           hx-boost="true"
           hx-target=".htmx-navigator"
           hx-swap="outerHTML"
@@ -108,6 +108,8 @@
               <li><a href="/org_admin/opportunities/#">Opportunities</a></li>
               <li><a href="/org_admin/registrations/#">Registrations</a></li>
               <li><a href="/org_admin/volunteers/#">Volunteers</a></li>
+              {% if not user.is_superuser %}<li><a href="/org_admin/rota/#">Rota Planning</a></li>{% endif %}
+              {% if not user.is_superuser %}<li><a href="/org_admin/supervisors/#">Shift Supervisors</a></li>{% endif %}
               <li><a href="/org_admin/mentoring/#">Mentoring</a></li>
               <li><a href="/org_admin/forms/#">Forms</a></li>
               <li><a href="/org_admin/communication/#">Communication</a></li>
@@ -125,8 +127,6 @@
           <a class="btn btn-sm btn-primary btn-outline" href="/org_admin/logout/#">Logout</a>
         </div>
         </ul>
-
-
       </div>
     </div>
 

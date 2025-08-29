@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+<style>
+
+    .email-container {
+        padding: 2rem;
+        border-radius: 1rem;
+        margin: 1rem;
+        background-color: #383838;
+    }
+
+    html {
+        font-family: Arial, sans-serif;
+        background-color: #242529;
+    }
+
+    p, ol, ul  {
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    pre {
+        background-color: #2d2d2d;
+        color: white;
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+
+    blockquote {
+        background-color: #2d2d2d;
+        color: white;
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .header_logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        height: 100px;
+    }
+
+    a:link, a:visited {
+        background-color: #ff6e22;
+        color: white;
+        padding: 14px 25px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        border-radius: 5px;
+    }
+
+</style>
+</head>
+
+<body>
+<div class="email-container">
+    <div class="header_logo">
+        <img src="http://chipinbwd.co.uk/static/images/chip_in_logo.png" alt="Chip In Logo">
+    </div>
+    {{content|safe}}
+</div>
+</body>
+</html>

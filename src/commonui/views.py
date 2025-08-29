@@ -23,6 +23,7 @@ import re
 from django.contrib.auth.models import User
 
 
+
 class HTTPResponseHXRedirect(HttpResponseRedirect):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
