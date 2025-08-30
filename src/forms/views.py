@@ -393,6 +393,8 @@ def submit_superform(request, id):
                     registration_status.save()
                     # Save the registration
                     registration.save()
+                else:
+                    registration = active_registration.first().registration
             
                     
             except Registration.DoesNotExist:
