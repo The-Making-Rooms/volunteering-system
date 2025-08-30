@@ -20,6 +20,9 @@ def get_supervisor_shifts(request):
     if not request.user.is_authenticated:
         return sign_in(request)
 
+    if request.method == 'POST':
+        return sign_in()
+
     user = request.user
     supervisors = Supervisor.objects.filter(user=user)
     admin = OrganisationAdmin.objects.filter(user=user)
