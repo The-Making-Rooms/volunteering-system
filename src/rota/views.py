@@ -21,7 +21,7 @@ def get_supervisor_shifts(request):
         return sign_in(request)
 
     if request.method == 'POST':
-        return sign_in()
+        return sign_in(request)
 
     user = request.user
     supervisors = Supervisor.objects.filter(user=user)
