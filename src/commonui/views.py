@@ -22,6 +22,7 @@ import re
 # create uswer
 from django.contrib.auth.models import User
 
+from rota.models import Supervisor
 
 
 class HTTPResponseHXRedirect(HttpResponseRedirect):
@@ -88,6 +89,8 @@ def index(request):
             return HttpResponseRedirect("/org_admin")
         elif OrganisationAdmin.objects.filter(user=request.user).exists():
             return HttpResponseRedirect("/org_admin")
+        elif Supervisor.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/supervisor")
     
     template = loader.get_template("commonui/index.html")
     orgs = Organisation.objects.filter(featured=True)
