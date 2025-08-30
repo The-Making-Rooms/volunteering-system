@@ -368,10 +368,14 @@ def submit_superform(request, id):
             opportunity = Opportunity.objects.get(pk=superform.opportunity_to_register.id)
             
             try:
-                registration = Registration.objects.get(volunteer=volunteer, opportunity=opportunity)
+                registrations = Registration.objects.filter(volunteer=volunteer, opportunity=opportunity)
+                active_registration = VolunteerRegistrationStatus.objects.filter(
+                    registration__in=registrations,
+                    registration_status__status='active'
+                )
                 print("Registration exists")
                 
-                if registration.get_registration_status() == "stopped":
+                if not active_registration.exists():
                     
                     # Create a new registration
                     registration = Registration.objects.create(
