@@ -23,11 +23,16 @@ def get_supervisor_shifts(request):
     if request.method == 'POST':
         return sign_in(request)
 
+
+
+
     user = request.user
     supervisors = Supervisor.objects.filter(user=user)
     admin = OrganisationAdmin.objects.filter(user=user)
 
-    if not supervisors.exists() or not admin.exists():
+    print(f"{supervisors}")
+
+    if not supervisors.exists() and not admin.exists():
         context = {
             "error" : "You do not have any supervisor account access"
         }
