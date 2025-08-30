@@ -104,7 +104,9 @@ def superform(request, id):
     
     
 def submit_superform(request, id):
+    print("handling superform req")
     if request.method == 'POST':
+        print("handling superform")
         # Handle form submission
         superform = SuperForm.objects.get(pk=id)
         
@@ -369,14 +371,14 @@ def submit_superform(request, id):
             
             try:
                 registrations = Registration.objects.filter(volunteer=volunteer, opportunity=opportunity)
-                active_registration = VolunteerRegistrationStatus.objects.filter(
-                    registration__in=registrations,
-                    registration_status__status='active'
-                )
-                print("Registration exists")
+
+                active_registrations = [registration for registration in registrations if registration.get_registration_status()=="active" or registration.get_registration_status()=="awaiting_approval"]
+
+                print(f"{active_registrations}")
+
                 
-                if not active_registration.exists():
-                    
+                if len(active_registrations) == 0:
+                    print("creating new registration")
                     # Create a new registration
                     registration = Registration.objects.create(
                         volunteer=volunteer,
@@ -394,7 +396,8 @@ def submit_superform(request, id):
                     # Save the registration
                     registration.save()
                 else:
-                    registration = active_registration.first().registration
+                    print("using existing registration")
+                    registration = active_registrations[0]
             
                     
             except Registration.DoesNotExist:
