@@ -39,7 +39,8 @@ import re
 
 from threading import Thread
 
-from rota.models import VolunteerShift
+from rota.models import VolunteerShift, Supervisor
+
 
 # Create your views here.
 def check_valid_origin(func, expected_url_end, redirect_path):
@@ -67,6 +68,8 @@ def index(request):
             return HttpResponseRedirect("/org_admin")
         elif OrganisationAdmin.objects.filter(user=request.user).exists():
             return HttpResponseRedirect("/org_admin")
+        elif Supervisor.objects.filter(user=request.user).exists():
+            return HttpResponseRedirect("/supervisor")
     
     if request.user.is_authenticated:
         current_user = request.user

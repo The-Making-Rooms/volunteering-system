@@ -1,6 +1,7 @@
 from datetime import datetime, date, time
 from typing import Optional, Iterable
-
+import random
+import string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import render_to_string
 
@@ -1488,7 +1489,7 @@ def save_supervisor(request: HttpRequest, supervisor_id: Optional[int] = None):
         else:
             # Create user
             user = User.objects.create_user(username=email, email=email)
-            user.set_unusable_password()
+            user.set_password(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12)))
             user.save()
             supervisor = Supervisor(user=user, organisation=(admin.organisation if admin else None))
             supervisor.full_clean()

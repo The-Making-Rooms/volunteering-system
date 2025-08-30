@@ -130,7 +130,7 @@ class Occurrence(models.Model):
             self.end_time = self.one_off_date.end_time
 
     def __str__(self):
-        return str(self.date) + "(" + str(self.start_time) + " - " + str(self.end_time)  + ")"
+        return f"{self.one_off_date.opportunity}{f' - {self.one_off_date.role.name}' if self.one_off_date.role else ''} - {self.date} ({self.start_time} - {self.end_time})"
 
 
 class VolunteerShift(models.Model):
