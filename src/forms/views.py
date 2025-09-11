@@ -3,7 +3,8 @@ VolunteeringSystem
 
 This project is distributed under the CC BY-NC-SA 4.0 license. See LICENSE for details.
 """
-
+import random
+import string
 from django.shortcuts import render
 from django.http import HttpResponse as HTTPResponse
 from commonui.views import check_if_hx
@@ -284,8 +285,8 @@ def submit_superform(request, id):
                     first_name=userdata["first_name"],
                     last_name=userdata["last_name"],
                 )
-                
-                user.set_unusable_password()
+
+                user.set_password(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12)))
                 user.save()
                 print("User saved")
                 
