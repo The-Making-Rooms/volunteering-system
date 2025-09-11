@@ -53,7 +53,7 @@ def send_email_to_volunteer(domain, volunteer_id):
         <br>
         <a class="btn" href="https://{domain}/password_reset/">Reset Password</a>
         <br>
-        <p>Alternatively, visit https://{domain}/volunteer/ and click the password reset button.</p>
+        <p>Alternatively, visit <span>https://{domain}/volunteer/</span> and click the password reset button.</p>
         <p>Regards,<br>The Chip In Team</p>
         """
 
@@ -63,7 +63,7 @@ def send_email_to_volunteer(domain, volunteer_id):
         <br>
         <a class="btn" href="https://{domain}/volunteer/">Login</a>
         <br>
-        <p>Alternatively, visit https://{domain}/volunteer/</p>
+        <p>Alternatively, visit <span>https://{domain}/volunteer/</span></p>
         <p>Regards,<br>The Chip In Team</p>
         """
 
