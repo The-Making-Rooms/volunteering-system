@@ -18,6 +18,10 @@ from org_admin.models import OrganisationAdmin
 from django.contrib.auth.models import User
 from rota.models import Role, OneOffDate, VolunteerOneOffDateAvailability, VolunteerRoleIntrest
 from django.utils import timezone
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+from threading import Thread
 
 def pretty_print_dict(d):
     """Pretty prints a dictionary"""
@@ -25,6 +29,71 @@ def pretty_print_dict(d):
     for key, value in d.items():
         print(f"{key}: {value}")
     print("--" * 20)
+
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils import timezone
+
+def send_email_to_volunteer(domain, volunteer_id):
+    try:
+        volunteer = Volunteer.objects.select_related("user").get(id=volunteer_id)
+
+        # Get today's date in the active timezone, and the user's creation date as date
+        today = timezone.localdate()  # timezone-aware "today" date[2]
+        created_date = volunteer.user.date_joined.astimezone(
+            timezone.get_current_timezone()
+        ).date() if timezone.is_aware(volunteer.user.date_joined) else volunteer.user.date_joined.date()
+
+        subject = "Welcome to Chip In"
+
+        message_a = f"""
+        <p>Hello {volunteer.user.first_name} {volunteer.user.last_name},</p>
+        <p>Thank you for registering for an opportunity on the Chip in platform. To explore more opportunities, manage your registration, or view and keep your information up to date, click the link below to reset your password.</p>
+        <br>
+        <a class="btn" href="https://{domain}/password_reset/">Reset Password</a>
+        <br>
+        <p>Alternatively, visit https://{domain}/volunteer/ and click the password reset button.</p>
+        <p>Regards,<br>The Chip In Team</p>
+        """
+
+        message_b = f"""
+        <p>Hello {volunteer.user.first_name} {volunteer.user.last_name},</p>
+        <p>Thank you for registering for an opportunity on the Chip in platform. To explore more opportunities, manage your registration, or view and keep your information up to date, click the link below to login.</p>
+        <br>
+        <a class="btn" href="https://{domain}/volunteer/">Login</a>
+        <br>
+        <p>Alternatively, visit https://{domain}/volunteer/</p>
+        <p>Regards,<br>The Chip In Team</p>
+        """
+
+        # Choose content based on whether the user was created today (in current TZ)
+        chosen_message = message_a if created_date == today else message_b  # reset if today[2]
+
+        context = {"content": chosen_message}
+        html = render_to_string("org_admin/rota/email_template.html", context)  # HTML body[12]
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=html,  # plain body fallback (can also render a text version)
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[volunteer.user.email],
+        )
+        email.attach_alternative(html, "text/html")  # send HTML alternative[12]
+        email.send()
+
+    except Exception as e:
+        print(f"[error] Failed to send email {e}")
+
+
+class SendEmailToVolunteer(Thread):
+    def __init__(self, domain, volunteer_id):
+        Thread.__init__(self)
+        self.volunteer_id = volunteer_id
+        self.domain = domain
+
+    def run(self):
+        send_email_to_volunteer(self.domain, self.volunteer_id)
 
 def superform(request, id):
     """Superforms allow users to create an account, register for an opportunity, and fill out a form all at once. This allows incremental onboarding of users.
@@ -455,7 +524,12 @@ def submit_superform(request, id):
                 interested_role.save()
         
         completion_message = superform.submitted_message if superform.submitted_message else "Thank you for completing the form. You will be contacted shortly."
-        
+
+        domain = request.get_host()
+
+        email_thread = SendEmailToVolunteer(domain, volunteer.id)
+        email_thread.start()
+
         success_context = {
             "submission_message" : completion_message,
         }
