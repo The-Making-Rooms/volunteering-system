@@ -100,6 +100,9 @@ class Section(models.Model):
     required_volunteers = models.IntegerField()
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.role.name} - {self.name}"
+
 class VolunteerScheduleAvailability(models.Model):
     registration = models.ForeignKey('opportunities.Registration', on_delete=models.CASCADE)
     schedule = models.ForeignKey('rota.Schedule', on_delete=models.CASCADE)
