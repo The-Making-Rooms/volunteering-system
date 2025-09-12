@@ -120,7 +120,7 @@ def superform(request, id):
             opportunity=superform.opportunity_to_register,
             date__gte=timezone.now().date(),
             role__isnull=True
-        ).order_by('date', 'start_time')
+        ).order_by('date', 'start_time', 'end_time')
 
         # Deduplicate into template-friendly structure
         seen = {}

@@ -32,7 +32,7 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
         dates = OneOffDate.objects.filter(
             role_id__in=interested_roles,
             date__gte=datetime.now().date()
-        )
+        ).order_by('date', 'start_time', 'end_time')
     else:
         opportunity = Opportunity.objects.filter(id=opportunity_id)
         if opportunity.exists():
@@ -47,7 +47,7 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
         dates = OneOffDate.objects.filter(
             role__opportunity__id=opportunity_id,
             date__gte=datetime.now().date()
-        )
+        ).order_by('date', 'start_time', 'end_time')
 
     # Deduplicate by (date, start_time, end_time)
     seen = {}
@@ -189,7 +189,7 @@ def register(request, opportunity_id, error=None):
             opportunity=opportunity,
             date__gte=timezone.now().date(),
             role__isnull=True
-        ).order_by('date', 'start_time')
+        ).order_by('date', 'start_time', 'end_time')
 
         # Deduplicate into template-friendly structure
         seen = {}
