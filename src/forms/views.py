@@ -112,7 +112,7 @@ def superform(request, id):
 
     opportunity_roles = Role.objects.filter(
         opportunity = superform.opportunity_to_register
-    )
+    ).order_by('name')
 
     if superform.opportunity_to_register.rota_config == OpportunityRotaConfigChoices.SHARED_SCHEDULE:
         # Fetch all future OneOffDates for this opportunity (including role-specific and shared)

@@ -49,7 +49,7 @@ def detail(request, opportunity_id):
     text_rules_inclusion = []
     location = Location.objects.filter(opportunity=opportunity)
     sections = OpportunitySection.objects.filter(opportunity=opportunity)
-    roles = Role.objects.filter(opportunity=opportunity)
+    roles = Role.objects.filter(opportunity=opportunity).order_by('name')
     
     #print(opportunity.recurrences.rrules)
     #print(opportunity.recurrences.rdates)
