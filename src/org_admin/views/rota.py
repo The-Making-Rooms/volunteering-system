@@ -1778,7 +1778,7 @@ def delete_one_off_date(request, schedule_id: int):
 
     # Optionally redirect back to a rota index/editor
     if oneoff.role:
-        return edit_role(role_id=role.id)
+        return edit_role(request, role_id=role.id)
     else:
         return opportunity_rota_index(request, opportunity, success="Successfully deleted schedule.")
     # return opportunity_rota_index_request(request, opportunityid=oneoff.opportunity_id)
