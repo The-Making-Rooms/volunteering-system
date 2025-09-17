@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from opportunities.models import Opportunity
 from commonui.views import check_if_hx
-
+from organisations.admin import OrganisationAdmin
 
 
 def superforms(request, error=None, success=None):
@@ -17,6 +17,32 @@ def superforms(request, error=None, success=None):
         "success": success,
     }
     return render(request, 'org_admin/superforms/manage_superforms.html', context=context)
+
+def upload_superform_image(request, superform_id):
+    superform = SuperForm.objects.get(id=superform_id)
+    if not request.user.is_superuser and not (OrganisationAdmin.objects.filter(user=request.user, organisation=superform.opportunity_to_register.organisation).exists()):
+        return superforms(request)
+
+    if request.method == 'POST':
+        upload = request.FILES.get('import_file')
+        if not upload:
+            request.method = 'GET'
+            return edit_superform(request, superform_id)
+
+        if not upload.name.lower().endswith('.png'):
+            request.method = 'GET'
+            return edit_superform(request, superform_id)
+
+
+        superform.photo = upload
+
+        superform.save()
+
+        request.method='GET'
+        return edit_superform(request, superform_id)
+
+
+
 
 def new_superform(request):
     

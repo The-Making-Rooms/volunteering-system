@@ -13,6 +13,20 @@
 {% include "commonui/success.html" %}
 {% endif %}
 
+<form class="rounded-xl p-5 bg-base-200 mb-5" enctype="multipart/form-data" method="post" action="/org_admin/superforms/upload_image/{{ superform.id }}/">
+            {% csrf_token %}
+            <p>Upload banner image</p>
+            <div class="divider"></div>
+
+            {% if superform.photo %}
+                    <img class="w-1/2" src="/media/{{ superform.photo }}">
+                    <div class="divider"></div>
+            {% endif %}
+
+            <input type="file" name="import_file" class="file-input file-input-bordered w-full max-w-xs" required/>
+            <button class="btn btn-primary btn-sm" hx-target=".htmx-navigator" hx-swap="outerHTML">Submit</button>
+</form>
+
 <form action={%if superform%}"/org_admin/superforms/edit/{{ superform.id }}/"{%else%}"/org_admin/superforms/new/"{%endif%} method="POST" class="mb-5">
     {% csrf_token %}
 
@@ -91,6 +105,8 @@
 
 
 </form>
+
+
 
 <script>
     function copyToClipboard() {

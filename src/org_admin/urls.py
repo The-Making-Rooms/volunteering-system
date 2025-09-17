@@ -36,8 +36,7 @@ urlpatterns = [
     
     path("upload_icons/", views.upload_icons, name="upload_icons"),
     path("icons/", views.icons, name="icons"),
-    
-    path("export/", views.export_all_orgs_zip, name="export"),
+
     
     path("location/", views.add_location_by_id, name="locations"),
     path("delete_location/<int:location_id>/", views.delete_org_location, name="delete_location"),
@@ -198,8 +197,9 @@ urlpatterns = [
      path("superforms/", views.superforms, name="superforms"),
      path("superforms/new/", views.new_superform, name="new_superform"),
      path("superforms/edit/<str:superform_id>/", views.edit_superform, name="edit_superform"),
+     path("superforms/upload_image/<str:superform_id>/", views.upload_superform_image, name="image_superform"),
 
-     path("rota/", views.rota_index, name="rota"),
+    path("rota/", views.rota_index, name="rota"),
      path("rota/<int:opportunity_id>/", views.opportunity_rota_index, name="rota_opportunity"),
 
     path("rota/role/new/<int:opp_id>/", views.edit_role, name="create_new_rota_role"),
@@ -211,9 +211,11 @@ urlpatterns = [
 
     path("rota/section/new/<int:role_id>/", views.edit_section, name="create_new_rota_section"),
     path("rota/section/<int:section_id>/", views.edit_section, name="edit_rota_section"),
-
+    path("rota/section/delete/<int:section_id>/", views.delete_section, name="edit_rota_section"),
 
     path("rota/schedule/new/<int:opp_id>/", views.edit_rota_schedule, name="create_new_rota_schedule"),
+    path("rota/schedule/delete/<int:schedule_id>/", views.delete_one_off_date, name="create_new_rota_schedule"),
+
     path("rota/schedule/import/<int:opportunity_id>/<int:role_id>/", views.import_dates_csv, name="import_csv_role"),
     path("rota/schedule/import/<int:opportunity_id>/", views.import_dates_csv, name="import_csv_opp"),
 

@@ -281,6 +281,63 @@ def copy_shared_schedule_dates(opportunity_id):
     # bulk_create returns the list of instances created (may be empty if all conflicted)
     return len(created)
 
+# Place in rota.py (near existing email helpers)
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+
+def send_unassignment_email_for_shift(domain: str, shift) -> None:
+    """
+    Send an email notifying a volunteer that a previously confirmed shift has been unassigned.
+    Expects a VolunteerShift instance with related registration, role, occurrence, and (optional) section prefetched.
+    """
+    # Build context before any deletion
+    volunteer = shift.registration.volunteer.user
+    opp = shift.registration.opportunity
+    role = shift.role
+    section = shift.section
+    occ = shift.occurrence
+    date_str = occ.date.strftime("%d %b %Y") if occ and occ.date else ""
+    time_str = ""
+    if occ and occ.start_time and occ.end_time:
+        time_str = f"{occ.start_time.strftime('%H:%M')}–{occ.end_time.strftime('%H:%M')}"
+
+    subject = "Chip In System - Shift Unassigned"
+    message_html = f"""
+      <p>Hello {volunteer.first_name} {volunteer.last_name},</p>
+      <p>A confirmed shift has been unassigned for <strong>{opp.name}</strong>.</p>
+      <p style="font-weight: bold;">Shift Details</p>
+      <p>Role: {role.name}</p>
+      {"<p>Section: " + section.name + "</p>" if section else ""}
+      <p>{date_str} {time_str}</p>
+      <p>Please log into the app to review current shifts, or get in touch with the organisation if any help is needed.</p>
+      
+      <a class="btn" href="https://{domain}/volunteer/">Login Here</a>
+      
+      <p>Regards,<br/>The Chip In Team</p>
+    """
+
+    context = {"content": message_html}
+    text = render_to_string("org_admin/rota/email_template.html", context)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[volunteer.email],
+    )
+    email.attach_alternative(text, "text/html")
+    email.send()
+
+class SendUnassignmentEmailForShift(Thread):
+    def __init__(self, domain, shift):
+        Thread.__init__(self)
+        self.domain = domain
+        self.shift = shift
+
+    def run(self):
+        send_unassignment_email_for_shift(self.domain, self.shift)
 
 
 def send_email_to_volunteer(domain, shift_id):
@@ -679,10 +736,17 @@ def unassign_volunteer_shift_instance(request: HttpRequest, registration_id: int
         raise PermissionDenied("Invalid shift organisation.")
     assert_org_access(request, shift)
 
+    domain = request.get_host()
+
     # Capture route params for the return view
     role_id = shift.role.id
     schedule_id = shift.occurrence.one_off_date.id if shift.occurrence.one_off_date else None
     section_id = shift.section.id if shift.section else None
+
+    if shift.confirmed:
+        print("sent unassignment email")
+        unassignment_email_thread = SendUnassignmentEmailForShift(domain, shift)
+        unassignment_email_thread.start()
 
     shift.delete()
 
@@ -857,7 +921,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
             filtered_roles = Role.objects.filter(id=selected_role)
 
         if not selected_date:
-            schedules = OneOffDate.objects.filter(role__isnull=True, date__gte=datetime.now().date()).select_related(
+            schedules = OneOffDate.objects.filter(role__isnull=True, date__gte=datetime.now().date(), opportunity=opportunity).select_related(
                 "opportunity__organisation")
         else:
             filtered = OneOffDate.objects.get(id=selected_date)
@@ -1621,6 +1685,103 @@ def import_dates_csv(request: HttpRequest, opportunity_id: int, role_id: int|Non
         }
 
         return render(request, "org_admin/rota/import_roles_csv.html", context)
+
+@login_required
+def delete_section(request, section_id: int):
+    """
+    Delete a Section and unassign all VolunteerShifts that reference it.
+    Sends an email to volunteers with confirmed shifts in this section before deletion.
+    """
+    section = get_object_or_404(
+        Section.objects.select_related("role__opportunity__organisation"),
+        id=section_id,
+    )
+
+    # If you have org-scope helpers, call them here (e.g., assert_org_access(request, section))
+
+    domain = request.get_host()
+
+    shifts_qs = (
+        VolunteerShift.objects
+        .filter(section=section)
+        .select_related(
+            "registration__volunteer__user",
+            "registration__opportunity",
+            "role",
+            "occurrence",
+            "section",
+        )
+    )
+    confirmed_shifts = list(shifts_qs.filter(confirmed=True))
+
+    with transaction.atomic():
+        for shift in confirmed_shifts:
+            #print("sent deletion email")
+            unassignment_email_thread = SendUnassignmentEmailForShift(domain, shift)
+            unassignment_email_thread.start()
+
+        # Remove all assignments referencing this section
+        shifts_qs.delete()
+
+        role = section.role
+
+        # Finally delete the section
+        section.delete()
+
+        return edit_role(request, role.id, success='Successfully deleted section')
+
+
+
+@login_required
+def delete_one_off_date(request, schedule_id: int):
+    """
+    Delete a OneOffDate and its Occurrence (via cascade) after notifying volunteers
+    with confirmed shifts tied to that occurrence.
+    """
+    oneoff = get_object_or_404(
+        OneOffDate.objects.select_related("opportunity__organisation", "role"),
+        id=schedule_id,
+    )
+
+    # If you have org-scope helpers, call them here (e.g., assert_org_access(request, oneoff))
+
+    domain = request.get_host()
+
+    occ = Occurrence.objects.filter(one_off_date=oneoff)
+
+    if occ.exists():
+        shifts_qs = (
+            VolunteerShift.objects
+            .filter(occurrence=occ.first())
+            .select_related(
+                "registration__volunteer__user",
+                "registration__opportunity",
+                "role",
+                "occurrence",
+                "section",
+            )
+        )
+        confirmed_shifts = list(shifts_qs.filter(confirmed=True))
+
+        print(confirmed_shifts)
+
+        with transaction.atomic():
+            for shift in confirmed_shifts:
+                #print("sent deletion email")
+                unassignment_email_thread = SendUnassignmentEmailForShift(domain, shift)
+                unassignment_email_thread.start()
+
+    opportunity = oneoff.opportunity.id
+    role = oneoff.role
+    # Deleting OneOffDate should cascade to Occurrence and any FK-dependent shifts
+    oneoff.delete()
+
+    # Optionally redirect back to a rota index/editor
+    if oneoff.role:
+        return edit_role(role_id=role.id)
+    else:
+        return opportunity_rota_index(request, opportunity, success="Successfully deleted schedule.")
+    # return opportunity_rota_index_request(request, opportunityid=oneoff.opportunity_id)
 
 
 
