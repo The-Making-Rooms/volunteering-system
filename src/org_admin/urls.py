@@ -204,6 +204,7 @@ urlpatterns = [
 
     path("rota/role/new/<int:opp_id>/", views.edit_role, name="create_new_rota_role"),
     path("rota/role/<int:role_id>/", views.edit_role, name="edit_rota_role"),
+    path("rota/role/delete/<int:role_id>/", views.delete_role, name="edit_rota_role"),
 
     path("rota/toggle_rota_type/<int:opportunity_id>/", views.toggle_opportunity_scheduling_type, name="toggle_rota scheduling"),
     path("rota/toggle_rota_type/<int:opportunity_id>/copy/", views.toggle_opportunity_scheduling_type,

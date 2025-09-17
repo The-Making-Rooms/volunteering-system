@@ -1697,13 +1697,14 @@ def delete_section(request, section_id: int):
         id=section_id,
     )
 
-    # If you have org-scope helpers, call them here (e.g., assert_org_access(request, section))
+    if not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user, organisation=section.role.opportunity.organisation).exists():
+        return False
 
     domain = request.get_host()
 
     shifts_qs = (
         VolunteerShift.objects
-        .filter(section=section)
+        .filter(section=section, occurrence__date__gte=datetime.now())
         .select_related(
             "registration__volunteer__user",
             "registration__opportunity",
@@ -1716,7 +1717,7 @@ def delete_section(request, section_id: int):
 
     with transaction.atomic():
         for shift in confirmed_shifts:
-            #print("sent deletion email")
+            print("sent deletion email")
             unassignment_email_thread = SendUnassignmentEmailForShift(domain, shift)
             unassignment_email_thread.start()
 
@@ -1743,7 +1744,8 @@ def delete_one_off_date(request, schedule_id: int):
         id=schedule_id,
     )
 
-    # If you have org-scope helpers, call them here (e.g., assert_org_access(request, oneoff))
+    if not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user, organisation=oneoff.opportunity.organisation).exists():
+        return False
 
     domain = request.get_host()
 
@@ -1783,7 +1785,35 @@ def delete_one_off_date(request, schedule_id: int):
         return opportunity_rota_index(request, opportunity, success="Successfully deleted schedule.")
     # return opportunity_rota_index_request(request, opportunityid=oneoff.opportunity_id)
 
+def delete_role(request, role_id: int):
+    role = get_object_or_404(
+        Role,
+        id=role_id
+    )
 
+    if not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user, organisation=role.opportunity.organisation).exists():
+        return False
+
+    domain = request.get_host()
+
+
+    shifts = VolunteerShift.objects.filter(
+        role=role,
+        occurrence__date__gte=datetime.now(),
+        confirmed=True
+    )
+
+    if shifts:
+        with transaction.atomic():
+            for shift in shifts:
+                print("sent deletion email")
+                unassignment_email_thread = SendUnassignmentEmailForShift(domain, shift)
+                unassignment_email_thread.start()
+
+    opp_id = role.opportunity.id
+    role.delete()
+
+    return opportunity_rota_index(request, opp_id, success="Successfully deleted role.")
 
 # ------------- Additional Helper Routes -------------
 

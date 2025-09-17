@@ -166,6 +166,14 @@
                                 class="btn btn-primary btn-sm">
                                 Edit
                             </button>
+                            <button
+                                    class="btn bg-red-700 text-white btn-sm"
+                                    hx-confirm="Are you sure you want to delete this role? Any volunteers assigned a shift to this role will be sent a unassignment email."
+                                    hx-get="/org_admin/rota/role/delete/{{ role.id }}/"
+                                    hx-target=".htmx-navigator"
+                                    hx-push-url="true"
+                                    hx-swap="outerHTML"
+                            >Delete</button>
                         </td>
                     </tr>
             {% endfor %}
