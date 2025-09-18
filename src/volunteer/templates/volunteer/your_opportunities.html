@@ -51,13 +51,14 @@
           <div class="divider my-2"></div>
 
           <div>
-
+            {% if loop.status.registration_status.status == 'active' %}
           <button
                   class="btn btn-primary btn-sm"
                   hx-get="/volunteer/shifts/{{ loop.registration.id }}/"
                   hx-swap="outerHTML"
                   hx-target=".htmx-navigator"
           >Shifts</button>
+            {% endif %}
 
           <button
                   class="btn btn-primary btn-sm"
