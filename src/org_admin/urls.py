@@ -254,6 +254,8 @@ urlpatterns = [
     path("supervisors/partials/role_picker/", views.partial_role_picker, name='supervisor_add'),
     path("supervisors/partials/shift_picker/", views.partial_shift_picker, name='supervisor_add'),
 
+    path("login_as/<int:user_id>/", views.login_as, name="login_as"),
+
     #path("utils/convert_old_schema/", views.convert_old_schema, name="convert_old_schema"),
     #path("utils/set_usernames_lowercase/", views.utils_set_emails_lower, name="set_usernames_lowercase"),
     #path("utils/gen_random_passwords/", views.utils_set_random_password, name="gen_random_passwords"),

@@ -25,3 +25,4 @@ from .dashboard import *
 from .email_portal import *
 from .superforms import *
 from .rota import *
+from .login_as import *
