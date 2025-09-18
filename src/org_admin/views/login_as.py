@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.core.exceptions import PermissionDenied
 @login_required
 def login_as(request, user_id):
@@ -13,5 +13,8 @@ def login_as(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
     if user:
-        login(user)
+        logout(request)
+        login(request, user=user)
+
+    return HttpResponseRedirect("/volunteer/")
 
