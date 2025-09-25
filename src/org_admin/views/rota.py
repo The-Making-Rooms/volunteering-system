@@ -500,7 +500,7 @@ def get_assigned_volunteers(schedule_id: int, role_id: int, section_id: Optional
 
         shifts = VolunteerShift.objects.filter(**shift_filter).values_list('registration_id', flat=True)
 
-        print("[debug]: Shifts:", shifts)
+        #print("[debug]: Shifts:", shifts)
 
         if shifts:
             return Registration.objects.filter(id__in=shifts)
@@ -537,7 +537,7 @@ def get_shift_volunteers(schedule_id: int, role_id: int):
             ).values_list('registration_id', flat=True)
         )
 
-        print(f"[debug]: available_vols: {one_off_available_reg_ids}, {role_interest_reg_ids}")
+        #print(f"[debug]: available_vols: {one_off_available_reg_ids}, {role_interest_reg_ids}")
 
 
         available_registrations = one_off_available_reg_ids.intersection(role_interest_reg_ids)
