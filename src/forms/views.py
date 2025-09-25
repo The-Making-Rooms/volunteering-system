@@ -95,6 +95,45 @@ class SendEmailToVolunteer(Thread):
     def run(self):
         send_email_to_volunteer(self.domain, self.volunteer_id)
 
+def send_email_to_org_admin(opp_id):
+
+    opportunity = Opportunity.objects.get(
+        id=opp_id
+    )
+    org_admins = OrganisationAdmin.objects.filter(
+        organisation = opportunity.organisation
+    )
+
+
+    subject = f"New superform user signup - {opportunity.name}"
+    message = """
+    <p>Hello,</p>
+    <br>
+    <p>A volunteer has signed up for an opportunity linked to your organisation using a superform link. Please log in to the Chip In admin to manage the volunteer.
+    <br>
+    <p>Regards,<br>The Chip In Team</p>  
+    """
+
+    context = {"content": message}
+    html = render_to_string("org_admin/rota/email_template.html", context)  # HTML body[12]
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=html,  # plain body fallback (can also render a text version)
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[admin.user.email for admin in org_admins],
+    )
+    email.attach_alternative(html, "text/html")  # send HTML alternative[12]
+    email.send()
+
+class SendEmailToOrgAdmin(Thread):
+    def __init__(self, opp_id):
+        Thread.__init__(self)
+        self.opportunity_id = opp_id
+
+    def run(self):
+        send_email_to_org_admin(self.opportunity_id)
+
 def superform(request, id):
     """Superforms allow users to create an account, register for an opportunity, and fill out a form all at once. This allows incremental onboarding of users.
     """
@@ -529,6 +568,10 @@ def submit_superform(request, id):
 
         email_thread = SendEmailToVolunteer(domain, volunteer.id)
         email_thread.start()
+
+        org_admin_email_thread = SendEmailToOrgAdmin(superform.opportunity_to_register.id)
+        org_admin_email_thread.start()
+
 
         success_context = {
             "submission_message" : completion_message,
