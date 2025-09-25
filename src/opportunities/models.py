@@ -163,7 +163,11 @@ class Registration(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     
     def get_registration_status(self):
-        return VolunteerRegistrationStatus.objects.filter(registration=self).last().registration_status.status
+        status = VolunteerRegistrationStatus.objects.filter(registration=self)
+        if status.exists():
+            return status.last().registration_status.status
+        else:
+            return None
 
     def get_interested_roles_count(self):
         return VolunteerRoleIntrest.objects.filter(registration=self).count()
