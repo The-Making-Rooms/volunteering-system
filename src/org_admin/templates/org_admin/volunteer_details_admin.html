@@ -80,10 +80,10 @@
 </div>
 
 <div class="p-5 rounded-lg bg-base-200 mb-3">
-  <p class="text-xl font-bold">Emegency Contacts</p>
+  <p class="text-xl font-bold">Emergency Contacts</p>
   <div class="divider my-2"></div>
   {% if contacts|length == 0 %}
-  <p>No Emegency Contacts specified</p>
+  <p>No Emergency Contacts specified</p>
   {% else %}
 
   <table class="table">
@@ -192,6 +192,81 @@
   {% endif %}
 </div>
 
+    <div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Forms</p>
+  <div class="divider my-2"></div>
+  {% if forms|length == 0 %}
+  <p>No forms</p>
+  {% else %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Response Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in forms %}
+      <tr>
+        <td>{{ form.form.name }}</td>
+        <td>{{ form.response_date|date:"d/m/Y" }}</td>
+        <td>
+          <a
+            href="/org_admin/forms/response/{{form.id}}/"
+            class="btn btn-xs btn-primary"
+            >View
+          </a>
+            {% if registration.get_registration_status == 'active' %}
+          <a href="" class="btn btn-xs bg-red-600">Mark as complete</a>
+            {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+ <div class="p-5 rounded-lg bg-base-200 mb-3">
+  <p class="text-xl font-bold">Shifts</p>
+  <div class="divider my-2"></div>
+  {% if shifts|length == 0 %}
+  <p>No shifts</p>
+  {% else %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Opportunity Name</th>
+        <th>Role</th>
+        <th>Section</th>
+        <th>Date & Time</th>
+        <th>RSVP Status</th>
+          <th>Check in time</th>
+          <th>Check out time</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for shift in shifts %}
+      <tr>
+        <td>{{ shift.registration.opportunity.name }}</td>
+        <td>{{ shift.role.name }}</td>
+        <td>{% if shift.section %}{{ shift.section.name }}{% else %}-{% endif %}</td>
+
+        <td>{{ shift.occurrence.date|date:"d/m/Y" }}</td>
+        <td>{{ shift.rsvp_response }}</td>
+
+      <td>{{ shift.check_in_time }}</td>
+      <td>{{ shift.check_out_time }}</td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
 <div class="p-5 rounded-lg bg-base-200 mb-3">
   <p class="text-xl font-bold">Volunteer Registrations</p>
   <div class="divider my-2"></div>
@@ -203,6 +278,7 @@
       <tr>
         <th>Opportunity</th>
         <th>Registered</th>
+          <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -210,20 +286,22 @@
       {% for registration in registrations %}
       <tr>
         <td>{{ registration.opportunity.name }}</td>
-        <td>{{ registration.date_created }}</td>
+        <td>{{ registration.date_created|date:"d/m/Y" }}</td>
+        <td>{{ registration.get_registration_status }}</td>
         <td>
           <a
             href="/org_admin/opportunities/{{registration.opportunity.id}}"
-            class="btn btn-primary"
-            >View</a
-          >
-          <a href="" class="btn bg-red-600">Mark as complete</a>
+            class="btn btn-xs btn-primary"
+            >View
+          </a>
+            {% if registration.get_registration_status == 'active' %}
+          <a href="" class="btn btn-xs bg-red-600">Mark as complete</a>
+            {% endif %}
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% endif %}
- 
 </div>
 {% endblock %}
