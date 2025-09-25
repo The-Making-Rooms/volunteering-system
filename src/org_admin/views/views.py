@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+
+from rota.models import VolunteerShift
 from ..models import OrganisationAdmin
 from commonui.views import check_if_hx, HTTPResponseHXRedirect
 from webpush import  send_user_notification
@@ -485,11 +487,13 @@ def volunteer_details_admin(request, id):
         return redirect("/org_admin/sign_in/")
     elif not request.user.is_superuser and not OrganisationAdmin.objects.filter(user=request.user).exists():
         return render(request, "org_admin/no_admin.html", {"hx": check_if_hx(request)})
+
+    org_admin = OrganisationAdmin.objects.filter(user=request.user).first() if not request.user.is_superuser else None
     
     volunteer = Volunteer.objects.get(id=id)
 
     if not request.user.is_superuser:
-        volunteer_part_of_org = Registration.objects.filter(volunteer=volunteer, opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation).exists()
+        volunteer_part_of_org = Registration.objects.filter(volunteer=volunteer, opportunity__organisation=org_admin.organisation).exists()
         if not volunteer_part_of_org:
             return volunteer_admin(request, error="You do not have permission to view this volunteer")
     
@@ -527,67 +531,31 @@ def volunteer_details_admin(request, id):
                 else:
                     if answer.answer != "" and answer.answer != None:
                         formatted_response[answer.question.question] = answer.answer
-            
-    
-    
-    
+
     if request.user.is_superuser:
         print("superuser")
-        registrations = Registration.objects.filter(volunteer=volunteer)
+        registrations = Registration.objects.filter(volunteer=volunteer).order_by("date_created").reverse()
         vol_supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer)
     else:
         registrations = Registration.objects.filter(volunteer=volunteer, opportunity__organisation=OrganisationAdmin.objects.get(user=request.user).organisation)
         org_supp_info = SupplimentaryInfoRequirement.objects.filter(opportunity__in=registrations.values_list('opportunity', flat=True))
         vol_supp_info = VolunteerSupplementaryInfo.objects.filter(volunteer=volunteer, info__id__in=org_supp_info.values_list('info', flat=True))
-    
-    for registration in registrations:
-        opportunity = registration.opportunity
-        stopped_status = RegistrationStatus.objects.get(status="stopped")
-        started_status = RegistrationStatus.objects.get(status="active")
-        
-        if VolunteerRegistrationStatus.objects.filter(registration=registration, registration_status=started_status).exists():
-        
-            volunteer_start = VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=started_status).date
-            
-            
-            dateTimeA = datetime.combine(date.today(), opportunity.start_time)
-            dateTimeB = datetime.combine(date.today(), opportunity.end_time)
-            # Get the difference between datetimes (as timedelta)
-            dateTimeDifference = dateTimeB - dateTimeA
-            print(dateTimeDifference)
-            
-            
-            start_date_0_0 = datetime(volunteer_start.date().year, volunteer_start.date().month, volunteer_start.date().day, 0, 0)
-            
-            if VolunteerRegistrationStatus.objects.filter(registration=registration, registration_status=stopped_status).exists():
-                print("stopped as of: ", VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=stopped_status).date.date())
-                is_stopped = VolunteerRegistrationStatus.objects.get(registration=registration, registration_status=stopped_status)
-                is_stopped_23_59 = datetime(is_stopped.date.date().year, is_stopped.date.date().month, is_stopped.date.date().day, 23, 59)
-            else:
-                now= datetime.now()
-                is_stopped_23_59 = datetime(now.year, now.month, now.day, 23, 59)
-            
-            recurrences = len(opportunity.recurrences.between(
-                start_date_0_0,
-                is_stopped_23_59,
-                inc=True
-            ))
-            
-            absences = RegistrationAbsence.objects.filter(registration=registration).count()
-            hours = dateTimeDifference.total_seconds() / 3600 * recurrences - absences
-        else:
-            print("not been approved")
-            hours = 0
-            
-            
-        latest_status = VolunteerRegistrationStatus.objects.filter(registration=registration).last()
-        
-        
-    
+
     conditions = VolunteerConditions.objects.filter(volunteer=volunteer)
     addresses = VolunteerAddress.objects.filter(volunteer=volunteer)
     emergency_contacts = EmergencyContacts.objects.filter(volunteer=volunteer)
     interests = OrganisationInterest.objects.filter(volunteer=volunteer)
+
+    if request.user.is_superuser:
+        forms = Response.objects.filter(user=volunteer.user)
+    else:
+        forms = Response.objects.filter(user=volunteer.user, form__organisation=org_admin.organisation)
+
+    if request.user.is_superuser:
+        shifts = VolunteerShift.objects.filter(registration__volunteer=volunteer).order_by("occurrence__date").reverse()
+    else:
+        shifts = VolunteerShift.objects.filter(registration__volunteer=volunteer, registration__opportunity__organisation=org_admin.organisation).order_by("occurrence__date").reverse()
+
     
     context = {
         "hx": check_if_hx(request),
@@ -598,6 +566,8 @@ def volunteer_details_admin(request, id):
         "addresses": addresses,
         "contacts": emergency_contacts,
         "interests": interests,
+        "forms" : forms,
+        "shifts" : shifts,
         "superuser": request.user.is_superuser,
         "sign_up_form_answers": formatted_response,
     }
