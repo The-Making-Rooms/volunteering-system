@@ -913,8 +913,6 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
 
     shifts = []
     if getattr(opportunity, "rota_config", "SHARED") == "SHARED":
-
-
         if not selected_role:
             filtered_roles = Role.objects.filter(opportunity=opp_id).select_related("opportunity__organisation")
         else:
@@ -958,19 +956,33 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
                         'accepted_volunteers': get_accepted_and_confirmed(schedule.id, role.id),
                     })
     else:
-
         print(selected_date, selected_role)
-        shifts = get_available_volunteers_discrete(opportunity.id, omit_confirmed=True, selected_role=selected_role, selected_date=selected_date)
+        try:
+            shifts = get_available_volunteers_discrete(opportunity.id, omit_confirmed=True, selected_role=selected_role, selected_date=selected_date)
+        except Exception as e:
+            print(f"[debug] Error: {e}")
+
+    print(f"[debug] Getting unconfirmed shifts")
 
     unconfirmed_shifts = VolunteerShift.objects.filter(
         registration__opportunity=opportunity,
         confirmed=False
     )
 
-    unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
+    print(f"[debug] filtering unconfirmed shifts")
+
+    try:
+        unconfirmed_shifts = [shift for shift in unconfirmed_shifts if shift.registration.get_registration_status() == 'active']
+    except Exception as e:
+        print(f"[debug] Error: {e}")
+
+    print(f"[debug] sorting shifts")
 
     # In-place ascending sort (modifies the original list)
-    shifts.sort(key=lambda d: len(d.get("available_volunteers", [])))
+    try:
+        shifts.sort(key=lambda d: len(d.get("available_volunteers", [])))
+    except Exception as e:
+        print(f"[debug] Error: {e}")
 
     slots = (
         OneOffDate.objects
