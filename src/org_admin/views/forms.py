@@ -268,7 +268,7 @@ def get_response(request, response_id):
         
         if answer.question.question_type == 'multi_choice' and answer.answer != "":
             
-            if "," in answer.answer:
+            if answer.answer != None and "," in answer.answer:
                 print("multi")
                 print(answer.answer)
                 answer.answer = answer.answer.split(",")
