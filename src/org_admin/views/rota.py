@@ -9,7 +9,7 @@ from django.conf import settings
 from datetime import datetime, time as dtime
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction
-
+from .rota_assign import assign_rota
 from typing import List, Dict, Any, Optional
 from django.db.models import Count, Q, F, Min, Prefetch, OuterRef, Subquery
 import csv
@@ -993,7 +993,7 @@ def get_sections_modal(request: HttpRequest, role_id: int, schedule_id: int):
     return render(request, 'org_admin/rota/partials/section_picker.html', context)
 
 @login_required
-def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None, error: Optional[str] = None) -> HttpResponse:
+def assign_rota_old(request: HttpRequest, opp_id: int, success: Optional[str] = None, error: Optional[str] = None) -> HttpResponse:
     """
     Display the main shift assignment interface for an opportunity.
     Shows all shifts that need volunteers assigned.

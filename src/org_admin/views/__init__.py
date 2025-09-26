@@ -26,3 +26,4 @@ from .email_portal import *
 from .superforms import *
 from .rota import *
 from .login_as import *
+from .rota_assign import *
