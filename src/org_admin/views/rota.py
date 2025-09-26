@@ -890,7 +890,7 @@ def assign_rota_by_registrations(request: HttpRequest, opp_id: int) -> HttpRespo
 
     registrations = Registration.objects.filter(
         opportunity = opportunity
-    )
+    ).order_by('date_created').reverse()
 
     active_registrations = [registration for registration in registrations if registration.get_registration_status() == 'active']
 
@@ -910,45 +910,63 @@ def assign_rota_by_registration(request: HttpRequest, reg_id: int) -> HttpRespon
         registration = registration
     )
 
-    available_dates = VolunteerOneOffDateAvailability.objects.filter(
-        registration=registration,
-    )
+    if registration.opportunity.rota_config == "SHARED":
+        valid_dates = OneOffDate.objects.filter(
+            opportunity=registration.opportunity, role_id__isnull=True,
+            date__gte=datetime.now()
+        )
+
+        available_dates = VolunteerOneOffDateAvailability.objects.filter(
+            registration=registration,
+            one_off_date__in=valid_dates
+        )
+    else:
+        available_dates = None
 
     shifts = []
 
     for role in available_roles:
-        for date in available_dates:
+        if registration.opportunity.rota_config == "PER_ROLE":
+            available_dates = OneOffDate.objects.filter(role=role, date__gte=datetime.now())
 
+        for date in available_dates:
             shift_details = {
                 'date' : date,
                 'role' : role,
                 'assigned_count' : 0,
                 'assigned' : False,
-                'sections' : False
+                'sections' : False,
+                'required_volunteers' : 0,
+                'conflict' : check_time_conflict(registration.id, date.one_off_date.start_time, date.one_off_date.end_time, date.one_off_date.date)
             }
 
             #get assigned volunteers for this shift
             shift_occ = VolunteerShift.objects.filter(
                 role = role.role,
-                occurrence__one_off_date=date.one_off_date
+                occurrence__one_off_date=date.one_off_date,
             )
 
+
+
             if shift_occ.exists():
-                shift_details['assigned_count'] = VolunteerShift.objects.filter(
-                    occurrence=shift_occ
-                ).count()
+                shift_details['assigned_count'] = shift_occ.count()
 
                 #Check to see if this volunteer has already been assigned to this shift
                 if shift_occ.filter(
                     registration=registration
                 ).exists():
-                    shift_details['assigned'] = True
+                    shift_details['assigned'] = shift_occ.filter(
+                    registration=registration
+                ).first()
 
             #Check to see if the role has sections, as this needs a selection modal
-            if Section.objects.filter(role=role).exists():
+            if Section.objects.filter(role=role.role).exists():
                 shift_details['sections'] = True
 
             shifts.append(shift_details)
+
+    # ascending by date
+    shifts.sort(key=lambda s: s["date"].one_off_date.date)
 
     context = {
         'hx' : check_if_hx(request),
@@ -958,12 +976,21 @@ def assign_rota_by_registration(request: HttpRequest, reg_id: int) -> HttpRespon
 
     return render(request, 'org_admin/rota/assign_shift_by_registration_instance.html', context)
 
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+def get_sections_modal(request: HttpRequest, role_id: int, schedule_id: int):
+    role = Role.objects.get(id=role_id)
+    schedule = OneOffDate.objects.get(id=schedule_id)
+    sections = Section.objects.filter(role=role)
 
-from django.db.models import Prefetch, Min, Q
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+    if not check_if_hx(request):
+        return None
+
+    context = {
+        'role' : role,
+        'schedule' : schedule,
+        'sections' : sections
+    }
+
+    return render(request, 'org_admin/rota/partials/section_picker.html', context)
 
 @login_required
 def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None, error: Optional[str] = None) -> HttpResponse:
@@ -1398,7 +1425,7 @@ def save_role(request: HttpRequest, role_id: int) -> HttpResponse:
         role.full_clean()
         role.save()
         request.method = 'GET'
-        return edit_role(request, role.id)
+        return edit_role(request, role.id, success="Role saved successfully")
     except ValidationError as ve:
         return render(request, 'org_admin/error.html', {'error': f'Validation error: {ve.message_dict if hasattr(ve, "message_dict") else ve}'})
     except Exception as e:
@@ -1874,7 +1901,7 @@ def delete_one_off_date(request, schedule_id: int):
 
     # Optionally redirect back to a rota index/editor
     if oneoff.role:
-        return edit_role(request, role_id=role.id)
+        return edit_role(request, role_id=role.id, success="Successfully deleted schedule.")
     else:
         return opportunity_rota_index(request, opportunity, success="Successfully deleted schedule.")
     # return opportunity_rota_index_request(request, opportunityid=oneoff.opportunity_id)
