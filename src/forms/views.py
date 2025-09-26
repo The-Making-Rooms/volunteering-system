@@ -202,6 +202,7 @@ def superform(request, id):
         "forms": formsets,
         "dates": available_dates,
         "hx": check_if_hx(request),
+        'page_title' : superform.name
     }
     
     return render(request, 'forms/superform/form.html', context=context) 

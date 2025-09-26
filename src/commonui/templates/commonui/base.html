@@ -12,7 +12,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Chip In</title>
+    <title>{% if page_title %}{{ page_title }}{% else %}Chip In{% endif %}</title>
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}" />
     {% endcompress %}
