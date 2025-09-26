@@ -40,13 +40,14 @@
 
     <div class="divider"></div>
 
+
     <form id="filters">
   {% csrf_token %}
 
       <select
     class="select select-bordered"
     name="date_filter"
-    hx-post="{% url 'assign_rota' opportunity.id %}"
+    hx-post="{% url 'assign_rota' opp.id %}"
     hx-trigger="change changed"
     hx-swap="outerHTML"
     hx-target=".htmx-navigator"
@@ -59,7 +60,7 @@
   <select
     class="select select-bordered"
     name="role_filter"
-    hx-post="{% url 'assign_rota' opportunity.id %}"
+    hx-post="{% url 'assign_rota' opp.id %}"
     hx-trigger="change changed"
     hx-swap="outerHTML"
     hx-target=".htmx-navigator"
@@ -95,14 +96,14 @@
         {% if shifts|length > 0 %}
             {% for shift in shifts %}
                 <tr class="hover:bg-base-300 border-b border-base-300">
-                    <td>{{ shift.schedule.date|date:"Y-m-d" }}</td>
+            <td>{{ shift.schedule.date|date:"Y-m-d" }}</td>
                     <td>{{ shift.schedule.start_time|date:"H:i" }} - {{ shift.schedule.end_time|date:"H:i" }}</td>
                     <td>{{ shift.role.name }}</td>
                     <td>{% if shift.section %}{{ shift.section.name }}{% else %}-{% endif %}</td>
                     <td>{% if shift.section %}{{ shift.section.required_volunteers }}{% else %}{{ shift.role.required_volunteers }}{% endif %}</td>
-                    <td>{{ shift.available_volunteers|length }}</td>
-                    <td>{{ shift.assigned_volunteers|length}}</td>
-                    <td>{{ shift.accepted_volunteers.0|length }}/{{ shift.accepted_volunteers.1|length }}</td>
+                    <td>{{ shift.available_volunteers }}</td>
+                    <td>{{ shift.assigned_volunteers }}</td>
+                    <td>{{ shift.accepted_volunteers.0 }}/{{ shift.accepted_volunteers.1 }}</td>
                     <td>
                         {% if shift.section %}
                             <button
