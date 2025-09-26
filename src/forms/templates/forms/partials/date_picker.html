@@ -1,21 +1,58 @@
 {% if dates|length > 0 %}
 <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
-    <label class="text-[12pt] mb-3" for="post_code" class="mr-3">Please select the dates/times you are available: <span class="text-red-600 font-bold">*</span></label>
+  <label class="text-[12pt] mb-3" for="post_code" class="mr-3">
+    Please select the dates/times you are available: <span class="text-red-600 font-bold">*</span>
+  </label>
 
-        <div class="flex flex-col gap-3">
-            {% for d in dates %}
-                <div class="flex items-center gap-x-3">
-                    <input
-                            class="checkbox"
-                            type="checkbox"
-                            id="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
-                            name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
-                    />
-                    <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
-                    {{ d.date|date:"d-m-Y" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
-                    </label>
-                </div>
-            {% endfor %}
-        </div>
+  <!-- Select all -->
+  <div class="flex items-center gap-x-3 mb-2">
+    <input
+      type="checkbox"
+      id="select_all_schedules"
+      class="checkbox"
+    />
+    <label for="select_all_schedules">Select all</label>
+  </div>
+
+  <div class="flex flex-col gap-3" id="schedules_container">
+    {% for d in dates %}
+      <div class="flex items-center gap-x-3">
+        <input
+          class="checkbox schedule-checkbox"
+          type="checkbox"
+          id="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+          name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
+        />
+        <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
+          {{ d.date|date:"d-m-Y" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+        </label>
+      </div>
+    {% endfor %}
+  </div>
 </div>
+
+<script>
+  (function () {
+    const selectAll = document.getElementById('select_all_schedules');
+    const itemCheckboxes = document.querySelectorAll('.schedule-checkbox');
+
+    // Toggle all on master change
+    selectAll.addEventListener('change', function () {
+      const checked = this.checked;
+      itemCheckboxes.forEach(cb => { cb.checked = checked; });
+    });
+
+    // Keep master in sync if user toggles individuals
+    const syncMaster = () => {
+      const total = itemCheckboxes.length;
+      const checkedCount = Array.from(itemCheckboxes).filter(cb => cb.checked).length;
+      selectAll.checked = checkedCount === total && total > 0;
+      selectAll.indeterminate = checkedCount > 0 && checkedCount < total;
+    };
+
+    itemCheckboxes.forEach(cb => cb.addEventListener('change', syncMaster));
+    // Initial state (e.g., on back navigation or server-side pre-checked values)
+    syncMaster();
+  })();
+</script>
 {% endif %}
