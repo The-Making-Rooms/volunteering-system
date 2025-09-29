@@ -990,6 +990,10 @@ def assign_rota_by_registrations(request: HttpRequest, opp_id: int, error: str|N
                 "volunteershift",
                 filter=Q(volunteershift__confirmed=True, volunteershift__rsvp_response="yes"),
             ),
+            declined_shifts=Count(
+                "volunteershift",
+                filter=Q(volunteershift__confirmed=True, volunteershift__rsvp_response__in=["no", "cmi"]),
+            ),
         )
         .order_by("-date_created")
     )
@@ -1062,6 +1066,11 @@ def assign_rota_by_registration(request: HttpRequest, reg_id: int, success=None,
 
     shifts = []
 
+    all_regs = Registration.objects.filter(
+        opportunity=registration.opportunity
+    )
+    active_regs = [reg.id for reg in all_regs if reg.get_registration_status() == 'active']
+
 
     for role in available_roles:
 
@@ -1088,25 +1097,29 @@ def assign_rota_by_registration(request: HttpRequest, reg_id: int, success=None,
                 'date' : date,
                 'role' : role,
                 'required_count' : 0,
-                'assigned_count' : 0,
+                'assigned_unsent_count' : 0,
+                'assigned_sent_count': 0,
                 'assigned' : False,
                 'sections' : False,
                 'required_volunteers' : 0,
                 'conflict' : check_time_conflict(registration.id, date.one_off_date.start_time, date.one_off_date.end_time, date.one_off_date.date),
             }
 
-            #Get required volunteers count
-
             #get assigned volunteers for this shift
             shift_occ = VolunteerShift.objects.filter(
                 role = role.role,
                 occurrence__one_off_date=date.one_off_date,
+                registration__id__in=active_regs
             )
 
 
 
             if shift_occ.exists():
-                shift_details['assigned_count'] = shift_occ.count()
+                shift_details['assigned_sent_count'] = shift_occ.filter(confirmed=True).count()
+                shift_details['assigned_unsent_count'] = shift_occ.filter(confirmed=False).count()
+                shift_details['assigned_accepted_count'] = shift_occ.filter(rsvp_response='yes').count()
+                shift_details['assigned_no_count'] = shift_occ.filter(rsvp_response__in=['no', 'cmi']).count()
+
 
                 #Check to see if this volunteer has already been assigned to this shift
                 if shift_occ.filter(

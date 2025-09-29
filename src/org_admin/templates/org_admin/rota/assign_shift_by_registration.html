@@ -47,8 +47,10 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Registered Date</th>
-                <th>Unconfirmed Shifts</th>
-                <th>Accepted/Sent</th>
+                <th>To send</th>
+                <th>Sent</th>
+                <th>Accepted</th>
+                <th>Declined</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -61,8 +63,12 @@
                     <td>{{ registration.volunteer.user.email }}</td>
 
                     <td>{{ registration.date_created|date:"d-m-Y" }}</td>
+
                     <td>{{ registration.unconfirmed_shifts }}</td>
-                    <td>{{ registration.accepted_shifts }}/{{ registration.confirmed_shifts }}</td>
+                    <td>{{ registration.confirmed_shifts }}</td>
+                    <td>{{ registration.accepted_shifts }}</td>
+                    <td>{{ registration.declined_shifts }}</td>
+
                     <td>
                         <button
                             class="btn btn-primary btn-xs"
