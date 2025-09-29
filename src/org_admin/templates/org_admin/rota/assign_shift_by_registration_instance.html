@@ -96,6 +96,7 @@
                 <th>Time</th>
                 <th>Role</th>
                 <th>Assigned Shifts / Required</th>
+                <th>RSVP Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -107,7 +108,9 @@
                     <td>{{ shift.date.one_off_date.date|date:"d/m/Y" }}</td>
                     <td>{{ shift.date.one_off_date.start_time|date:"H:i" }} - {{ shift.date.one_off_date.end_time|date:"H:i" }}</td>
                     <td>{{ shift.role.role.name }}</td>
+
                     <td>{{ shift.assigned_count }}/{{ shift.required_count }}</td>
+                <td>{% if shift.assigned %}{{shift.assigned.rsvp_response}}{% else %}-{% endif %}</td>
                     <td>
                     {% if not shift.assigned %}
                         <button
