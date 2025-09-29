@@ -340,6 +340,65 @@ class SendUnassignmentEmailForShift(Thread):
         send_unassignment_email_for_shift(self.domain, self.shift)
 
 
+def send_email_to_volunteer_batch(domain, registration_id, shift_ids):
+    shifts = VolunteerShift.objects.filter(id__in=shift_ids)
+    subject = 'Chip in System - Shift Assignments'
+    registration = Registration.objects.get(id=registration_id)
+
+    shift_string = ""
+
+    for shift in shifts:
+        section_name = "" if not shift.section else "Section Name: " + shift.section.name
+        section_desc = "" if not shift.section else "Section Description: " + shift.section.description
+
+        current_shift_string = f"""
+<p>Role: {shift.role.name}</p>
+<p>Role Volunteer Information: {shift.role.volunteer_description}</p>
+"""
+        if section_name:
+            current_shift_string += f"""
+<p>{section_name}</p>
+<p>{section_desc}</p>
+
+"""
+
+        shift_string += current_shift_string
+
+    message = f"""
+<p>Hello {shift.registration.volunteer.user.first_name} {shift.registration.volunteer.user.last_name},</p>
+
+<p>You have been assigned a shift for the opportunity: {shift.registration.opportunity.name}.</p>
+
+<p style="font-weight: bold">Shift Details:</p>
+
+{shift_string}
+
+<a class="btn" href="https://{domain}/volunteer/shifts/{registration.id}/">RSVP Here</a>
+
+<p>Alternatively, log in to the app, press the calendar icon at the bottom of the screen and click the "shifts' button for the relevant opportunity.</p>
+
+<p>Regards,<br>
+The Chip In Team</p>
+"""
+
+    print(message)
+
+    context = {
+        'content' : message
+    }
+
+    text = render_to_string('org_admin/rota/email_template.html', context)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[registration.volunteer.user.email]
+    )
+
+    email.attach_alternative(text, "text/html")
+    email.send()
+
 def send_email_to_volunteer(domain, shift_id):
     shift = VolunteerShift.objects.get(id=shift_id)
     subject = 'Chip in System - Shift Assignment'
@@ -437,6 +496,16 @@ class SendEmailToVolunteer(Thread):
 
     def run(self):
         send_email_to_volunteer(self.domain, self.shift)
+
+class SendEmailToVolunteerBatch(Thread):
+    def __init__(self, domain, regstration_id, shift_ids):
+        Thread.__init__(self)
+        self.shifts = shift_ids
+        self.domain = domain
+        self.reg_id = regstration_id
+
+    def run(self):
+        send_email_to_volunteer_batch(self.domain, self.reg_id, self.shifts)
 
 def times_overlap(start_a: time, end_a: time, start_b: time, end_b: time) -> bool:
     """
@@ -1571,9 +1640,124 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     }
     return render(request, "org_admin/rota/rota_opp_index.html", context)
 
+from collections import defaultdict
+from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
 
 @login_required
-def confirm_shifts(request: HttpRequest, opp_id: int|None=None, registration_id:  int|None=None) -> HttpResponse:
+def confirm_shifts(request: HttpRequest, opp_id: int | None = None, registration_id: int | None = None) -> HttpResponse:
+    """
+    Confirm all unconfirmed shifts for an opportunity or a specific registration,
+    and notify volunteers with a single email containing all their shifts.
+    """
+    require_authenticated(request)  # existing helper
+    # Resolve scope
+    if opp_id:
+        opportunity = get_object_or_404(
+            Opportunity.objects.select_related("organisation"),
+            id=opp_id,
+        )
+        assert_org_access(request, opportunity)
+    elif registration_id:
+        registration = get_object_or_404(Registration, id=registration_id)
+        assert_org_access(request, registration)
+    else:
+        return HttpResponse()
+
+    try:
+        # Fetch unconfirmed shifts in scope
+        if registration_id:
+            base_qs = VolunteerShift.objects.filter(
+                registration=registration,
+                confirmed=False,
+            )
+        else:
+            base_qs = (
+                VolunteerShift.objects
+                .filter(
+                    registration__opportunity=opportunity,
+                    confirmed=False,
+                )
+                .select_related("registration", "occurrence", "role", "section")
+            )
+
+        # Only notify active registrations
+        # Build groups per volunteer registration (or per volunteer user if preferred)
+        shifts_by_registration = defaultdict(list)
+        for shift in base_qs:
+            if shift.registration.get_registration_status() == "active":
+                shifts_by_registration[shift.registration_id].append(shift)
+
+        # Confirm all grouped shifts atomically
+        count_confirmed = 0
+        with transaction.atomic():
+            for reg_id, shifts in shifts_by_registration.items():
+                for s in shifts:
+                    if not s.confirmed:
+                        s.confirmed = True
+                        s.save(update_fields=["confirmed"])
+                        count_confirmed += 1
+
+        # Send one email per registration with all shifts
+        domain = request.get_host()
+
+        for reg_id, shifts in shifts_by_registration.items():
+            # Choose the multi-shift emailer when multiple, else the single-shift emailer for compatibility
+            if len(shifts) > 1:
+                # Expects a function/class like SendEmailToVolunteerBatch(domain, registration_id, shift_ids)
+                print("sending batch email")
+                shift_ids = [s.id for s in shifts]
+                email_thread = SendEmailToVolunteerBatch(domain, reg_id, shift_ids)
+                email_thread.start()
+            else:
+                email_thread = SendEmailToVolunteer(domain, shifts[0].id)
+                email_thread.start()
+
+        # Route back depending on referer context
+        if "assign_by_registrations" in (request.META.get("HTTP_REFERER") or ""):
+            if not opp_id:
+                return assign_rota_by_registration(
+                    request, registration_id,
+                    success=f"Sent shifts to {len(shifts_by_registration)} volunteer(s).",
+                )
+            else:
+                return assign_rota_by_registrations(
+                    request, opportunity.id,
+                    success=f"Sent shifts to {len(shifts_by_registration)} volunteer(s).",
+                )
+        else:
+            # When opp_id provided, we have opportunity; when registration_id only, derive opp from registration
+            opp_pk = opportunity.id if opp_id else registration.opportunity_id
+            return assign_rota(
+                request, opp_pk,
+                success=f"Sent shifts to {len(shifts_by_registration)} volunteer(s), {count_confirmed} shift(s) confirmed.",
+            )
+
+    except Exception as e:
+        print(e)
+        if "assign_by_registrations" in (request.META.get("HTTP_REFERER") or ""):
+            if not opp_id:
+                return assign_rota_by_registration(
+                    request, registration_id,
+                    error="Failed to confirm shifts. Please try again.",
+                )
+            else:
+                return assign_rota_by_registrations(
+                    request,
+                    error="Failed to confirm shifts. Please try again.",
+                )
+        else:
+            return assign_rota(
+                request,
+                opp_id or (registration.opportunity_id if registration_id else None),
+                error="Failed to confirm shifts. Please try again.",
+            )
+
+
+@login_required
+def confirm_shifts_old(request: HttpRequest, opp_id: int|None=None, registration_id:  int|None=None) -> HttpResponse:
     """
     Confirm all unconfirmed shifts for an opportunity and notify volunteers.
     """
@@ -1587,7 +1771,6 @@ def confirm_shifts(request: HttpRequest, opp_id: int|None=None, registration_id:
         print(registration)
         assert_org_access(request, registration)
     else:
-        print("How did we get here")
         return HttpResponse()
 
     try:
