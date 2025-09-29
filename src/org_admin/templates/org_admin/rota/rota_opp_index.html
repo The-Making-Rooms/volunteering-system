@@ -27,13 +27,24 @@
 
 
 
-    <div class="flex items-start justify-between">
+    <div class="flex items-start justify-between gap-x-3">
         <div class="flex flex-col space-y-2">
             <p class="text-2xl font-bold mb-3">Rota for: {{ opportunity.name }}</p>
             <p class="text-slate-400">
             Use this screen to manage your opportunities schedule and roles. Once you have approved registrations, use the "Assign shifts" button to assign shifts and get responses from volunteers.
             </p>
         </div>
+
+
+        <button
+            hx-get="/org_admin/rota/assign_by_registrations/{{ opportunity.id }}/"
+            hx-target=".htmx-navigator"
+            hx-swap="outerHTML"
+            hx-disabled-elt="this"
+            hx-push-url="true"
+            class="btn btn-primary btn-sm">
+            Assign Shifts by registration
+        </button>
 
 
         <button

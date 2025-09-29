@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction
 from .rota_assign import assign_rota
 from typing import List, Dict, Any, Optional
-from django.db.models import Count, Q, F, Min, Prefetch, OuterRef, Subquery
+from django.db.models import Count, Q, F, Min, Prefetch, OuterRef, Subquery, Sum
 import csv
 import io
 
@@ -752,7 +752,10 @@ def unassign_volunteer_shift_instance(request: HttpRequest, registration_id: int
 
     print(f"[debug] unassigned {role_id, schedule_id, section_id}")
 
-    return assign_volunteer_shift(request, role_id, schedule_id, section_id)
+    if "assign_by_registrations" in request.META.get('HTTP_REFERER'):
+        return assign_rota_by_registration(request, registration_id)
+    else:
+        return assign_volunteer_shift(request, role_id, schedule_id, section_id)
 
 
 @login_required
@@ -824,7 +827,10 @@ def assign_volunteer_shift_instance(request: HttpRequest, registration_id: int, 
             # Race condition fallback: shift exists
             pass
 
-    return assign_volunteer_shift(request, role_id, schedule_id, section_id)
+    if "assign_by_registrations" in request.META.get('HTTP_REFERER'):
+        return assign_rota_by_registration(request, registration_id)
+    else:
+        return assign_volunteer_shift(request, role_id, schedule_id, section_id)
 
 
 @login_required
@@ -882,63 +888,135 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
 
+def unique_key_values_ordered(rows, key):
+    seen = {}
+    for row in rows:
+        if key in row:
+            seen.setdefault(row[key], None)
+    return list(seen.keys())
+
 @login_required
-def assign_rota_by_registrations(request: HttpRequest, opp_id: int) -> HttpResponse:
+def assign_rota_by_registrations(request: HttpRequest, opp_id: int, error: str|None = None, success: str|None = None) -> HttpResponse:
     require_authenticated(request)
     opportunity = Opportunity.objects.get(id=opp_id)
     assert_org_access(request, opportunity)
 
-    registrations = Registration.objects.filter(
-        opportunity = opportunity
-    ).order_by('date_created').reverse()
+    registrations = (
+        Registration.objects
+        .filter(opportunity=opportunity)
+        .annotate(
+            unconfirmed_shifts=Count("volunteershift", filter=Q(volunteershift__confirmed=False)),
+            confirmed_shifts=Count("volunteershift", filter=Q(volunteershift__confirmed=True)),
+            accepted_shifts=Count(
+                "volunteershift",
+                filter=Q(volunteershift__confirmed=True, volunteershift__rsvp_response="yes"),
+            ),
+        )
+        .order_by("-date_created")
+    )
 
     active_registrations = [registration for registration in registrations if registration.get_registration_status() == 'active']
+
+    unconfirmed = VolunteerShift.objects.filter(registration__in=active_registrations, confirmed=False).exists()
 
     context = {
         'hx' : check_if_hx(request),
         'active_registrations' : active_registrations,
         'opp' : opportunity,
+        'unconfirmed_shifts' : unconfirmed,
+        'success' : success,
+        'error' : error
     }
 
     return render(request, "org_admin/rota/assign_shift_by_registration.html", context)
 
 @login_required
-def assign_rota_by_registration(request: HttpRequest, reg_id: int) -> HttpResponse:
+def assign_rota_by_registration(request: HttpRequest, reg_id: int, success=None, error=None) -> HttpResponse:
     registration = Registration.objects.get(id=reg_id)
+    print(registration)
+    assert_org_access(request, registration)
 
-    available_roles = VolunteerRoleIntrest.objects.filter(
-        registration = registration
-    )
+    #Get query parameters for filtering
+    rget_role = request.GET.get("role")
+    rget_date = request.GET.get("date")
+
+    selected_role = rget_role if rget_role else None
+    selected_date = rget_date if rget_date else None
+
+    if request.method == "POST":
+        post_role = request.POST.get("role_filter")
+        post_date = request.POST.get("date_filter")
+        print(post_date, post_date)
+        print(request.POST)
+        selected_role = post_role if post_role and post_role != "all" else None
+        selected_date = post_date if post_date and post_date != "all" else None
+
+
+    if selected_role:
+        available_roles = VolunteerRoleIntrest.objects.filter(
+            registration=registration,
+            role__id=selected_role
+        )
+    else:
+        available_roles = VolunteerRoleIntrest.objects.filter(
+            registration = registration
+        )
+
+    if selected_date:
+        selected_date_instance = OneOffDate.objects.get(id=selected_date)
 
     if registration.opportunity.rota_config == "SHARED":
-        valid_dates = OneOffDate.objects.filter(
-            opportunity=registration.opportunity, role_id__isnull=True,
-            date__gte=datetime.now()
-        )
+        if selected_date:
+            valid_dates = OneOffDate.objects.filter(
+                opportunity=registration.opportunity, role_id__isnull=True,
+                date = selected_date_instance.date,
+                start_time= selected_date_instance.start_time,
+                end_time=selected_date_instance.end_time
+            )
+        else:
+            valid_dates = OneOffDate.objects.filter(
+                opportunity=registration.opportunity, role_id__isnull=True,
+                date__gte=datetime.now())
 
-        available_dates = VolunteerOneOffDateAvailability.objects.filter(
-            registration=registration,
-            one_off_date__in=valid_dates
-        )
     else:
         available_dates = None
 
     shifts = []
 
+
     for role in available_roles:
+
         if registration.opportunity.rota_config == "PER_ROLE":
-            available_dates = OneOffDate.objects.filter(role=role, date__gte=datetime.now())
+
+            if selected_date:
+                valid_dates = OneOffDate.objects.filter(
+                    role=role.role,
+                    date=selected_date_instance.date,
+                    start_time=selected_date_instance.start_time,
+                    end_time=selected_date_instance.end_time)
+
+            else:
+                valid_dates = OneOffDate.objects.filter(role=role.role, date__gte=datetime.now())
+
+            available_dates = VolunteerOneOffDateAvailability.objects.filter(
+                registration=registration,
+                one_off_date__in=valid_dates
+            )
+
 
         for date in available_dates:
             shift_details = {
                 'date' : date,
                 'role' : role,
+                'required_count' : 0,
                 'assigned_count' : 0,
                 'assigned' : False,
                 'sections' : False,
                 'required_volunteers' : 0,
-                'conflict' : check_time_conflict(registration.id, date.one_off_date.start_time, date.one_off_date.end_time, date.one_off_date.date)
+                'conflict' : check_time_conflict(registration.id, date.one_off_date.start_time, date.one_off_date.end_time, date.one_off_date.date),
             }
+
+            #Get required volunteers count
 
             #get assigned volunteers for this shift
             shift_occ = VolunteerShift.objects.filter(
@@ -960,34 +1038,71 @@ def assign_rota_by_registration(request: HttpRequest, reg_id: int) -> HttpRespon
                 ).first()
 
             #Check to see if the role has sections, as this needs a selection modal
-            if Section.objects.filter(role=role.role).exists():
+            sections_q = Section.objects.filter(role=role.role)
+            if sections_q.exists():
                 shift_details['sections'] = True
+                shift_details['required_count'] = sections_q.aggregate(Sum('required_volunteers'))['required_volunteers__sum']
+            else:
+                shift_details['required_count'] = role.role.required_volunteers
 
             shifts.append(shift_details)
 
     # ascending by date
     shifts.sort(key=lambda s: s["date"].one_off_date.date)
 
+
+    slots = (
+        OneOffDate.objects
+        .filter(opportunity=registration.opportunity, date__gte=datetime.now(), role__isnull=True if registration.opportunity.rota_config == "SHARED" else False)
+        .values("date", "start_time", "end_time")
+        .annotate(id=Min("id"))  # or Max("id")
+        .order_by("date", "start_time", "end_time")
+    )
+
+    roles = Role.objects.filter(
+        id__in=VolunteerRoleIntrest.objects.filter(registration=registration).values_list('role__id')
+    )
+
+    unconfirmed = VolunteerShift.objects.filter(registration=registration, confirmed=False).exists()
+
     context = {
         'hx' : check_if_hx(request),
         'shifts' : shifts,
         'registration' : registration,
+        'slots' : slots,
+        'roles' : roles,
+        'unconfirmed_shifts' : unconfirmed,
+        'selected_date' : selected_date,
+        'selected_role' : selected_role,
+        'success' : success,
+        'error' : error
+
     }
 
     return render(request, 'org_admin/rota/assign_shift_by_registration_instance.html', context)
 
-def get_sections_modal(request: HttpRequest, role_id: int, schedule_id: int):
+def get_sections_modal(request: HttpRequest, registration_id: int, role_id: int, schedule_id: int):
+    registration = Registration.objects.get(id=registration_id)
+    assert_org_access(request, registration)
     role = Role.objects.get(id=role_id)
     schedule = OneOffDate.objects.get(id=schedule_id)
     sections = Section.objects.filter(role=role)
 
+    print(role, sections)
+
     if not check_if_hx(request):
         return None
 
+    rget_role = request.GET.get("role")
+    rget_date = request.GET.get("date")
+
     context = {
+        'registration' : registration,
         'role' : role,
         'schedule' : schedule,
-        'sections' : sections
+        'sections' : sections,
+        'selected_date' : rget_date,
+        'selected_role' : rget_role
     }
 
     return render(request, 'org_admin/rota/partials/section_picker.html', context)
@@ -1458,20 +1573,38 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
 
 
 @login_required
-def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
+def confirm_shifts(request: HttpRequest, opp_id: int|None=None, registration_id:  int|None=None) -> HttpResponse:
     """
     Confirm all unconfirmed shifts for an opportunity and notify volunteers.
     """
     require_authenticated(request)
-    opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opp_id)
-    assert_org_access(request, opportunity)
+
+    if opp_id:
+        opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opp_id)
+        assert_org_access(request, opportunity)
+    elif registration_id:
+        registration = get_object_or_404(Registration, id=registration_id)
+        print(registration)
+        assert_org_access(request, registration)
+    else:
+        print("How did we get here")
+        return HttpResponse()
 
     try:
         count = 0
-        unconfirmed_shifts = VolunteerShift.objects.filter(
-            registration__opportunity=opportunity,
-            confirmed=False
-        ).select_related("registration")
+
+        if registration_id:
+            unconfirmed_shifts = VolunteerShift.objects.filter(
+                registration=registration,
+                confirmed=False
+            )
+        elif opp_id:
+            unconfirmed_shifts = VolunteerShift.objects.filter(
+                registration__opportunity=opportunity,
+                confirmed=False
+            ).select_related("registration")
+        else:
+            unconfirmed_shifts = None
 
         domain = request.get_host()
 
@@ -1481,15 +1614,28 @@ def confirm_shifts(request: HttpRequest, opp_id: int) -> HttpResponse:
                 shift.confirmed = True
                 shift.save()
 
-
                 email_thread = SendEmailToVolunteer(domain, shift.id)
                 email_thread.start()
 
                 count += 1
 
-        return assign_rota(request, opportunity.id, success=f"Sent shifts to {count} volunteers.")
-    except Exception:
-        return assign_rota(request, opp_id, error="Failed to confirm shifts. Please try again.")
+        if "assign_by_registrations" in request.META.get('HTTP_REFERER'):
+            if not opp_id:
+                return assign_rota_by_registration(request, registration_id, success="Shifts sent Successfully")
+            else:
+                return assign_rota_by_registrations(request, opportunity.id, success=f"Sent shifts to {count} volunteers.")
+
+        else:
+            return assign_rota(request, opportunity.id, success=f"Sent shifts to {count} volunteers.")
+    except Exception as e:
+        print(e)
+        if "assign_by_registrations" in request.META.get('HTTP_REFERER'):
+            if not opp_id:
+                return assign_rota_by_registration(request, registration_id, error="Failed to confirm shifts. Please try again.")
+            else:
+                return assign_rota_by_registrations(request, error="Failed to confirm shifts. Please try again.")
+        else:
+            return assign_rota(request, opp_id, error="Failed to confirm shifts. Please try again.")
 
 
 @login_required

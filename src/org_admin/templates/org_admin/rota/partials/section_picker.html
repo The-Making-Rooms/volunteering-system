@@ -1,0 +1,29 @@
+<div id="section_picker">
+<p class="font-bold mb-3">Pick a section to assign to:</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for section in sections %}
+                <tr>
+                    <td>{{ section.name }}</td>
+                    <td>
+                        <button
+                                class="btn btn-primary btn-xs"
+                                hx-get="/org_admin/rota/assign/instance/{{ registration.id }}/{{ role.id }}/{{ schedule.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
+                                hx-target=".htmx-navigator"
+                                hx-swap="outerHTML"
+                        >Assign</button>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
