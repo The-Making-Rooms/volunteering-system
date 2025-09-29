@@ -362,7 +362,7 @@ def send_email_to_volunteer_batch(domain, registration_id, shift_ids):
 
 """
 
-            current_shift_string += """
+        current_shift_string += """
 
 <p>---</p>
 
