@@ -352,8 +352,10 @@ def send_email_to_volunteer_batch(domain, registration_id, shift_ids):
         section_desc = "" if not shift.section else "Section Description: " + shift.section.description
 
         current_shift_string = f"""
-<p>Role: {shift.role.name}</p>
-<p>Role Volunteer Information: {shift.role.volunteer_description}</p>
+<p style="font-weight: bold;">{shift.role.name}</p>
+<p>Time and date: {shift.occurrence.one_off_date.date.strftime("%d/%m/%Y")} {shift.occurrence.one_off_date.start_time.strftime("%H:%M")} - {shift.occurrence.one_off_date.end_time.strftime("%H:%M")}</p>
+<p>Role Volunteer Information: </p>
+<p>{shift.role.volunteer_description}</p>
 """
         if section_name:
             current_shift_string += f"""
@@ -419,8 +421,10 @@ def send_email_to_volunteer(domain, shift_id):
 
 <p style="font-weight: bold">Shift Details:</p>
 
-<p>Role: {shift.role.name}</p>
-<p>Role Volunteer Information: {shift.role.volunteer_description}</p>
+<p style="font-weight: bold;">{shift.role.name}</p>
+<p>Time and date: {shift.occurrence.one_off_date.date.strftime("%d/%m/%Y")} {shift.occurrence.one_off_date.start_time.strftime("%H:%M")} - {shift.occurrence.one_off_date.end_time.strftime("%H:%M")}</p>
+<p>Role Volunteer Information: </p>
+<p>{shift.role.volunteer_description}</p>
 <p>{section_name}</p>
 <p>{section_desc}</p>
 
