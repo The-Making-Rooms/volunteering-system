@@ -108,7 +108,7 @@
                         {% if shift.section %}
                             <button
                                 class="btn btn-primary btn-xs"
-                                hx-get="/org_admin/rota/assign/shift/{{ shift.role.id }}/{{ shift.schedule.id }}/{{ shift.section.id }}/"
+                                hx-get="/org_admin/rota/assign/shift/{{ shift.role.id }}/{{ shift.schedule.id }}/{{ shift.section.id }}/?{% if selected_date %}date={{ selected_date }}{% if selected_role %}&{% endif %}{% endif %}{% if selected_role %}role={{ selected_role }}{% endif %}"
                             hx-target=".htmx-navigator"
                             hx-swap="outerHTML">
                                 Assign
