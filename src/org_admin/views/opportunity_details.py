@@ -161,6 +161,9 @@ def opportunity_details(request, id, error=None, success=None, index=False, tab_
 
         try: opp.featured = True if form_data["featured"] == "on" else False
         except KeyError: opp.featured = False
+
+        try: opp.show_times_on_sign_up = True if form_data["show_times"] == "on" else False
+        except KeyError: opp.show_times_on_sign_up = False
         
         print(form_data)
         

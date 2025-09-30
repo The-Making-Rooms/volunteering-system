@@ -17,6 +17,7 @@ from rota.models import OneOffDate, VolunteerOneOffDateAvailability, Role, Volun
 def get_opportunity_dates(request, opportunity_id, superform = False):
     interested_roles = []
     dedup_dates = []
+    show_times = True
 
     # Get interested role IDs from POST
     for key, value in request.POST.items():
@@ -33,8 +34,13 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
             role_id__in=interested_roles,
             date__gte=datetime.now().date()
         ).order_by('date', 'start_time', 'end_time')
+
+        if dates.exists():
+            show_times = dates.first().opportunity.show_times_on_sign_up
     else:
         opportunity = Opportunity.objects.filter(id=opportunity_id)
+        show_times = opportunity.show_times_on_sign_up
+
         if opportunity.exists():
             if opportunity.first().rota_config == 'PER_ROLE':
                 if not superform:
@@ -50,9 +56,13 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
         ).order_by('date', 'start_time', 'end_time')
 
     # Deduplicate by (date, start_time, end_time)
+
     seen = {}
     for date_obj in dates:
-        key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+        if show_times:
+            key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+        else:
+            key = (date_obj.date)
         if key not in seen:
             seen[key] = {
                 'date': date_obj.date,
@@ -70,7 +80,8 @@ def get_opportunity_dates(request, opportunity_id, superform = False):
     print("Deduped:", dedup_dates)
 
     context = {
-        "dates" : dedup_dates
+        "dates" : dedup_dates,
+        "show_times" : show_times
     }
 
     if not superform:

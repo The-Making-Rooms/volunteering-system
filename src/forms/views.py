@@ -163,13 +163,19 @@ def superform(request, id):
 
         # Deduplicate into template-friendly structure
         seen = {}
+
+        show_times = superform.opportunity_to_register.show_times_on_sign_up
+
         for date_obj in dates_qs:
-            key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+            if show_times:
+                key = (date_obj.date, date_obj.start_time, date_obj.end_time)
+            else:
+                key = (date_obj.date)
             if key not in seen:
                 seen[key] = {
                     'date': date_obj.date,
-                    'start_time': date_obj.start_time,
-                    'end_time': date_obj.end_time,
+                    'start_time': date_obj.start_time if show_times else None,
+                    'end_time': date_obj.end_time if show_times else None,
                     'ids': [date_obj.id]
                 }
             else:
@@ -211,7 +217,7 @@ def superform(request, id):
     #get email and create user if not exists
     
     #Create and update formResponseRequirements and formResponses
-    
+
     
 def submit_superform(request, id):
     print("handling superform req")
@@ -282,10 +288,7 @@ def submit_superform(request, id):
                 return render(request, 'forms/superform/age_req.html', context={})
         else:
             return render(request, 'forms/superform/age_req.html', context={})
-        
-        #pretty_print_dict(userdata)
-        #pretty_print_dict(form_data)
-        
+
         
         #try to find user by email
         email = request.POST.get('email')

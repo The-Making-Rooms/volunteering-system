@@ -1,8 +1,9 @@
 {% if dates|length > 0 %}
 <div class="flex flex-col rounded-[8px] p-5 bg-white border border-gray-300 mb-5">
   <label class="text-[12pt] mb-3" for="post_code" class="mr-3">
-    Please select the dates/times you are available: <span class="text-red-600 font-bold">*</span>
+    Please select the dates{% if show_times %}/times{% endif %} you are available: <span class="text-red-600 font-bold">*</span>
   </label>
+
 
   <!-- Select all -->
   <div class="flex items-center gap-x-3 mb-2">
@@ -24,7 +25,7 @@
           name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
         />
         <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
-          {{ d.date|date:"d-m-Y" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+          {{ d.date|date:"d-m-Y" }}{% if show_times %} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}{% endif %}
         </label>
       </div>
     {% endfor %}

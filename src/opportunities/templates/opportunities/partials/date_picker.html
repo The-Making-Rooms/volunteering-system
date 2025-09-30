@@ -21,7 +21,7 @@
           name="schedule{% for id in d.ids %}_{{ id }}{% endfor %}"
         />
         <label for="schedule{% for id in d.ids %}_{{ id }}{% endfor %}">
-          {{ d.date|date:"d-m-Y" }} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}
+          {{ d.date|date:"d-m-Y" }}{% if show_times %} | {{ d.start_time|date:"H:i" }} - {{ d.end_time|date:"H:i" }}{% endif %}
         </label>
       </div>
     {% endfor %}

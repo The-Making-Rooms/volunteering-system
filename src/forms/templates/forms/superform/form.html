@@ -6,14 +6,6 @@
 
 <div class="font-[roboto] max-w-[90vw] w-[640px] m-auto text-wrap" style="overflow-wrap: break-word;">
 
-    {% if superform.opportunity_to_register.organisation.name == "National Festival of Making" %}
-<div class="flex flex-col md:flex-row rounded-[8px] p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
-    <img src="/static/images/NFM_Black.png" alt="Festival of Making Logo" class="w-full md:w-1/2 object-contain p-3 md:p-10 max-h-96">
-    <div class="divider md:divider-horizontal"></div>
-    <img src="/static/images/ChipIn_Black.jpg" alt="Chip In Logo" class="object-contain w-full md:w-1/2 p-3 md:p-10 max-h-96">
-</div>
-{% endif %}
-
 {% if superform.photo %}
     <div class="flex flex-col md:flex-row rounded-[8px] p-5 bg-white border border-gray-300 mb-5 items-center justify-center">
         <img src="/media/{{ superform.photo }}" alt="From Banner" class="w-full object-contain p-3 max-h-96">

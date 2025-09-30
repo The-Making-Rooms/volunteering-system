@@ -5321,31 +5321,6 @@ html:has(.drawer-toggle:checked) {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
-@media (min-width: 768px) {
-  .md\:divider-horizontal {
-    flex-direction: column;
-  }
-
-  .md\:divider-horizontal:before {
-    height: 100%;
-    width: 0.125rem;
-  }
-
-  .md\:divider-horizontal:after {
-    height: 100%;
-    width: 0.125rem;
-  }
-
-  .md\:divider-horizontal {
-    margin-left: 1rem;
-    margin-right: 1rem;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    height: auto;
-    width: 1rem;
-  }
-}
-
 @media (min-width: 1024px) {
   .lg\:drawer-open > .drawer-toggle {
     display: none;
@@ -5485,10 +5460,6 @@ html:has(.drawer-toggle:checked) {
     --tw-space-x-reverse: 0;
     margin-right: calc(1rem * var(--tw-space-x-reverse));
     margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
-  }
-
-  .md\:p-10 {
-    padding: 2.5rem;
   }
 
   .md\:text-2xl {

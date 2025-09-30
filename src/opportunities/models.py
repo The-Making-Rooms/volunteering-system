@@ -83,6 +83,8 @@ class Opportunity(models.Model):
     featured = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
 
+    show_times_on_sign_up = models.BooleanField(default=True)
+
     rota_config = models.CharField(choices=OpportunityRotaConfigChoices.choices, default=OpportunityRotaConfigChoices.SHARED_SCHEDULE, max_length=50)
 
     def __str__(self):
