@@ -2102,7 +2102,8 @@ def role_shift_viewer(request: HttpRequest, role_id: int):
             print(date)
             shifts = VolunteerShift.objects.filter(
                 occurrence__one_off_date__date=date,
-                registration_id__in=active_registrations
+                registration_id__in=active_registrations,
+                rsvp_response__in=['yes', '-']
             )
             day = {
                 'date': date,
