@@ -93,17 +93,15 @@ def manage_registration_preferences(request, registration_id):
                 'ids': [date_obj.id],
                 'is_checked' : len(set(volunteer_dates).intersection(set([date_obj.id]))) > 0
             }
-            print("[debug]: Sets:",set(volunteer_dates).issubset({date_obj.id}), {date_obj.id})
+            #print("[debug]: Sets:",set(volunteer_dates).issubset({date_obj.id}), {date_obj.id})
         else:
             if date_obj.id not in seen[key]['ids']:
                 seen[key]['ids'].append(date_obj.id)
-                print(set(seen[key]['ids']))
+                #print(set(seen[key]['ids']))
                 seen[key]['is_checked']: len(set(volunteer_dates).intersection(set(seen[key]['ids']))) > 0
 
     available_dates = list(seen.values())
 
-    print(available_dates)
-    print(volunteer_roles, volunteer_dates)
 
     context = {
         'hx' : check_if_hx(request),
@@ -124,8 +122,16 @@ def update_registration_preferences(request, registration_id):
         return render(request, "404.html")
 
 
-    updated_dates = [key.split("_")[1] for key in request.POST.keys() if key.startswith('schedule_')]
+    updated_dates_q = [key.split("_")[1:] for key in request.POST.keys() if key.startswith('schedule_')]
+
+    updated_dates = []
+
+    for q in updated_dates_q:
+        updated_dates.extend(q)
+
     updated_roles = [key.split("_")[1] for key in request.POST.keys() if key.startswith('roles_')]
+
+    print('updated_roles', updated_roles)
 
     #Delete any dates not in the reply:
 

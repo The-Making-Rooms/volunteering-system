@@ -69,6 +69,8 @@ def count_assigned_unconfirmed_active(one_off_date: OneOffDate, role: Role, sect
         confirmed=False,
     )  # [attached_file:1]
 
+    print(base)
+
     # Subquery: latest VolunteerRegistrationStatus for this shift's registration
     # and select its registration_status.status directly
     latest_status_value_sq = (
@@ -100,11 +102,14 @@ def count_available_volunteers_for_oneoff(one_off_date: OneOffDate, role: Role) 
         VolunteerShift.objects.filter(
             registration=OuterRef('registration'),
             occurrence__date=one_off_date.date,
+            rsvp_response__in=['yes', '-']
         ).filter(
             occurrence__start_time__lt=one_off_date.end_time,
             occurrence__end_time__gt=one_off_date.start_time,
         )
     )  # [attached_file:1]
+
+    print(overlap_exists)
 
     # Latest registration status value for this registration
     latest_status_value_sq = (
@@ -138,19 +143,19 @@ def count_sent_and_accepted(one_off_date: OneOffDate, role: Role, section: Secti
     """
     # Resolve occurrence via subquery (unique relation to OneOffDate)
     from rota.models import Occurrence  # local import to avoid cycles  [attached_file:1]
-    occ_id_sq = (
-        Occurrence.objects
-        .filter(one_off_date=one_off_date)
-        .values('id')[:1]
-    )  # [attached_file:1]
+
 
     # Base: confirmed shifts for this specific shift combo
     base_sent = VolunteerShift.objects.filter(
-        occurrence_id=Subquery(occ_id_sq),
+        occurrence__one_off_date__date=one_off_date.date,
+        occurrence__one_off_date__start_time=one_off_date.start_time,
+        occurrence__one_off_date__end_time=one_off_date.end_time,
         role=role,
         section=section,
         confirmed=True,
     )  # [attached_file:1]
+
+    print('sent',base_sent)
 
     # Latest registration status per registration (by date then id)
     latest_status_value_sq = (
