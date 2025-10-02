@@ -309,6 +309,8 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     selected_role = rget_role if rget_role else None
     selected_date = rget_date if rget_date else None
 
+    selected_date_instance = None
+
     if request.method == "POST":
         post_role = request.POST.get("role_filter")
         post_date = request.POST.get("date_filter")
@@ -378,11 +380,13 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
         'opp' : opportunity,
         'unconfirmed_shifts' : unconfirmed_shifts,
         'selected_role': selected_role,
-        'selected_date': selected_date,
+        'selected_date': slots.filter(date=selected_date_instance.date, start_time=selected_date_instance.start_time, end_time=selected_date_instance.end_time).first()['id'],
         'roles': roles,
         'rget_rview' : rget_rview,
         'success' : success,
         'error' : error
     }
+
+    print(context['selected_date'])
 
     return render(request, "org_admin/rota/shift_assignment.html", context)

@@ -65,7 +65,7 @@
   >
     <option value="all" {% if not selected_date %}selected{% endif %}>All Dates/Times</option>
     {% for slot in slots %}
-      <option value="{{ slot.id }}" {% if slot.id|slugify == selected_date %}selected{% endif %}>{{ slot.date|date:"Y-m-d" }} {{ slot.start_time|date:"H:i" }}-{{ slot.end_time|date:"H:i" }}</option>
+      <option value="{{ slot.id }}" {% if slot.id == selected_date %}selected{% endif %}>{{ slot.date|date:"Y-m-d" }} {{ slot.start_time|date:"H:i" }}-{{ slot.end_time|date:"H:i" }}</option>
     {% endfor %}
   </select>
   <select

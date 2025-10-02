@@ -2097,7 +2097,6 @@ def role_shift_viewer(request: HttpRequest, role_id: int):
             'days' : []
         }
         for day in range(0,7):
-
             date = start_date + timedelta(days=day)
             print(date)
             shifts = VolunteerShift.objects.filter(
