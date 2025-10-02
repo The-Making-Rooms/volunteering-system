@@ -4385,6 +4385,10 @@ html:has(.drawer-toggle:checked) {
   height: 100%;
 }
 
+.h-3 {
+  height: 0.75rem;
+}
+
 .max-h-96 {
   max-height: 24rem;
 }
@@ -4595,6 +4599,10 @@ html:has(.drawer-toggle:checked) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.grid-cols-7 {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -4676,6 +4684,20 @@ html:has(.drawer-toggle:checked) {
   row-gap: 1.25rem;
 }
 
+.gap-x-5 {
+  -moz-column-gap: 1.25rem;
+       column-gap: 1.25rem;
+}
+
+.gap-x-2 {
+  -moz-column-gap: 0.5rem;
+       column-gap: 0.5rem;
+}
+
+.gap-y-1 {
+  row-gap: 0.25rem;
+}
+
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -4698,8 +4720,16 @@ html:has(.drawer-toggle:checked) {
   align-self: flex-end;
 }
 
+.self-center {
+  align-self: center;
+}
+
 .justify-self-end {
   justify-self: end;
+}
+
+.justify-self-center {
+  justify-self: center;
 }
 
 .overflow-auto {
@@ -4762,9 +4792,18 @@ html:has(.drawer-toggle:checked) {
   border-radius: 0.75rem;
 }
 
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
 .rounded-t-xl {
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
+}
+
+.rounded-s {
+  border-start-start-radius: 0.25rem;
+  border-end-start-radius: 0.25rem;
 }
 
 .border {
@@ -4936,6 +4975,31 @@ html:has(.drawer-toggle:checked) {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.bg-red-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 202 202 / var(--tw-bg-opacity, 1));
+}
+
+.bg-red-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(153 27 27 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 101 52 / var(--tw-bg-opacity, 1));
+}
+
+.bg-orange-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(194 65 12 / var(--tw-bg-opacity, 1));
+}
+
+.bg-orange-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 115 22 / var(--tw-bg-opacity, 1));
 }
 
 .bg-opacity-50 {

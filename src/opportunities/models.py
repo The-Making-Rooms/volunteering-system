@@ -14,6 +14,8 @@ from django.core.files.base import ContentFile
 import os
 import uuid
 from rota.models import VolunteerRoleIntrest
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 
 def get_random_filename_image(instance, filename):
     ext = filename.split('.')[-1]
@@ -82,8 +84,8 @@ class Opportunity(models.Model):
     active = models.BooleanField(default=False)
     featured = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
-
     show_times_on_sign_up = models.BooleanField(default=True)
+    week_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)], default=0)
 
     rota_config = models.CharField(choices=OpportunityRotaConfigChoices.choices, default=OpportunityRotaConfigChoices.SHARED_SCHEDULE, max_length=50)
 

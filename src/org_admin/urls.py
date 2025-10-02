@@ -230,7 +230,7 @@ urlpatterns = [
     path("rota/assign_by_registration/<int:reg_id>/", views.assign_rota_by_registration, name="assign_rota_by_reg"),
     path("rota/assign_by_registration/<int:registration_id>/confirm/", views.confirm_shifts, name="confirm_assigned_shifts_by_registration"),
     path("rota/get_sections/<int:registration_id>/<int:role_id>/<int:schedule_id>/", views.get_sections_modal, name="assign_section_picker"),
-
+    path("rota/shift_view/<int:role_id>/", views.role_shift_viewer, name="role_shift_viewer"),
     path("rota/assign/shift/<int:role_id>/<int:schedule_id>/", views.assign_volunteer_shift, name="assign_role_shift"),
     path("rota/assign/shift/<int:role_id>/<int:schedule_id>/<int:section_id>/", views.assign_volunteer_shift, name="assign_role_shift"),
 

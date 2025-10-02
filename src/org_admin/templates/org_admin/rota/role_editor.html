@@ -49,6 +49,21 @@
 
             </div>
 
+          <div class="flex flex-col mb-5">
+                <p class="font-bold">Role Start Day:</p>
+              <select class="select select-bordered" name="rota_day">
+                  <option value="default" {% if role.week_start == none %}selected{% endif %}>Default</option>
+                  <option value="0" {% if role.week_start == 0 %}selected{% endif %}>Monday</option>
+                  <option value="1" {% if role.week_start == 1 %}selected{% endif %}>Tuesday</option>
+                  <option value="2" {% if role.week_start == 2 %}selected{% endif %}>Wednesday</option>
+                  <option value="3" {% if role.week_start == 3 %}selected{% endif %}>Thursday</option>
+                  <option value="4" {% if role.week_start == 4 %}selected{% endif %}>Friday</option>
+                  <option value="5" {% if role.week_start == 5 %}selected{% endif %}>Saturday</option>
+                  <option value="6" {% if role.week_start == 6 %}selected{% endif %}>Sunday</option>
+              </select>
+            </div>
+
+
 
         </div>
 

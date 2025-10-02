@@ -1,0 +1,91 @@
+<!-- rota/shift_assignment.html -->
+{% extends 'org_admin/navigation_template.html' %}
+
+{% block page_content %}
+
+
+    <button
+        class="btn btn-primary btn-sm mb-3"
+        type="submit"
+        hx-get="/org_admin/rota/{{ role.opportunity.id }}/"
+        hx-target=".htmx-navigator"
+        hx-swap="outerHTML"
+        hx-push-url="true"
+    >
+        ↩ Back
+    </button>
+
+    <p class="text-2xl font-bold">Shifts for role: {{ role.name }}</p>
+
+    <div class="divider"></div>
+    <p class="font-bold">Key:</p>
+        <div class="flex gap-5">
+            <div class="flex items-center gap-2">
+                <div class="aspect-square rounded w-3 h-3 bg-red-700"></div>
+                <p>Unassigned</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <div class="aspect-square rounded w-3 h-3 bg-gray-600"></div>
+                <p>Unconfirmed</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <div class="aspect-square rounded w-3 h-3 bg-green-700"></div>
+                <p>RSVP - Yes</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <div class="aspect-square rounded w-3 h-3 bg-orange-500"></div>
+                <p>RSVP - Tentative</p>
+            </div>
+
+        </div>
+    <div class="divider"></div>
+
+    <div class="grid grid-cols-7 my-2 gap-x-2">
+        {% for day_name in day_names %}
+                <div class="p-2 bg-base-200 flex items-center justify-center">
+                    <p>{{ day_name }}</p>
+                </div>
+        {% endfor %}
+    </div>
+
+    {% for week in weeks %}
+        <div class="grid grid-cols-7 p-2 my-2 bg-base-200">
+
+            {% for day in week.days %}
+                {% if day.exists %}
+                <div class=" aspect-square m-2 flex flex-col items-center gap-y-1">
+                <div class="flex gap-2 justify-center w-full bg-base-300 rounded p-1">
+                    <p>{{ day.date|date:"d/m/y" }}</p>
+                    {% if day.assignable %}
+                    <button
+                        hx-get="/org_admin/rota/assign/{{ role.opportunity.id }}/?date={{ day.exists.id }}&role={{ role.id }}&roleview={{ role.id }}"
+                        hx-target=".htmx-navigator"
+                        hx-swap="outerHTML"
+                        hx-push-url="true"
+                        class="btn btn-primary btn-xs">
+                        +
+                    </button>
+                        {% endif %}
+                </div>
+
+                    {% for shift in day.assigned %}
+                        <p class="p-1 w-full rounded {% if shift.confirmed %} {% if shift.rsvp_response == '-' %}bg-orange-500{% else %}bg-green-800{% endif %}{% else %}bg-gray-600{% endif %}">{{ shift.registration.volunteer.user.first_name }} {{ shift.registration.volunteer.user.last_name }}</p>
+                    {% endfor %}
+                {% for shift in day.left %}
+                        <p class="bg-red-800 p-1 w-full rounded">Unassigned</p>
+                    {% endfor %}
+                </div>
+                {% else %}
+
+                <div class=" aspect-square m-2 flex flex-col items-center gap-y-1">
+                    <p>{{ day.date|date:"d/m/y" }}</p>
+                </div>
+
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% endblock %}

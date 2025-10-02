@@ -180,15 +180,14 @@ def count_sent_and_accepted(one_off_date: OneOffDate, role: Role, section: Secti
 ROTA_CONFIG_SHARED = "SHARED"
 ROTA_CONFIG_PER_ROLE = "PER_ROLE"
 
+
+from datetime import date as _date
+from django.db import connection
+
+ROTA_CONFIG_SHARED = "SHARED"
+ROTA_CONFIG_PER_ROLE = "PER_ROLE"
+
 def iter_shift_triplets_for_opportunity(opportunity_id: int, oneoffdate_id: int | None = None, role_id: int | None = None):
-    """
-    Yields (role_id, oneoffdate_id, section_id|NULL) for the given opportunity,
-    filtered optionally by oneoffdate_id and/or role_id.
-    - SHARED: pairs each Role in the opportunity with OneOffDate where role_id IS NULL.
-    - PER_ROLE: pairs each Role with OneOffDate where ood.role_id = role.id.
-    Only returns OneOffDate rows with date >= CURRENT_DATE.
-    Results are sorted by OneOffDate.date, then start_time.
-    """
     with connection.cursor() as cur:
         # Fetch rota_config
         cur.execute("""
@@ -211,13 +210,26 @@ def iter_shift_triplets_for_opportunity(opportunity_id: int, oneoffdate_id: int 
         extra_ood_filter = ""
         extra_ood_params = []
         if oneoffdate_id is not None:
-            extra_ood_filter = " and ood.id = %s"
-            extra_ood_params.append(oneoffdate_id)
+            cur.execute("""
+                        select date, start_time, end_time
+                        from rota_oneoffdate
+                        where id = %s
+                        """, [oneoffdate_id])  # [attached_file:1]
+            ref = cur.fetchone()
+            if not ref:
+                return
+            ref_date, ref_start, ref_end = ref
+            # Convert time objects for SQLite binding
+            if hasattr(ref_start, 'isoformat'):
+                ref_start = ref_start.isoformat(timespec='seconds')
+            if hasattr(ref_end, 'isoformat'):
+                ref_end = ref_end.isoformat(timespec='seconds')
+            extra_ood_filter = " and ood.date = %s and ood.start_time = %s and ood.end_time = %s"
+            extra_ood_params.extend([ref_date, ref_start, ref_end])
 
         params = [opportunity_id] + extra_role_params + extra_ood_params
 
         if rota_config == ROTA_CONFIG_SHARED:
-            # Situation A: shared dates (ood.role_id is null) within this opportunity
             sql = f"""
             with role_ood as (
                 select r.id as role_id, ood.id as oneoffdate_id, ood.date, ood.start_time
@@ -231,12 +243,10 @@ def iter_shift_triplets_for_opportunity(opportunity_id: int, oneoffdate_id: int 
                 {extra_ood_filter}
             ),
             expanded as (
-                -- explode sections if present
                 select ro.role_id, ro.oneoffdate_id, s.id as section_id, ro.date, ro.start_time
                   from role_ood ro
                   join rota_section s on s.role_id = ro.role_id
                 union all
-                -- otherwise single row with null section
                 select ro.role_id, ro.oneoffdate_id, null as section_id, ro.date, ro.start_time
                   from role_ood ro
                  where not exists (
@@ -249,7 +259,6 @@ def iter_shift_triplets_for_opportunity(opportunity_id: int, oneoffdate_id: int 
             """
             cur.execute(sql, params)  # [attached_file:1]
         else:
-            # Situation B: per-role dates (ood.role_id = r.id) within this opportunity
             sql = f"""
             with role_ood as (
                 select r.id as role_id, ood.id as oneoffdate_id, ood.date, ood.start_time
@@ -289,6 +298,8 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
     #Get query parameters for filtering
     rget_role = request.GET.get("role")
     rget_date = request.GET.get("date")
+    rget_rview = request.GET.get("roleview")
+
 
     selected_role = rget_role if rget_role else None
     selected_date = rget_date if rget_date else None
@@ -364,6 +375,7 @@ def assign_rota(request: HttpRequest, opp_id: int, success: Optional[str] = None
         'selected_role': selected_role,
         'selected_date': selected_date,
         'roles': roles,
+        'rget_rview' : rget_rview,
         'success' : success,
         'error' : error
     }

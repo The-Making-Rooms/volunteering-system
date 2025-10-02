@@ -66,6 +66,23 @@
       <label for="show_times">Show times on sign up</label>
     </div>
 
+  <div class="divider"></div>
+
+  <div class="flex flex-col mb-2 gap-2 ml-2">
+        <label for="show_times">Role view start date:</label>
+      <select class="select select-bordered" name="rota_day">
+          <option value="0" {% if opportunity.week_start == 0 %}selected{% endif %}>Monday</option>
+          <option value="1" {% if opportunity.week_start == 1 %}selected{% endif %}>Tuesday</option>
+          <option value="2" {% if opportunity.week_start == 2 %}selected{% endif %}>Wednesday</option>
+          <option value="3" {% if opportunity.week_start == 3 %}selected{% endif %}>Thursday</option>
+          <option value="4" {% if opportunity.week_start == 4 %}selected{% endif %}>Friday</option>
+          <option value="5" {% if opportunity.week_start == 5 %}selected{% endif %}>Saturday</option>
+          <option value="6" {% if opportunity.week_start == 6 %}selected{% endif %}>Sunday</option>
+      </select>
+    </div>
+  <div class="divider"></div>
+
+
     <button
     class="btn bg-green-600"
     hx-post="/org_admin/opportunities/details/{{opportunity.id}}/"

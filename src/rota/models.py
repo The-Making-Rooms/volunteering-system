@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 
 from django.conf import settings
 
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 class RSVPChoices(models.TextChoices):
     YES = 'yes', 'Yes'
     NO = 'no', 'No'
@@ -82,6 +84,8 @@ class Role(models.Model):
     volunteer_description = models.TextField(blank=True, default='')
     required_volunteers = models.IntegerField()
     opportunity = models.ForeignKey("opportunities.Opportunity", on_delete=models.CASCADE)
+
+    week_start = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)], blank=True, null=True, default=None)
 
     def __str__(self):
         return self.opportunity.name + " - " + self.name

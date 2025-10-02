@@ -42,7 +42,7 @@ from rota.models import (
 
 from django.contrib.auth.models import User
 
-
+from datetime import timedelta
 
 # ------------- Authorization & Utilities -------------
 
@@ -963,6 +963,7 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
         'assigned_volunteers': assigned_volunteers,
         'schedule': schedule,
         'section_id': section_id,
+        'rget_rview' : request.GET.get('roleview'),
         'role': role,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
@@ -1623,6 +1624,8 @@ def save_role(request: HttpRequest, role_id: int) -> HttpResponse:
         role.description = request.POST.get("role_description", "")
         role.volunteer_description = request.POST.get("volunteer_description", "")
 
+        role.week_start = int(request.POST.get("rota_day")) if request.POST.get("rota_day") != 'default' else None
+
         if Section.objects.filter(role=role).count() == 0:
             new_required = int(request.POST.get("role_volunteers", 0))
             if new_required < 0:
@@ -1649,7 +1652,7 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opportunity_id)
     assert_org_access(request, opportunity)
 
-    schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True, date__gte=datetime.now())
+    schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True).order_by('date')
     roles = Role.objects.filter(opportunity=opportunity)
 
 
@@ -1697,6 +1700,12 @@ def confirm_shifts(request: HttpRequest, opp_id: int | None = None, registration
                 confirmed=False,
             )
         else:
+
+            role = request.GET.get('role')
+            date = request.GET.get('date')
+
+            print(role, date)
+
             base_qs = (
                 VolunteerShift.objects
                 .filter(
@@ -1705,6 +1714,27 @@ def confirm_shifts(request: HttpRequest, opp_id: int | None = None, registration
                 )
                 .select_related("registration", "occurrence", "role", "section")
             )
+
+            if role:
+                try:
+                    role_inst = Role.objects.get(id=role)
+                    base_qs = base_qs.filter(role=role_inst)
+                    print("filtered by role")
+                except:
+                    raise Exception()
+
+            if date:
+                try:
+                    date_inst = OneOffDate.objects.get(id=date)
+
+                    base_qs = base_qs.filter(
+                        occurrence__one_off_date__date=date_inst.date,
+                        occurrence__one_off_date__start_time=date_inst.start_time,
+                        occurrence__one_off_date__end_time=date_inst.end_time)
+
+                    print("filtered by date:")
+                except:
+                    raise Exception()
 
         # Only notify active registrations
         # Build groups per volunteer registration (or per volunteer user if preferred)
@@ -1992,6 +2022,110 @@ def partial_shift_picker(request: HttpRequest, supervisor_id: Optional[int] = No
         'sup_shifts': sup_shifts
     }
     return render(request, "org_admin/rota/partials/shift_picker.html", context)
+
+def prev_or_same_weekday(given: date, target_weekday: int) -> date:
+    diff = target_weekday - given.weekday()
+    if diff > 0:
+        diff -= 7
+    return given + timedelta(days=diff)
+
+def next_or_same_weekday(given: date, target_weekday: int) -> date:
+    diff = target_weekday - given.weekday()
+    if diff < 0:
+        diff += 7
+    return given + timedelta(days=diff)
+
+from datetime import date
+
+def weeks_between(d1: date, d2: date) -> int:
+    days = abs((d2 - d1).days)
+    if days < 7:
+        return 1
+
+    return days // 7
+
+def weekdays_from(start_index: int) -> list[str]:
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    start = start_index % 7
+    return days[start:] + days[:start]
+
+
+@login_required
+def role_shift_viewer(request: HttpRequest, role_id: int):
+    WEEKDAY_NAME_TO_NUM = {
+        "MONDAY": 0,
+        "TUESDAY": 1,
+        "WEDNESDAY": 2,
+        "THURSDAY": 3,
+        "FRIDAY": 4,
+        "SATURDAY": 5,
+        "SUNDAY": 6,
+    }
+
+    role = Role.objects.get(id=role_id)
+    assert_org_access(request, role)
+
+    if role.opportunity.rota_config == "PER_ROLE":
+        dates = OneOffDate.objects.filter(role=role).order_by('date')
+    else:
+        dates = OneOffDate.objects.filter(role__isnull=True).order_by('date')
+
+
+
+    active_registrations = [registration.id for registration in Registration.objects.filter(opportunity=role.opportunity) if registration.get_registration_status() == 'active']
+
+    required = role.required_volunteers if Section.objects.filter(role=role).count() == 0 else Section.objects.filter(role=role).aggregate(total=Sum("required_volunteers"))["total"]
+
+    if not dates.exists():
+        raise Exception()
+
+    start_day = role.week_start if role.week_start else role.opportunity.week_start
+
+    first_date = dates.first().date
+    last_date = dates.last().date
+
+    first_view_date = prev_or_same_weekday(first_date, start_day)
+    last_view_date = prev_or_same_weekday(last_date, start_day)
+
+
+    weeks = []
+
+    for week in range(0, weeks_between(first_view_date, last_view_date)):
+        print(week)
+        start_date = first_view_date + timedelta(days=7*week)
+        week = {
+            'days' : []
+        }
+        for day in range(0,7):
+
+            date = start_date + timedelta(days=day)
+            print(date)
+            shifts = VolunteerShift.objects.filter(
+                occurrence__one_off_date__date=date,
+                registration_id__in=active_registrations
+            )
+            day = {
+                'date': date,
+                'supervisor': None,
+                'assigned': shifts,
+                'left' : [x for x in range(0, required - shifts.count())],
+                'exists' : dates.filter(date=date).first() if dates.filter(date=date).exists() else None,
+                'assignable' : date >= datetime.now().date(),
+            }
+            print(required, day['assigned'].count(), day['left'])
+
+            week['days'].append(day)
+
+        weeks.append(week)
+
+    context  = {
+        'hx' : check_if_hx(request),
+        'role' : role,
+        'day_names' : weekdays_from(start_day),
+        'weeks' : weeks
+    }
+
+    return render(request, 'org_admin/rota/role_view.html', context)
 
 
 @login_required

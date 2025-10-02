@@ -170,6 +170,14 @@
                         <td>{{ role.get_volunteers }}</td>
                         <td>
                             <button
+                                hx-get="/org_admin/rota/shift_view/{{ role.id }}/"
+                                hx-target=".htmx-navigator"
+                                hx-swap="outerHTML"
+                                hx-push-url="true"
+                                class="btn btn-primary btn-sm">
+                                View Shifts
+                            </button>
+                            <button
                                 hx-get="/org_admin/rota/role/{{ role.id }}/"
                                 hx-target=".htmx-navigator"
                                 hx-swap="outerHTML"

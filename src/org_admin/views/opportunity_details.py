@@ -164,6 +164,9 @@ def opportunity_details(request, id, error=None, success=None, index=False, tab_
 
         try: opp.show_times_on_sign_up = True if form_data["show_times"] == "on" else False
         except KeyError: opp.show_times_on_sign_up = False
+
+        try: opp.week_start = int(form_data["rota_day"]) if form_data["rota_day"] else 0
+        except: opp.week_start = 0
         
         print(form_data)
         
