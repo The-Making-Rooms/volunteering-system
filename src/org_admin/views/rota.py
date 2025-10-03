@@ -1562,7 +1562,7 @@ def edit_role(request: HttpRequest, role_id: Optional[int] = None, opp_id: Optio
         opp = role.opportunity
         sections = Section.objects.filter(role=role)
         volunteers_required = sum(section.required_volunteers for section in sections)
-        one_off_dates = OneOffDate.objects.filter(role=role)
+        one_off_dates = OneOffDate.objects.filter(role=role).order_by('date', 'start_time', 'end_time')
     elif opp_id:
         opp = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opp_id)
         assert_org_access(request, opp)
@@ -1653,7 +1653,7 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     opportunity = get_object_or_404(Opportunity.objects.select_related("organisation"), id=opportunity_id)
     assert_org_access(request, opportunity)
 
-    schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True).order_by('date')
+    schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True).order_by('date', 'start_time', 'end_time')
     roles = Role.objects.filter(opportunity=opportunity)
 
     if opportunity.rota_config == "SHARED":

@@ -112,7 +112,7 @@
             <tbody>
                 {% for schedule in schedules %}
                     <tr class="hover:bg-base-300 border-b border-base-300">
-                        <td>{{ schedule.date }}</td>
+                        <td>{{ schedule.date|date:"d/m/Y" }}</td>
                         <td>{{ schedule.start_time|time:"H:i" }}</td>
                         <td>{{ schedule.end_time|time:"H:i" }}</td>
                         <td>
