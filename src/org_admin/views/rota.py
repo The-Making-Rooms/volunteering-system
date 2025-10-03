@@ -2076,9 +2076,15 @@ def date_shift_viewer(request: HttpRequest, date_id:int|None=None):
     role_dicts = []
     active_registrations = [registration.id for registration in Registration.objects.filter(opportunity=date.opportunity) if registration.get_registration_status() == 'active']
 
-    for role in Role.objects.filter(opportunity=date.opportunity):
+    if date.opportunity.rota_config =="PER_ROLE":
+        roles_on_date = OneOffDate.objects.filter(
+                role__isnull=False,
+                date=date.date,
+        ).values_list('role_id', flat=True)
 
+    roles = Role.objects.filter(opportunity=date.opportunity) if date.opportunity.rota_config =="SHARED" else Role.objects.filter(opportunity=date.opportunity, id__in=[roles_on_date])
 
+    for role in roles:
         required = role.required_volunteers if Section.objects.filter(role=role).count() == 0 else \
         Section.objects.filter(role=role).aggregate(total=Sum("required_volunteers"))["total"]
 
