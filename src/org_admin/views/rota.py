@@ -1664,10 +1664,10 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     else:
         dates = (
             OneOffDate.objects
-            .filter(opportunity=opportunity, date__gte=datetime.now())
-            .values("date", "start_time", "end_time")
+            .filter(opportunity=opportunity, date__gte=datetime.now(), role__isnull=False)
+            .values("date")
             .annotate(id=Min("id"))  # or Max("id")
-            .order_by("date", "start_time", "end_time")
+            .order_by("date")
         )
 
     context = {
