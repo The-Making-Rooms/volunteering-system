@@ -964,6 +964,7 @@ def assign_volunteer_shift(request: HttpRequest, role_id: int,
         'schedule': schedule,
         'section_id': section_id,
         'rget_rview' : request.GET.get('roleview'),
+        'rget_dview': request.GET.get('dateview'),
         'role': role,
     }
     return render(request, 'org_admin/rota/volunteer_shift_assignment.html', context)
@@ -1655,10 +1656,24 @@ def opportunity_rota_index(request: HttpRequest, opportunity_id: int,
     schedules = OneOffDate.objects.filter(opportunity=opportunity, role__isnull=True).order_by('date')
     roles = Role.objects.filter(opportunity=opportunity)
 
+    if opportunity.rota_config == "SHARED":
+        dates = OneOffDate.objects.filter(
+            date__gte=datetime.now().date(),
+            role__isnull=True
+        )
+    else:
+        dates = (
+            OneOffDate.objects
+            .filter(opportunity=opportunity, date__gte=datetime.now())
+            .values("date", "start_time", "end_time")
+            .annotate(id=Min("id"))  # or Max("id")
+            .order_by("date", "start_time", "end_time")
+        )
 
     context = {
         'opportunity': opportunity,
         'schedules': schedules,
+        'view_dates' : dates,
         'roles': roles,
         'error': error,
         'success': success,
@@ -2048,6 +2063,61 @@ def weekdays_from(start_index: int) -> list[str]:
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     start = start_index % 7
     return days[start:] + days[:start]
+
+
+@login_required
+def date_shift_viewer(request: HttpRequest, date_id:int|None=None):
+
+    date_id = request.GET.get('date') if not date_id else date_id
+
+    date = OneOffDate.objects.get(id=date_id)
+    assert_org_access(request, date)
+
+    role_dicts = []
+    active_registrations = [registration.id for registration in Registration.objects.filter(opportunity=date.opportunity) if registration.get_registration_status() == 'active']
+
+    for role in Role.objects.filter(opportunity=date.opportunity):
+
+
+        required = role.required_volunteers if Section.objects.filter(role=role).count() == 0 else \
+        Section.objects.filter(role=role).aggregate(total=Sum("required_volunteers"))["total"]
+
+        dates = OneOffDate.objects.filter(
+            role=role,
+            date=date.date,
+        )
+
+        dates_shifts = []
+
+        for date_inst in dates:
+            shifts = VolunteerShift.objects.filter(
+                    occurrence__one_off_date= date_inst,
+                    role = role,
+                    registration_id__in=active_registrations
+                )
+
+            dates_shifts.append({
+                'date' : date_inst,
+                'shifts' : shifts,
+                'left': [x for x in range(0, required - shifts.count())]
+            })
+
+        role_dict = {
+            'role': role,
+            'dates_shifts' : dates_shifts,
+            'supervisor': None,
+        }
+
+        role_dicts.append(role_dict)
+
+    context = {
+        'hx' : check_if_hx(request),
+        'roles' : role_dicts,
+        'date' : date
+    }
+
+    return render(request, 'org_admin/rota/date_view.html', context)
+
 
 
 @login_required

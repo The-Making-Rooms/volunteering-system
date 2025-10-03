@@ -19,7 +19,7 @@
 
     <div class="divider"></div>
     <p class="font-bold">Key:</p>
-        <div class="flex gap-5">
+        <div class="flex gap-5 flex-col md:flex-row">
             <div class="flex items-center gap-2">
                 <div class="aspect-square rounded w-3 h-3 bg-red-700"></div>
                 <p>Unassigned</p>
@@ -43,7 +43,9 @@
         </div>
     <div class="divider"></div>
 
-    <div class="grid grid-cols-7 my-2 gap-x-2">
+    <div class="overflow-x-auto">
+
+    <div class="grid grid-cols-7 my-2 gap-x-2 min-w-[50rem]">
         {% for day_name in day_names %}
                 <div class="p-2 bg-gray-500 flex items-center justify-center">
                     <p>{{ day_name }}</p>
@@ -52,12 +54,12 @@
     </div>
 
     {% for week in weeks %}
-        <div class="grid grid-cols-7 p-2 my-2 bg-base-200">
+        <div class="grid grid-cols-7 p-2 my-2 bg-base-200 min-w-[50rem]">
 
             {% for day in week.days %}
                 {% if day.exists %}
                 <div class=" aspect-square m-2 flex flex-col items-center gap-y-1">
-                <div class="flex gap-2 justify-center w-full bg-base-300 rounded p-1">
+                <div class="flex gap-2 justify-center w-full bg-blue-500 rounded p-1">
                     <p>{{ day.date|date:"d/m/y" }}</p>
                     {% if day.assignable %}
                     <button
@@ -90,4 +92,6 @@
             {% endfor %}
         </div>
     {% endfor %}
+
+    </div>
 {% endblock %}
