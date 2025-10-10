@@ -59,6 +59,7 @@ def get_supervisor_shifts(request):
             print(shifts[-1]["rsvp_null"])
 
         context = {
+            'hx' : check_if_hx(request),
             'shifts': shifts
         }
 
