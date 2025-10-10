@@ -3,11 +3,11 @@
 
 {% block page_content %}
 
-    {% if role %}
+    {% if schedule.role %}
                 <button
         class="btn btn-primary btn-sm mb-3"
         type="submit"
-        hx-get="/org_admin/rota/role/{{ role }}/"
+        hx-get="/org_admin/rota/role/{{ schedule.role.id }}/"
         hx-target=".htmx-navigator"
         hx-swap="outerHTML"
         >

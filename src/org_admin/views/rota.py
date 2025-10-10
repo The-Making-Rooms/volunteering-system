@@ -1356,7 +1356,6 @@ def edit_rota_schedule(request: HttpRequest, opp_id: Optional[int] = None,
         'hx': safe_check_if_hx(request),
         'schedule': schedule,
         'opp': opportunity.id if opportunity else None,
-        'role': role_id if role_id else None,
     }
     return render(request, "org_admin/rota/one_off_schedule_editor.html", context)
 
