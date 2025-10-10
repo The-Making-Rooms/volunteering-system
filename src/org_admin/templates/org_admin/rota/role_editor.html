@@ -99,9 +99,9 @@
                 <div class="flex justify-between">
                     <div class="flex flex-col space-y-4">
                         <p class="text-xl font-bold">Schedule:</p>
-                        <p class="text-slate-400">If you define a schedule here, it will override any shifts generated from schedules from the parent opportunity.</p>
                     </div>
-                    <button
+                    <div class="flex gap-3">
+                        <button
                         hx-get="/org_admin/rota/schedule/import/{{ opp.id }}/{{ role.id }}/"
                         hx-target=".htmx-navigator"
                         hx-swap="outerHTML"
@@ -115,6 +115,8 @@
                         class="btn btn-primary btn-sm">
                         New Schedule
                     </button>
+                    </div>
+
                 </div>
 
                 <div class="divider"></div>
