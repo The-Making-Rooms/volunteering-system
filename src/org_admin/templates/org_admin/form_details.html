@@ -131,4 +131,27 @@
 </div>
 {% endfor %}
 
+    {% if questions|length > 0 %}
+        <button class="btn btn-primary btn-md"
+                hx-get="/org_admin/forms/{{form.id}}/add_question/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                onclick="setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);">
+            Add Question
+        </button>
+        <button class="btn btn-primary btn-md"
+                hx-get="/org_admin/forms/{{form.id}}/add_boolean/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                onclick="setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);">
+            Add Yes/No
+        </button>
+        <button class="btn btn-primary btn-md"
+                hx-get="/org_admin/forms/{{form.id}}/add_multi_choice/"
+                hx-target=".htmx-navigator"
+                hx-swap="outerHTML"
+                onclick="setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);">
+            Add Multi Choice
+        </button>
+    {% endif %}
 {% endblock %}
