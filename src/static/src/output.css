@@ -4757,6 +4757,10 @@ html:has(.drawer-toggle:checked) {
   overflow-x: auto;
 }
 
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
 .text-wrap {
   text-wrap: wrap;
 }
