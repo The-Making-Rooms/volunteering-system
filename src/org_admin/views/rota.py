@@ -339,6 +339,58 @@ class SendUnassignmentEmailForShift(Thread):
     def run(self):
         send_unassignment_email_for_shift(self.domain, self.shift)
 
+def send_change_email_for_shift(domain: str, shift) -> None:
+    """
+    Send an email notifying a volunteer that a previously confirmed shift has been unassigned.
+    Expects a VolunteerShift instance with related registration, role, occurrence, and (optional) section prefetched.
+    """
+    # Build context before any deletion
+    volunteer = shift.registration.volunteer.user
+    opp = shift.registration.opportunity
+    role = shift.role
+    section = shift.section
+    occ = shift.occurrence
+    date_str = occ.date.strftime("%d %b %Y") if occ and occ.date else ""
+    time_str = ""
+
+    if occ and occ.start_time and occ.end_time:
+        time_str = f"{occ.start_time.strftime('%H:%M')}–{occ.end_time.strftime('%H:%M')}"
+
+    subject = "Chip In System - Shift Changed"
+    message_html = f"""
+      <p>Hello {volunteer.first_name} {volunteer.last_name},</p>
+      <p>A confirmed shift has been changed for <strong>{opp.name}</strong>.</p>
+      <p style="font-weight: bold;">Shift Details</p>
+      <p>Role: {role.name}</p>
+      {"<p>Section: " + section.name + "</p>" if section else ""}
+      <p>{date_str} {time_str}</p>
+      <p>Please log into the app to review current shifts, or get in touch with the organisation if any help is needed.</p>
+
+      <a class="btn" href="https://{domain}/volunteer/">Login Here</a>
+
+      <p>Regards,<br/>The Chip In Team</p>
+    """
+
+    context = {"content": message_html}
+    text = render_to_string("org_admin/rota/email_template.html", context)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[volunteer.email],
+    )
+    email.attach_alternative(text, "text/html")
+    email.send()
+
+class SendChangeEmailForShift(Thread):
+    def __init__(self, domain, shift):
+        Thread.__init__(self)
+        self.domain = domain
+        self.shift = shift
+
+    def run(self):
+        send_change_email_for_shift(self.domain, self.shift)
 
 def send_email_to_volunteer_batch(domain, registration_id, shift_ids):
     shifts = VolunteerShift.objects.filter(id__in=shift_ids)
@@ -454,8 +506,6 @@ The Chip In Team</p>
 
 def send_email_to_supervisor(domain, supervisor_id):
     supervisor = Supervisor.objects.get(id=supervisor_id)
-
-
     subject = 'Chip in System - New Supervisor'
 
     message = f"""
@@ -1411,6 +1461,31 @@ def edit_schedule(request: HttpRequest, schedule_id: int) -> HttpResponse:
         schedule.end_time = request.POST.get('schedule_end_time')
         schedule.full_clean()
         schedule.save()
+
+        #Update any occurrences referencing this schedule
+        occurrences = Occurrence.objects.filter(one_off_date=schedule)
+
+        domain = request.get_host()
+
+        for occurrence in occurrences:
+            occurrence.start_time = schedule.start_time
+            occurrence.end_time = schedule.end_time
+            occurrence.date = schedule.date
+
+            occurrence.save()
+
+        #Send emails if the schedule has confirmed, RSVP'd shifts assigned to it
+        if schedule.date >= datetime.now().date():
+            shifts = VolunteerShift.objects.filter(
+                occurrence__in=occurrences,
+                confirmed=True,
+                rsvp_response='yes'
+            )
+
+            for shift in shifts:
+                change_email_thread = SendChangeEmailForShift(domain, shift)
+                change_email_thread.start()
+
         request.method = "GET"
         if schedule.role:
             return edit_role(request, schedule.role.id)
