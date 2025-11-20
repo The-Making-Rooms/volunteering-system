@@ -1,6 +1,10 @@
 <div id="redirect_div"></div>
 
-<form class="p-2">
+<form
+    class="p-2"
+    hx-post="/volunteer/volunteer_form/"
+    hx-swap="outerHTML transition:true"
+    hx-target="#redirect_div">
   {% csrf_token %}
 
     
@@ -15,21 +19,21 @@
       <div class="label">
         <span class="label-text">First Name</span>
       </div>
-      <input value="{{ user.first_name }}" name="first_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      <input value="{{ user.first_name }}" name="first_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" required/>
     </label>
 
     <label class="form-control w-full max-w-xs">
       <div class="label">
         <span class="label-text">Last Name</span>
       </div>
-      <input value="{{ user.last_name }}" name="last_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      <input value="{{ user.last_name }}" name="last_name" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" required/>
     </label>
 
     <label class="form-control w-full max-w-xs">
       <div class="label">
         <span class="label-text">Post Code:</span>
       </div>
-      <input name="post_code" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+      <input name="post_code" type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" required/>
     </label>
 
     <label class="form-control w-full md:col-span-2">
@@ -43,6 +47,7 @@
     id="date_of_birth"
     placeholder="Date of Birth (DD/MM/YYYY)"
     name="date_of_birth"
+    required
   />
     </label>
 
@@ -52,7 +57,7 @@
       <div class="label">
         <span class="label-text">Phone Number</span>
       </div>
-      <input value="{{ volunteer.phone_number }}" name="phone_number" type="text" placeholder="Type here" class="input input-bordered w-full" />
+      <input value="{{ volunteer.phone_number }}" name="phone_number" type="text" placeholder="Type here" class="input input-bordered w-full" required/>
     </label>
 
   </div>
@@ -123,16 +128,9 @@
 <div class="divider"></div>
 {% endif %}
 
+    <button onclick="window.scrollTo(0,0)" type="submit" class="btn btn-primary col-span-2">Save</button>
 
 
-  <a
-    href="#"
-    class="btn btn-primary col-span-2"
-    hx-post="/volunteer/volunteer_form/"
-    hx-swap="outerHTML transition:true"
-    hx-target="#redirect_div"
-    >Save</a
-  >
 </form>
 
 <div class="card-header" hx-swap-oob="innerHTML:.card-header">
