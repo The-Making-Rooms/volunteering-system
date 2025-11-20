@@ -23,8 +23,9 @@
               </th>
             <th>Name</th>
             <th>Volunteering for</th>
-            <th>Registered on</th>
-            <th>Registration Status</th>
+            <th>Opportunity</th>
+            <th>Registered On</th>
+            <th>Registration Staus</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -36,12 +37,12 @@
             <td>
                 <input type="checkbox" class="checkbox checkbox-primary" name="registration_ids" value="{{registration.id}}" {% if registration.get_registration_status == "stopped" or registration.get_registration_status == "completed"%}disabled{% endif%}>
             </td>
-
             <td>{{registration.volunteer.user.first_name}} {{registration.volunteer.user.last_name}}</td>
             <td>{{registration.opportunity.organisation.name}}</td>
             <td>{{registration.opportunity.name}}</td>
             <td>{{registration.date_created}}</td>
             <td>{{registration.get_registration_status}}</td>
+            <td><button class="btn btn-primary btn-sm" hx-get="/org_admin/volunteers/{{ registration.volunteer.id }}/" hx-target=".htmx-navigator" hx-swap="outerHTML">View</button></td>
         </tr>
         {% endfor %}
         <tr>
