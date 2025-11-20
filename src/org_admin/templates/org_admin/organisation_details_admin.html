@@ -337,6 +337,37 @@
   </div>
 </div>
 
+
+<div class="p-5 rounded-lg bg-base-200 mt-3">
+  <div class="flex justify-between items-center">
+    <p class="text-xl">Volunteers Registered: {{registered_volunteers|length}}</p>
+    <p>The following volunteers have registered to opportunities from this organisation</p>
+  </div>
+<div class="divider"></div>
+    {% if registered_volunteers|length == 0 %}
+    <p>No volunteers are registered to opportunities from this organisation</p>
+    {% else %}
+<table class="table w-full">
+  <thead>
+    <tr>
+        <th>Name</th>
+        <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+
+
+    {% for vols in registered_volunteers %}
+    <tr>
+        <td>{{ vols.user.first_name}} {{ vols.user.last_name }}</td>
+        <td><button class="btn btn-primary btn-sm" hx-get="/org_admin/volunteers/{{ vols.id }}/" hx-target=".htmx-navigator" hx-swap="outerHTML">View</button></td>
+    </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+</div>
+
 <div class="p-5 rounded-lg bg-base-200 mt-3">
   <div class="flex justify-between items-center">
     <p class="text-xl">Volunteers Following: {{interested_vols|length}}</p>
@@ -360,10 +391,11 @@
       <td>{{ vols.volunteer.user.first_name}} {{ vols.volunteer.user.last_name }}</td>
     </tr>
     {% endfor %}
-  </tbody>
-</table>
+      </tbody>
+    </table>
+    {% endif %}
 </div>
-{% endif %}
+
 
 <!-- Open the modal using ID.showModal() method -->
 <dialog id="my_modal_2" class="modal">
