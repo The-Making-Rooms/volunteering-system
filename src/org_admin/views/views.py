@@ -399,8 +399,7 @@ def details(request, error=None, success=None, organisation_id=None):
                     for volunteer in all_org_volunteers:
                         if volunteer.get_registration_status() == "active" or volunteer.get_registration_status() == "awaiting_approval":
                             organisation.volunteers += 1
-                            
-                    print(organisation.name,organisation.volunteers, organisation.opportunities)
+
         
                 context = {
                     "hx": check_if_hx(request),
@@ -422,7 +421,9 @@ def details(request, error=None, success=None, organisation_id=None):
         supp_info = SupplementaryInfo.objects.filter(organisation=organisation)
         interested_vols = OrganisationInterest.objects.filter(organisation=organisation)
         sections = OrganisationSection.objects.filter(organisation=organisation)
-        
+
+        registered_volunteers = Volunteer.objects.filter(id__in=Registration.objects.filter(opportunity__organisation=organisation).values_list('volunteer_id', flat=True))
+        print(Registration.objects.filter(opportunity__organisation=organisation).values_list('id', flat=True))
         link_obj = []
         
         for link in link_types:
@@ -434,6 +435,7 @@ def details(request, error=None, success=None, organisation_id=None):
             "hx": check_if_hx(request),
             "locations": Location.objects.filter(organisation=organisation),
             "organisation": organisation,
+            "registered_volunteers": registered_volunteers,
             "org_videos": org_videos,
             "org_images": org_images,
             "badges": badges,
