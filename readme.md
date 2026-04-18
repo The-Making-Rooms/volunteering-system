@@ -55,6 +55,9 @@ And you should be good to go!
 ## 📚 System Architecture:
 The system is written in Django, htmx and tailwindCSS+DaisyUI. htmx is used for interactivity, and most routes have a check to see if the request has a htmx header. If it does, only a partial will be sent. DaisyUI components are used throughout using tailwind utility classes.
 
+### Database Schema:
+A comprehensive Entity Relationship Diagram (ERD) documenting all database models and their relationships is available in [DATABASE_ERD.md](DATABASE_ERD.md). The diagram covers all 74 entities across 7 modules and can be viewed using any Mermaid-compatible viewer.
+
 ### User Roles:
 **superuser**: Can see and manage everything
 **staff**: Can manage a single organisation, all of it's opportunities and volunteers
