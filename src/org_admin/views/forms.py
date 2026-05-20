@@ -364,7 +364,7 @@ def download_responses_CSV(request, form_id, anonymous=False):
     else:
         field_names = ["first_name", "last_name", "DOB", "email", "phone_number", "postcode", "preferred_contact", "response_date"]
         
-    field_names += [question.question for question in Question.objects.filter(form=form, enabled=True)]
+    field_names += [question.question for question in Question.objects.filter(form=form, enabled=True).order_by('index')]
     
     for res in response:
         answers = Answer.objects.filter(response=res)
