@@ -7,7 +7,7 @@ from org_admin.views import check_ownership
 from org_admin.models import OrganisationAdmin
 import csv
 from django.http import HttpResponse
-from volunteer.models import Volunteer
+from volunteer.models import Volunteer, VolunteerContactPreferences, VolunteerAddress
 from opportunities.models import Registration, RegistrationStatus, VolunteerRegistrationStatus, Opportunity
 from organisations.models import Organisation
 
@@ -362,7 +362,7 @@ def download_responses_CSV(request, form_id, anonymous=False):
     if anonymous:
         field_names = ["response_date"]
     else:
-        field_names = ["first_name", "last_name", "DOB", "email", "phone_number", "response_date"]
+        field_names = ["first_name", "last_name", "DOB", "email", "phone_number", "postcode", "preferred_contact", "response_date"]
         
     field_names += [question.question for question in Question.objects.filter(form=form, enabled=True)]
     
@@ -372,11 +372,20 @@ def download_responses_CSV(request, form_id, anonymous=False):
         response_dict = {}
         
         if not anonymous:
+            volunteer = Volunteer.objects.get(user=res.user)
             response_dict["first_name"] = res.user.first_name
             response_dict["last_name"] = res.user.last_name
-            response_dict["DOB"] = Volunteer.objects.get(user=res.user).date_of_birth
+            response_dict["DOB"] = volunteer.date_of_birth
             response_dict["email"] = res.user.email
-            response_dict["phone_number"] = Volunteer.objects.get(user=res.user).phone_number
+            response_dict["phone_number"] = volunteer.phone_number
+            address = VolunteerAddress.objects.filter(volunteer=volunteer).first()
+            response_dict["postcode"] = address.postcode if address else ""
+            try:
+                prefs = VolunteerContactPreferences.objects.get(volunteer=volunteer)
+                methods = [m for m in ["email", "whatsapp", "phone"] if getattr(prefs, m)]
+                response_dict["preferred_contact"] = ", ".join(methods)
+            except VolunteerContactPreferences.DoesNotExist:
+                response_dict["preferred_contact"] = ""
             
         response_dict["response_date"] = res.response_date
         
@@ -396,8 +405,6 @@ def download_responses_CSV(request, form_id, anonymous=False):
             
     #create CSV from response_dicts
     bytes_file = io.StringIO()
-    
-    print(response_dicts)
     
     writer = csv.DictWriter(bytes_file, fieldnames=field_names)
     writer.writeheader()
